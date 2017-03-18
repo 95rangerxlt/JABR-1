@@ -1,3 +1,5 @@
+package org.jabs.jabst;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;//type of event
 import javafx.event.EventHandler;//this activates when a button is pressed
