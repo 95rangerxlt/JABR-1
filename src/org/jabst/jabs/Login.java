@@ -1,4 +1,4 @@
-package org.jabs.jabst;
+package org.jabst.jabs;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;//type of event
@@ -35,7 +35,7 @@ public String hashAlgorithm = "SHA-256";
 				System.out.println(password);
 				// check username and password
 
-// TODO: SET LOGIN CLASS HERE
+// TODO: set login class here
 				if(loginClass.checkLogin(username, password)) {
 					System.exit(0);//close the window
 				} else {
