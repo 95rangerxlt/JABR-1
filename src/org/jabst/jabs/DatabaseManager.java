@@ -23,7 +23,7 @@ import java.util.Scanner;
 
 public class DatabaseManager {
     private static final String dbfilePrefix = "jdbc:hsqldb:file:";
-    private static final String dbfileTesterName = "../db/jabs_database";
+    public static final String dbFileTesterName = "db/jabs_database";
     private Connection connection;
     
     /** Creates a new DatabaseManager
@@ -32,17 +32,19 @@ public class DatabaseManager {
      * @param The name of the file to open
      * @throws HsqlException, SQLException
      */
-    public DatabaseManager(String dbfile) {
+    public DatabaseManager(String dbfile) throws HsqlException, SQLException {
         try {
             connection = DriverManager.getConnection(dbfilePrefix+dbfile, "sa", "");
         } catch (HsqlException hse) {
             System.err.println(
                 "DriverManager: Error: Cannot connect to database file (driver error)"
             );
+            throw hse;
         } catch (SQLException se) {
             System.err.println(
                 "DriverManager: Error: Cannot connect to database file (SQL error)"
             );
+            throw se;
         }
     }
     
@@ -98,16 +100,27 @@ public class DatabaseManager {
         boolean success = false;
 
         PreparedStatement statement = connection.prepareStatement(
-            "SELECT * from CREDENTIALS WHERE USERNAME='?'"
+            "SELECT * from CREDENTIALS WHERE USERNAME='"+username+"'"
         );
-        
-        statement.setString(1, username);
+
         ResultSet rs = statement.executeQuery(); 
         while (rs.next()) {
-            if (
-                   (rs.getString("username").equals(username))
-                && (rs.getString("password").equals(password))
-               ) { success = true; }
+            String result_username = rs.getString("username");
+            byte[] result_password = rs.getBytes("password");
+            System.out.format("Input: username,password = %s,%s",
+                username, digestToHexString(password_hash)
+            );
+            System.out.format("Result:username,password = %s,%s",
+                result_username, digestToHexString(result_password)
+            );
+            
+            for (int i = 0; i < result_password.length; ++i) {
+                if (result_password[i] != password_hash[i]) {
+                    success = false;
+                    break;
+                }
+            }
+            success = true;
         }
 
         rs.close();
@@ -195,28 +208,21 @@ public class DatabaseManager {
         
         boolean success = false;
         try {
-            checkUser(username, password);
-            success = true;
+            success = checkUser(username, password);
         } catch (SQLException se) {
-                
-            if (se instanceof SQLIntegrityConstraintViolationException) {
-                System.err.println(
-                    "Checking user failed: Already a user with that username"
-                );
-            }
-            else {
                 System.err.println("checkUser failed...");
                 se.printStackTrace(System.err);
-            }
         }
         
         System.out.println(
-            success ? "Added user successfully" : "Didn't add user"
+            success ?
+                "Found a user with that username (NYI: and password" :
+                "Didn't find a user with that username"
         );
     }
     
-    public static void main (String[] args) {
-        DatabaseManager dbm = new DatabaseManager(dbfileTesterName);
+    public static void main (String[] args) throws SQLException, HsqlException{
+        DatabaseManager dbm = new DatabaseManager(dbFileTesterName);
         Scanner sc = new Scanner(System.in);
         //sc.useDelimiter("\n");
         String input;
