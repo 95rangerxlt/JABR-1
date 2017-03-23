@@ -31,6 +31,12 @@ public class SessionManager {
 		
 	}
 	
+	public boolean registerUser(String username, String password, String name, String address, String phone){
+		// Query Database for existing user
+		// populate database
+		return true;
+	}
+	
 	public void populateCustomer(String username){
 		// Request object data from DatabaseManager
 		// create new customer object
