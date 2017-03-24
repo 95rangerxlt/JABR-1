@@ -23,7 +23,7 @@ import java.util.Scanner;
 
 public class DatabaseManager {
     private static final String dbfilePrefix = "jdbc:hsqldb:file:";
-    public static final String dbFileTesterName = "db/jabs_database";
+    public static final String dbDefaultFileName = "db/jabs_database";
     private Connection connection;
     
     /** Creates a new DatabaseManager
@@ -222,7 +222,8 @@ public class DatabaseManager {
     }
     
     public static void main (String[] args) throws SQLException, HsqlException{
-        DatabaseManager dbm = new DatabaseManager(dbFileTesterName);
+        DatabaseManager dbm = new DatabaseManager(dbDefaultFileName);
+        System.out.println("Connecting to database: "+dbDefaultFileName);
         Scanner sc = new Scanner(System.in);
         //sc.useDelimiter("\n");
         String input;
