@@ -1,0 +1,2 @@
+Main-Class: org.jabst.jabs.Login
+Class-Path: hsqldb.jar
