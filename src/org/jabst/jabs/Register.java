@@ -45,6 +45,13 @@ public class Register extends Application {
 		PasswordField tfPWord = new PasswordField();
 		PasswordField tfPWord2 = new PasswordField();
 
+		tfUName.setPrefWidth(800);
+		tfPWord.setPrefWidth(800);
+		tfPWord2.setPrefWidth(800);
+		tfPhone.setPrefWidth(800);
+		tfAddress.setPrefWidth(800);
+		tfName.setPrefWidth(800);
+
 		tfUName.setText(params.get(0));
 		tfPWord.setText(params.get(1));
 
@@ -95,6 +102,10 @@ public class Register extends Application {
 
 		VBox root = new VBox();//layout manager
 		HBox buttons = new HBox();
+
+		root.setSpacing(2);
+		root.setPadding(3);
+		buttons.setSpacing(2);
 
 		//add elements to the layout
 		buttons.getChildren().addAll(bRegister, bLogin);

@@ -10,7 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 
-import org.hsqldb.HsqlException;
+// import org.hsqldb.HsqlException;
 
 // MessageDigest for SHA256 hash
 import java.security.MessageDigest;
@@ -32,20 +32,20 @@ public class DatabaseManager {
      * @param The name of the file to open
      * @throws HsqlException, SQLException
      */
-    public DatabaseManager(String dbfile) throws HsqlException, SQLException {
-        try {
-            connection = DriverManager.getConnection(dbfilePrefix+dbfile, "sa", "");
-        } catch (HsqlException hse) {
-            System.err.println(
-                "DriverManager: Error: Cannot connect to database file (driver error)"
-            );
-            throw hse;
-        } catch (SQLException se) {
-            System.err.println(
-                "DriverManager: Error: Cannot connect to database file (SQL error)"
-            );
-            throw se;
-        }
+    public DatabaseManager(String dbfile) throws /*HsqlException,*/ SQLException {
+        // try {
+        //     connection = DriverManager.getConnection(dbfilePrefix+dbfile, "sa", "");
+        // } catch (HsqlException hse) {
+        //     System.err.println(
+        //         "DriverManager: Error: Cannot connect to database file (driver error)"
+        //     );
+        //     throw hse;
+        // } catch (SQLException se) {
+        //     System.err.println(
+        //         "DriverManager: Error: Cannot connect to database file (SQL error)"
+        //     );
+        //     throw se;
+        // }
     }
     
     /** Closes the database connection associated with the manager
@@ -221,7 +221,7 @@ public class DatabaseManager {
         );
     }
     
-    public static void main (String[] args) throws SQLException, HsqlException{
+    public static void main (String[] args) throws SQLException/*, HsqlException*/{
         DatabaseManager dbm = new DatabaseManager(dbDefaultFileName);
         System.out.println("Connecting to database: "+dbDefaultFileName);
         Scanner sc = new Scanner(System.in);

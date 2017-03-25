@@ -33,6 +33,9 @@ public class Login extends Application {
 		TextField tfUName = new TextField();
 		PasswordField tfPWord = new PasswordField();
 
+		tfUName.setPrefWidth(800);
+		tfPWord.setPrefWidth(800);
+
 		tfUName.setText(params.get(0));
 		tfPWord.setText(params.get(1));
 
@@ -69,6 +72,10 @@ public class Login extends Application {
 
 		VBox root = new VBox();//layout manager
 		HBox buttons = new HBox();
+
+		root.setSpacing(2);
+		root.setPadding(3);
+		buttons.setSpacing(2);
 
 		//add elements to the layout
 		buttons.getChildren().addAll(bLogin, bRegister);
