@@ -9,12 +9,22 @@ import javafx.scene.layout.VBox;//layout manager
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;//window
 
-public class Login extends Application {
+import java.util.List;
 
-public String hashAlgorithm = "SHA-256";
+public class Login extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
+		// get a StageCoordinate class
+		StageCoordinate sc = new StageCoordinate();
+		sc.setStage(primaryStage);
+
+		SessionManager session = new SessionManager();
+
+
+		List<String> params = getParameters().getRaw();//get parameters
+		// params.get(1)
+
 		// create all elements
 		Button bLogin = new Button("Login");
 		Button bRegister = new Button("Register");
@@ -23,20 +33,22 @@ public String hashAlgorithm = "SHA-256";
 		TextField tfUName = new TextField();
 		PasswordField tfPWord = new PasswordField();
 
-		// bLogin.setText("Login");
+		tfUName.setText(params.get(0));
+		tfPWord.setText(params.get(1));
+
+		bLogin.setDefaultButton(true);
 		bLogin.setOnAction(new EventHandler<ActionEvent>() {
 			// handle method is called when the button is pressed
 			@Override
 			public void handle(ActionEvent event) {
-				String username = tfUName.getText();
-				String password = tfPWord.getText();
 
-				System.out.println(username);
-				System.out.println(password);
+				System.out.println(tfUName.getText());
+				System.out.println(tfPWord.getText());
 				// check username and password
 
-// TODO: set login class here
-				if(loginClass.checkLogin(username, password)) {
+
+				if(session.loginUser(tfUName.getText(), tfPWord.getText())) {
+					// StageCoordinate sc = new StageCoordinate(primaryStage);
 					System.exit(0);//close the window
 				} else {
 					tfUName.setText("");
@@ -49,7 +61,8 @@ public String hashAlgorithm = "SHA-256";
 
 			@Override
 			public void handle(ActionEvent event) {
-// TODO: tell session manager to open register window
+				// StageCoordinate sc = new StageCoordinate(primaryStage);
+				session.swapToRegisterWindow(tfUName.getText(), tfPWord.getText());
 				System.exit(0);
 			}
 		});
@@ -68,17 +81,4 @@ public String hashAlgorithm = "SHA-256";
 		primaryStage.show();//put the window on the desktop
 	}
 
-	public static void main(String[] args) {
-		launch(args);
-	}
-
-}
-
-class loginClass {
-	public static boolean checkLogin(String u, String p) {
-		if(u.equals("test") && p.equals("password") || u.equals(p)) {
-			return true;
-		}
-		return false;
-	}
 }

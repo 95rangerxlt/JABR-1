@@ -1,37 +1,34 @@
+package org.jabst.jabs;
+
+import javafx.application.Application;
 
 public class SessionManager {
 
-	//Variables
-	
-	private String username; //parse from GUI?
-	private String password; //parse from GUI?
-	//Initialise the database
-	//DatabaseManager dbm = new DatabaseManager();
-	
-	
-	//Methods
-	
-	public boolean session()
-	{
-		if (requestUserCredentialCheck(username, password) == true)
-		{
-			// Create either CustomerUser or BusinessUser object
-			// Initialise appropriate menu for new user object (Integration with GUI)
-			// Populate business objects if CustomerUser is created
+	public SessionManager() {}
+
+	public boolean loginUser(String user, String pass) {
+		if(user.equals(pass))
 			return true;
-		}
-		else
-		{
-			return false;
-		}
-			
-		
+		return false;
 	}
-	
-	public boolean requestUserCredentialCheck(String username, String password)
-	{
-		//dbm.RequestUserCredentialCheck(username, password);
-		return true; //stub
-		
+
+	public void swapToLoginWindow(String user, String pass) {
+		Application.launch(Login.class, new String[]{user, pass});
 	}
+
+	public boolean registerUser(String user, String pass, String name, String address, String phone) {
+		if(user.equals(pass))
+			return true;
+		return false;
+	}
+
+	public void swapToRegisterWindow(String user, String pass) {
+		Application.launch(Register.class, new String[]{user, pass});
+	}
+
+
+	public static void main(String[] args) {
+		Application.launch(Login.class, new String[]{"", ""});
+	}
+
 }
