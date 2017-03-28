@@ -9,7 +9,7 @@ public class SessionManager {
 	
 	//Methods
 	
-	public boolean checkUser(String username, String password){
+	public boolean loginUser(String username, String password){
 		if (dbm.checkUser(username, password) == true){
 			return true;
 		}
@@ -47,17 +47,20 @@ public class SessionManager {
 		// create new business object
 	}
 	
+	public void swapToLoginWindow(String user, String pass) {
+		Application.launch(Login.class, new String[]{user, pass});
+	}
+	
 	void swapToRegisterWindow(String username, String password){
-		//String[] args = new String[]{username, password};
-		//Application.launch(Login.class, args);
+		Application.launch(Register.class, new String[]{user, pass});
 	}
 	
 	void launchCustomerMenu(){
-		//Application.launch(CustomerMenu.class);
+		Application.launch(CustomerMenu.class);
 	}
 	
 	void launchBusinessMenu(){
-		//Application.launch(BusinessMenu.class);
+		Application.launch(BusinessMenu.class);
 	}
 	
 	
