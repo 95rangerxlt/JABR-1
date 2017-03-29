@@ -23,6 +23,7 @@ import java.util.Scanner;
 
 public class DatabaseManager {
     private static final String dbfilePrefix = "jdbc:hsqldb:file:";
+    private static final String SQL_TABLE_CREDENTIALS ="CREATE TABLE CREDENTIALS ( USERNAME VARCHAR(20), PASSWORD VARBINARY(32), USERTYPE VARCHAR(1), PRIMARY KEY(USERNAME))";
     public static final String dbDefaultFileName = "db/jabs_database";
     private Connection connection;
     
@@ -32,20 +33,52 @@ public class DatabaseManager {
      * @param The name of the file to open
      * @throws HsqlException, SQLException
      */
-    public DatabaseManager(String dbfile) throws /*HsqlException,*/ SQLException {
+    public DatabaseManager(String dbfile) throws HsqlException, SQLException {
          try {
-             connection = DriverManager.getConnection(dbfilePrefix+dbfile, "sa", "");
+             this.connection = DriverManager.getConnection(dbfilePrefix+dbfile+";ifexists=true", "sa", "");
          } catch (HsqlException hse) {
-             System.err.println(
-                 "DriverManager: Error: Cannot connect to database file (driver error)"
-             );
-             throw hse;
-         } catch (SQLException se) {
-             System.err.println(
-                 "DriverManager: Error: Cannot connect to database file (SQL error)"
-             );
-             throw se;
+             System.err.println("HqlException conecting to database: Doesn't exist");
          }
+
+         catch (SQLException se) {
+            try {
+                connection = DriverManager.getConnection(dbfilePrefix+dbfile, "sa", "");
+            } catch (SQLException sqle) {
+                System.err.println(
+                    "DriverManager: Error: Cannot connect to database file (SQL error) (when trying to open new)"
+                );
+            }
+            if (!createTables()) {
+                System.err.println(
+                    "DriverManager: Error: Cannot create tables in new database"
+                 );
+            }
+         }
+    }
+    
+    /** Creates the database tables
+     *  in case the database is being created for the first time
+     *  @return whether the tables could be successfully created
+     */
+    private boolean createTables() {
+        Statement statement = null;
+        try {
+            statement = connection.createStatement();
+        } catch (SQLException se) {
+            System.err.println("Error creating statement for tables");
+            return false;
+        }
+        
+        try {
+            // Statement.execute returns false if no results were returned,
+            // including for CREATE statements
+            statement.execute(SQL_TABLE_CREDENTIALS);
+            System.out.println("Successfully created tables");
+            return true;
+        } catch (SQLException se) {
+            System.out.println("Did not successfully create tables");
+            return false;   
+        }
     }
     
     /** Closes the database connection associated with the manager
@@ -144,7 +177,7 @@ public class DatabaseManager {
         PreparedStatement statement = null;
 
         statement = connection.prepareStatement(
-            "INSERT INTO CREDENTIALS VALUES (?, ?)"
+            "INSERT INTO CREDENTIALS VALUES (?, ?, 'C')"
         );
 
         statement.setString(1, username);
