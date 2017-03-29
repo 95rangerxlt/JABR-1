@@ -8,6 +8,7 @@ import javafx.scene.control.*;//buttons, labels  etc.
 import javafx.scene.layout.VBox;//layout manager
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;//window
+import javafx.geometry.Insets;//insets = padding
 
 import java.util.List;
 
@@ -104,7 +105,7 @@ public class Register extends Application {
 		HBox buttons = new HBox();
 
 		root.setSpacing(2);
-		root.setPadding(3);
+		root.setPadding(new Insets(3.0, 3.0, 3.0, 3.0));
 		buttons.setSpacing(2);
 
 		//add elements to the layout
