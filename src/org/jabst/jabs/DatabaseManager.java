@@ -194,6 +194,11 @@ public class DatabaseManager {
         );
     }
     
+    public String checkUserType(String username) {
+        // NYI: Check if in Business(name)
+        return "Customer";
+    }
+    
     private void scannerCheckUser(Scanner sc) {
         String username, password;
         byte[] digest;
