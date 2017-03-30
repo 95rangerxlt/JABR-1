@@ -1,6 +1,6 @@
 package org.jabst.jabs;
 
-import javafx.application.Application;
+
 import javafx.event.ActionEvent;//type of event
 import javafx.event.EventHandler;//this activates when a button is pressed
 import javafx.scene.Scene;//area inside stage
@@ -8,24 +8,18 @@ import javafx.scene.control.*;//buttons, labels  etc.
 import javafx.scene.layout.VBox;//layout manager
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;//window
+import javafx.stage.Modality;
 import javafx.geometry.Insets;//insets = padding
 
-import java.util.List;
 
-public class Login extends Application {
+public class Login {
 
-	@Override
-	public void start(Stage primaryStage) {
-		// get a StageCoordinate class
-		StageCoordinate sc = new StageCoordinate();
-		sc.setStage(primaryStage);
+	private static String redBorder = "-fx-border-color: red ; -fx-border-width: 2px ;";
 
-		SessionManager session = new SessionManager();
-
-
-		List<String> params = getParameters().getRaw();//get parameters
-		// params.get(1)
-
+	public static LoginInfo display(SessionManager session, String user, String pass) {
+		LoginInfo info = new LoginInfo();
+		// create the window
+		Stage window = new Stage();
 		// create all elements
 		Button bLogin = new Button("Login");
 		Button bRegister = new Button("Register");
@@ -34,14 +28,16 @@ public class Login extends Application {
 		TextField tfUName = new TextField();
 		PasswordField tfPWord = new PasswordField();
 
-		tfUName.setPrefWidth(800);
-		tfPWord.setPrefWidth(800);
+		tfUName.setText(user);
+		tfPWord.setText(pass);
 
-		tfUName.setText(params.get(0));
-		tfPWord.setText(params.get(1));
+		//block events to other window
+		window.initModality(Modality.APPLICATION_MODAL);
 
+		// setup login button
 		bLogin.setDefaultButton(true);
 		bLogin.setOnAction(new EventHandler<ActionEvent>() {
+			
 			// handle method is called when the button is pressed
 			@Override
 			public void handle(ActionEvent event) {
@@ -52,22 +48,27 @@ public class Login extends Application {
 
 
 				if(session.loginUser(tfUName.getText(), tfPWord.getText())) {
-					// StageCoordinate sc = new StageCoordinate(primaryStage);
-					System.exit(0);//close the window
+					// StageCoordinate sc = new StageCoordinate(window);
+					info.username = tfUName.getText();
+					info.password = tfPWord.getText();
+					info.button = LoginInfo.Buttons.LOGIN;
+					window.close();//close the window
 				} else {
 					tfUName.setText("");
 					tfPWord.setText("");
+					tfUName.setStyle(redBorder);
+					tfPWord.setStyle(redBorder);
 				}
 			}
 		});
-		// can just use lambda function
+		
+		// setup register button (swap to register window)
 		bRegister.setOnAction(new EventHandler<ActionEvent>() {
 
 			@Override
 			public void handle(ActionEvent event) {
-				// StageCoordinate sc = new StageCoordinate(primaryStage);
-				session.swapToRegisterWindow(tfUName.getText(), tfPWord.getText());
-				System.exit(0);
+				info.button = LoginInfo.Buttons.REGISTER;
+				window.close();
 			}
 		});
 
@@ -82,11 +83,17 @@ public class Login extends Application {
 		buttons.getChildren().addAll(bLogin, bRegister);
 		root.getChildren().addAll(lUName, tfUName, lPWord, tfPWord, buttons);
 
-		Scene scene = new Scene(root/*, 300, 200*/);//create window
+		Scene scene = new Scene(root/*, 300, 200*/);//create area inside window
 
-		primaryStage.setTitle("JABLS System: JABLS Automatic Booking Login System");//text at the top of the window
-		primaryStage.setScene(scene);//add scene to window
-		primaryStage.show();//put the window on the desktop
+		window.setTitle("JABLS System: JABLS Automatic Booking Login System");//text at the top of the window
+		window.setScene(scene);//add scene to window
+		window.showAndWait();//put the window on the desktop
+
+		return info;
+	}
+
+	public static LoginInfo display(SessionManager session) {
+		return display(session, "", "");
 	}
 
 }
