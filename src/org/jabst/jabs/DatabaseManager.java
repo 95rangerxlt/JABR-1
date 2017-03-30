@@ -199,10 +199,28 @@ public class DatabaseManager {
         // to act correctly on program shutdown
     }
 
-    //public void addUser
+    public void addUser(String username, String password,
+        String name, String address, String phone) throws SQLException
+    {
+        // Add to credentials table
+        addUser(username, password);
+        
+        // Now add to customers table
+        PreparedStatement statement = connection.prepareStatement(
+            // USERNAME, NAME, ADDRESS, PHONE
+            "INSERT INTO CUSTOMERS VALUES (?, ?, ?, ?)"
+        );
+        statement.setString(1, username);
+        statement.setString(2, name);
+        statement.setString(3, address);
+        statement.setString(4, phone);
+        
+        statement.execute();
+        statement.close();
+    }
     
     private void scannerAddUser(Scanner sc) {
-        String username, password;
+        String username, password, name, address, phone;
         byte[] digest;
         
         System.out.print("Enter username: ");
@@ -213,9 +231,14 @@ public class DatabaseManager {
         password = sc.next();
         System.out.println();
         
+        System.out.print("Next up: name, address, phone");
+        name = sc.next(); System.out.println();
+        address = sc.next(); System.out.println();
+        phone = sc.next(); System.out.println();
+        
         boolean success = false;
         try {
-            addUser(username, password);
+            addUser(username, password, name, address, phone);
             success = true;
         } catch (SQLException se) {
                 
@@ -262,7 +285,10 @@ public class DatabaseManager {
                 "Didn't find a user with that username"
         );
     }
-    
+    /**
+      * This main exists to interactively test the code in DatabaseManager. It is
+      * not the entry point to the actual application
+      */
     public static void main (String[] args) throws SQLException, HsqlException{
         DatabaseManager dbm = new DatabaseManager(dbDefaultFileName);
         System.out.println("Connecting to database: "+dbDefaultFileName);
