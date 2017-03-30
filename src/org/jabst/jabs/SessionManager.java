@@ -1,36 +1,30 @@
-//import javafx.application.Application;
+package org.jabst.jabs;
+
+import javafx.application.Application;
+import java.sql.SQLException;
 
 public class SessionManager {
-
+	// Fields
+	private DatabaseManager dbm;
 	
-	//Initialise the database
-	public dbmStub dbm = new dbmStub();
-	
-	
-	//Methods
-	
-	public boolean loginUser(String username, String password){
-		if (dbm.checkUser(username, password) == true){
-			return true;
+	public SessionManager() {
+		try {
+			dbm = new DatabaseManager(DatabaseManager.dbDefaultFileName);
+		} catch (SQLException sqle) {
+			System.err.println("FATAL: SessionManager: Could not open DatabaseManager");
+			System.exit(1);
 		}
-		else{
+	}
+	
+	// Methods
+	public boolean loginUser(String username, String password){
+		try {
+			return dbm.checkUser(username, password);
+		} catch (SQLException sqle) {
 			return false;
 		}
 	}
-	
-	public void checkUserType(String username){
-		if (dbm.checkUserType(username) == "Customer"){
-			populateCustomer(username);
-			// TODO: Here the default business will have to be created as an object.
-			launchCustomerMenu();
-		}
-		if (dbm.checkUserType(username) == "Business"){
-			populateBusiness(username);
-			launchBusinessMenu();
-		}
-		
-	}
-	
+
 	public boolean registerUser(String username, String password, String name, String address, String phone){
 		// Query Database for existing user
 		// populate database
@@ -48,20 +42,24 @@ public class SessionManager {
 	}
 	
 	public void swapToLoginWindow(String user, String pass) {
-		Application.launch(Login.class, new String[]{user, pass});
+		Application.launch(Login.class, new String[]{user,pass});
 	}
 	
 	void swapToRegisterWindow(String username, String password){
-		Application.launch(Register.class, new String[]{user, pass});
+		Application.launch(Register.class, new String[]{username,password});
 	}
 	
 	void launchCustomerMenu(){
-		Application.launch(CustomerMenu.class);
+		// NYI
+		//Application.launch(CustomerMenu.class);
 	}
 	
 	void launchBusinessMenu(){
-		Application.launch(BusinessMenu.class);
+		// NYI
+		//Application.launch(BusinessMenu.class);
 	}
 	
-	
+	public static void main(String[] args) {
+		Application.launch(Login.class, new String[]{"", ""});
+	}
 }

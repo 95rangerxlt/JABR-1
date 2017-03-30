@@ -1,0 +1,2 @@
+Main-Class: org.jabst.jabs.SessionManager
+Class-Path: hsqldb.jar

@@ -12,16 +12,16 @@ import javafx.geometry.Insets;//insets = padding
 
 import java.util.List;
 
-public class Login extends Application {
+public class Register extends Application {
+
+	private String redBorder = "-fx-border-color: red ; -fx-border-width: 2px ;";
 
 	@Override
 	public void start(Stage primaryStage) {
+		SessionManager session = new SessionManager();
 		// get a StageCoordinate class
 		StageCoordinate sc = new StageCoordinate();
 		sc.setStage(primaryStage);
-
-		SessionManager session = new SessionManager();
-
 
 		List<String> params = getParameters().getRaw();//get parameters
 		// params.get(1)
@@ -31,42 +31,72 @@ public class Login extends Application {
 		Button bRegister = new Button("Register");
 		Label lUName = new Label("Username: ");
 		Label lPWord = new Label("Password: ");
+		Label lPWord2 = new Label("Re-Enter Password: ");
+
+		Label lName = new Label("Name: ");
+		TextField tfName = new TextField();
+		Label lAddress = new Label("Address: ");
+		TextField tfAddress = new TextField();
+		// Label lEmail = new Label("Email: ");
+		// TextField tfEmail = new TextField();
+		Label lPhone = new Label("Phone: ");
+		TextField tfPhone = new TextField();
+
 		TextField tfUName = new TextField();
 		PasswordField tfPWord = new PasswordField();
+		PasswordField tfPWord2 = new PasswordField();
 
 		tfUName.setPrefWidth(800);
 		tfPWord.setPrefWidth(800);
+		tfPWord2.setPrefWidth(800);
+		tfPhone.setPrefWidth(800);
+		tfAddress.setPrefWidth(800);
+		tfName.setPrefWidth(800);
 
 		tfUName.setText(params.get(0));
 		tfPWord.setText(params.get(1));
 
-		bLogin.setDefaultButton(true);
-		bLogin.setOnAction(new EventHandler<ActionEvent>() {
+		bRegister.setDefaultButton(true);
+		bRegister.setOnAction(new EventHandler<ActionEvent>() {
 			// handle method is called when the button is pressed
 			@Override
 			public void handle(ActionEvent event) {
+				// check that passwords match
+				if(!tfPWord.getText().equals(tfPWord2.getText())) {
+					tfPWord.setStyle(redBorder);
+					tfPWord2.setStyle(redBorder);
+					tfPWord.setText("");
+					tfPWord2.setText("");
+					return;
+				}
 
 				System.out.println(tfUName.getText());
 				System.out.println(tfPWord.getText());
-				// check username and password
+				System.out.println(tfPWord2.getText());
+				System.out.println("Name: "+tfName.getText());
+				System.out.println("Address: "+tfAddress.getText());
+				System.out.println("Phone: "+tfPhone.getText());
 
-
-				if(session.loginUser(tfUName.getText(), tfPWord.getText())) {
+				// register user or clear fields
+				if(session.registerUser(tfUName.getText(), tfPWord.getText(), tfName.getText(), tfAddress.getText(), tfPhone.getText())) {
 					// StageCoordinate sc = new StageCoordinate(primaryStage);
 					System.exit(0);//close the window
 				} else {
-					tfUName.setText("");
+					tfUName.setText("");// username taken
 					tfPWord.setText("");
+					tfPWord2.setText("");
+					tfUName.setStyle(redBorder);
 				}
 			}
 		});
-		// can just use lambda function
-		bRegister.setOnAction(new EventHandler<ActionEvent>() {
+
+
+		bLogin.setOnAction(new EventHandler<ActionEvent>() {
 
 			@Override
 			public void handle(ActionEvent event) {
 				// StageCoordinate sc = new StageCoordinate(primaryStage);
-				session.swapToRegisterWindow(tfUName.getText(), tfPWord.getText());
+				session.swapToLoginWindow(tfUName.getText(), tfPWord.getText());
 				System.exit(0);
 			}
 		});
@@ -79,12 +109,12 @@ public class Login extends Application {
 		buttons.setSpacing(2);
 
 		//add elements to the layout
-		buttons.getChildren().addAll(bLogin, bRegister);
-		root.getChildren().addAll(lUName, tfUName, lPWord, tfPWord, buttons);
+		buttons.getChildren().addAll(bRegister, bLogin);
+		root.getChildren().addAll(lName, tfName, lAddress, tfAddress, lPhone, tfPhone, lUName, tfUName, lPWord, tfPWord, lPWord2, tfPWord2, buttons);
 
 		Scene scene = new Scene(root/*, 300, 200*/);//create window
 
-		primaryStage.setTitle("JABLS System: JABLS Automatic Booking Login System");//text at the top of the window
+		primaryStage.setTitle("JABRS System: JABRS Automatic Booking Registration System");//text at the top of the window
 		primaryStage.setScene(scene);//add scene to window
 		primaryStage.show();//put the window on the desktop
 	}
