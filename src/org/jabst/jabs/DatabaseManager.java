@@ -23,7 +23,10 @@ import java.util.Scanner;
 
 public class DatabaseManager {
     private static final String dbfilePrefix = "jdbc:hsqldb:file:";
-    private static final String SQL_TABLE_CREDENTIALS ="CREATE TABLE CREDENTIALS ( USERNAME VARCHAR(20), PASSWORD VARBINARY(32), USERTYPE VARCHAR(1), PRIMARY KEY(USERNAME))";
+    private static final String[] SQL_TABLES = {
+        "CREATE TABLE CREDENTIALS ( USERNAME VARCHAR(20), PASSWORD VARBINARY(32), USERTYPE VARCHAR(1), PRIMARY KEY(USERNAME))",
+        "CREATE TABLE CUSTOMERS ( USERNAME VARCHAR(20), NAME VARCHAR(40), ADDRESS VARCHAR(255), PHONE VARCHAR(10), PRIMARY KEY(USERNAME), FOREIGN KEY (USERNAME) REFERENCES CREDENTIALS(USERNAME));"
+    };
     public static final String dbDefaultFileName = "db/jabs_database";
     private Connection connection;
     
@@ -61,24 +64,28 @@ public class DatabaseManager {
      *  @return whether the tables could be successfully created
      */
     private boolean createTables() {
-        Statement statement = null;
-        try {
-            statement = connection.createStatement();
-        } catch (SQLException se) {
-            System.err.println("Error creating statement for tables");
-            return false;
+        boolean success = false;
+        for (String currTable : SQL_TABLES) {
+            Statement statement = null;
+            try {
+                statement = connection.createStatement();
+            } catch (SQLException se) {
+                System.err.println("Error creating statement for tables");
+                return false;
+            }
+            
+            try {
+                // Statement.execute returns false if no results were returned,
+                // including for CREATE statements
+                statement.execute(currTable);
+                System.out.println("Successfully created tables");
+                success = true;
+            } catch (SQLException se) {
+                System.out.println("Did not successfully create tables");
+                return false;   
+            }
         }
-        
-        try {
-            // Statement.execute returns false if no results were returned,
-            // including for CREATE statements
-            statement.execute(SQL_TABLE_CREDENTIALS);
-            System.out.println("Successfully created tables");
-            return true;
-        } catch (SQLException se) {
-            System.out.println("Did not successfully create tables");
-            return false;   
-        }
+        return success;
     }
     
     /** Closes the database connection associated with the manager
@@ -191,6 +198,8 @@ public class DatabaseManager {
         // TODO: Always clean up! Leaving this here until we can set it
         // to act correctly on program shutdown
     }
+
+    //public void addUser
     
     private void scannerAddUser(Scanner sc) {
         String username, password;
