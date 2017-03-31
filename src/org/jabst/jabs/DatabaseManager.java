@@ -97,6 +97,9 @@ public class DatabaseManager {
             connection.close();
         } catch (SQLException e) {
             // Nah don't bother handling it
+            System.err.println(
+                "DatabaseManager: Error closing database properly. Continuing."
+            );
         }
     }
     
@@ -147,10 +150,10 @@ public class DatabaseManager {
         while (rs.next()) {
             String result_username = rs.getString("username");
             byte[] result_password = rs.getBytes("password");
-            System.out.format("Input: username,password = %s,%s",
+            System.out.format("Input: username,password = %s,%s\n",
                 username, digestToHexString(password_hash)
             );
-            System.out.format("Result:username,password = %s,%s",
+            System.out.format("Result:username,password = %s,%s\n",
                 result_username, digestToHexString(result_password)
             );
             
@@ -159,8 +162,8 @@ public class DatabaseManager {
                     success = false;
                     break;
                 }
+                success = true;
             }
-            success = true;
         }
 
         rs.close();
@@ -194,9 +197,8 @@ public class DatabaseManager {
         statement.execute();
 
         statement.close();
-        
-        // TODO: Always clean up! Leaving this here until we can set it
-        // to act correctly on program shutdown
+        // After adding a user, they need to be able to log in again
+        connection.commit();
     }
 
     public void addUser(String username, String password,

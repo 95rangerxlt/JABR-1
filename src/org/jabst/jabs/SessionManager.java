@@ -3,7 +3,9 @@ package org.jabst.jabs;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import org.hsqldb.HsqlException;
+
 
 public class SessionManager extends Application {
 	// Fields
@@ -40,7 +42,8 @@ public class SessionManager extends Application {
 					password = rInfo.password;
 					if(rInfo.button == RegisterInfo.Buttons.REGISTER) {
 						// open respective window
-						System.exit(0);
+						load_database();
+						currentWindow = Window.LOGIN;
 					} else if(rInfo.button == RegisterInfo.Buttons.LOGIN) {
 						// open register window
 						currentWindow = Window.LOGIN;
@@ -51,13 +54,17 @@ public class SessionManager extends Application {
 
 	}
 	
-	public SessionManager() {
+	public void load_database() {
 		try {
 			dbm = new DatabaseManager(DatabaseManager.dbDefaultFileName);
 		} catch (SQLException sqle) {
 			System.err.println("FATAL: SessionManager: Could not open DatabaseManager");
 			System.exit(1);
 		}
+	}
+	
+	public SessionManager() {
+		load_database();
 	}
 	
 	// Methods
@@ -69,13 +76,29 @@ public class SessionManager extends Application {
 		}
 	}
 
-	public boolean registerUser(String username, String password, String name, String address, String phone){
-		// Query Database for existing user
-		// populate database
-		if(username.equals(password))
+	public boolean registerUser(String username, String password,
+		String name, String address, String phone)
+	{
+		// If it throws an exception, it failed. Otherwise it succeeded
+		try {
+			dbm.addUser(username, password, name, address, phone);
+			System.out.println("SessionManager: Successfully added user with dbm");
 			return true;
-		return false;
-		// false if user exists
+		} catch (SQLException sqle) {
+			// false if user exists or the database is somehow broken
+			if (sqle instanceof SQLIntegrityConstraintViolationException) {
+				System.err.println(
+					"SessionManager: Adding user failed: Already a user with that username"
+				);
+			}
+			else {
+				System.err.println(
+					"SessionManager: Adding user failed: Other database error"
+				);
+				sqle.printStackTrace();
+			}
+			return false;
+		}
 	}
 	
 	public void populateCustomer(String username){
