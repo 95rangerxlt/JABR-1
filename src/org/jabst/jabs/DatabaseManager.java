@@ -44,9 +44,36 @@ public class DatabaseManager {
             +"PHONE VARCHAR(10),"
             +"PRIMARY KEY (USERNAME))"
     };
+    private static final String[] SQL_TABLES_BUSINESS = {
+        "CREATE TABLE EMPLOYEE ("
+            +    "EMPL_ID INTEGER,"
+            +    "EMPL_NAME VARCHAR(40),"
+            +    "ADDRESS VARCHAR(255),"
+            +    "PHONE VARCHAR(10),"
+            +    "PRIMARY KEY(EMPL_ID)"
+            +" )",
+            
+        "CREATE TABLE APPOINTMENTTYPE ("
+            +    "TYPE_ID INTEGER,"
+            +    "NAME VARCHAR(40),"
+            +    "COST_CENTS INTEGER,"
+            +    "PRIMARY KEY (TYPE_ID)"
+            +")",
+            
+        "CREATE TABLE APPOINTMENT ("
+            +    "APT_ID INTEGER,"
+            +    "DATE_AND_TIME DATETIME,"
+            +    "APPOINTMENT_TYPE INTEGER,"
+            +    "EMPLOYEE INTEGER,"
+            +    "PRIMARY KEY (APT_ID),"
+            +    "FOREIGN KEY (APPOINTMENT_TYPE)"
+            +       "REFERENCES APPOINTMENTTYPE (TYPE_ID),"
+            +    "FOREIGN KEY (EMPLOYEE) REFERENCES EMPLOYEE(EMPL_ID)"
+            +")"
+    };
     public static final String dbDefaultFileName = "db/credentials_db";
     private Connection generalConnection;
-    private Connection connection;
+    private Connection businessConnection;
     
     /** Creates a new DatabaseManager
      * Always open the DatabaseManager at program start (call the constructor),
