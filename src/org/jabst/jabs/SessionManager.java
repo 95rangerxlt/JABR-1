@@ -12,7 +12,7 @@ public class SessionManager extends Application {
 	private DatabaseManager dbm;
 
 	public enum Window {
-		LOGIN, REGISTER
+		LOGIN, REGISTER, BUSINESSMENU
 	}
 
 	// ++++++++++++THIS IS YOUR NEW MAIN++++++++++++++++
@@ -25,19 +25,19 @@ public class SessionManager extends Application {
 		for(;;) {
 			switch(currentWindow) {
 				case LOGIN:
-					LoginInfo lInfo = Login.display(this, username, password);
+					LoginInfo lInfo = LoginGUI.display(this, username, password);
 					username = lInfo.username;
 					password = lInfo.password;
 					if(lInfo.button == LoginInfo.Buttons.LOGIN) {
 						// open respective window
-						System.exit(0);
+						currentWindow = Window.BUSINESSMENU;
 					} else if(lInfo.button == LoginInfo.Buttons.REGISTER) {
 						// open register window
 						currentWindow = Window.REGISTER;
 					}
 				break;
 				case REGISTER:
-					RegisterInfo rInfo = Register.display(this, username, password);
+					RegisterInfo rInfo = RegisterGUI.display(this, username, password);
 					username = rInfo.username;
 					password = rInfo.password;
 					if(rInfo.button == RegisterInfo.Buttons.REGISTER) {
@@ -47,6 +47,13 @@ public class SessionManager extends Application {
 					} else if(rInfo.button == RegisterInfo.Buttons.LOGIN) {
 						// open register window
 						currentWindow = Window.LOGIN;
+					}
+				break;
+				case BUSINESSMENU:
+					BusinessInfo bInfo = BusinessMenuGUI.display(this);
+					if(bInfo.button == BusinessInfo.Buttons.OK) {
+						System.exit(0);
+						return;
 					}
 				break;
 			}
@@ -109,14 +116,6 @@ public class SessionManager extends Application {
 	public void populateBusiness(String username){
 		// Request object data from DatabaseManager
 		// create new business object
-	}
-	
-	public void swapToLoginWindow(String user, String pass) {
-		Login.display(this, user, pass);
-	}
-	
-	void swapToRegisterWindow(String username, String password){
-		Register.display(this, username, password);
 	}
 	
 	void launchCustomerMenu(){
