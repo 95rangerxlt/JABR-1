@@ -23,11 +23,29 @@ import java.util.Scanner;
 
 public class DatabaseManager {
     private static final String dbfilePrefix = "jdbc:hsqldb:file:";
-    private static final String[] SQL_TABLES = {
-        "CREATE TABLE CREDENTIALS ( USERNAME VARCHAR(20), PASSWORD VARBINARY(32), USERTYPE VARCHAR(1), PRIMARY KEY(USERNAME))",
-        "CREATE TABLE CUSTOMERS ( USERNAME VARCHAR(20), NAME VARCHAR(40), ADDRESS VARCHAR(255), PHONE VARCHAR(10), PRIMARY KEY(USERNAME), FOREIGN KEY (USERNAME) REFERENCES CREDENTIALS(USERNAME));"
+    private static final String[] SQL_TABLES_GENERAL = {
+        "CREATE TABLE CREDENTIALS ("
+            +"USERNAME VARCHAR(20),"
+            +"PASSWORD VARBINARY(32),"
+            +"USERTYPE VARCHAR(1),"
+            +"PRIMARY KEY(USERNAME))",
+        "CREATE TABLE CUSTOMERS ("
+            +"USERNAME VARCHAR(20),"
+            +"NAME VARCHAR(40),"
+            +"ADDRESS VARCHAR(255),"
+            +"PHONE VARCHAR(10),"
+            +"PRIMARY KEY(USERNAME),"
+            +"FOREIGN KEY (USERNAME) REFERENCES CREDENTIALS(USERNAME));",
+        "CREATE TABLE BUSINESS ("
+            +"USERNAME VARCHAR (40),"
+            +"BUSINESS_NAME VARCHAR(40),"
+            +"OWNER_NAME VARCHAR(40),"
+            +"ADDRESS VARCHAR(255),"
+            +"PHONE VARCHAR(10),"
+            +"PRIMARY KEY (USERNAME))"
     };
-    public static final String dbDefaultFileName = "db/jabs_database";
+    public static final String dbDefaultFileName = "db/credentials_db";
+    private Connection generalConnection;
     private Connection connection;
     
     /** Creates a new DatabaseManager
@@ -38,14 +56,14 @@ public class DatabaseManager {
      */
     public DatabaseManager(String dbfile) throws HsqlException, SQLException {
          try {
-             this.connection = DriverManager.getConnection(dbfilePrefix+dbfile+";ifexists=true", "sa", "");
+             this.generalConnection = DriverManager.getConnection(dbfilePrefix+dbfile+";ifexists=true", "sa", "");
          } catch (HsqlException hse) {
              System.err.println("HqlException conecting to database: Doesn't exist");
          }
 
          catch (SQLException se) {
             try {
-                connection = DriverManager.getConnection(dbfilePrefix+dbfile, "sa", "");
+                generalConnection = DriverManager.getConnection(dbfilePrefix+dbfile, "sa", "");
             } catch (SQLException sqle) {
                 System.err.println(
                     "DriverManager: Error: Cannot connect to database file (SQL error) (when trying to open new)"
@@ -65,10 +83,10 @@ public class DatabaseManager {
      */
     private boolean createTables() {
         boolean success = false;
-        for (String currTable : SQL_TABLES) {
+        for (String currTable : SQL_TABLES_GENERAL) {
             Statement statement = null;
             try {
-                statement = connection.createStatement();
+                statement = generalConnection.createStatement();
             } catch (SQLException se) {
                 System.err.println("Error creating statement for tables");
                 return false;
@@ -93,8 +111,8 @@ public class DatabaseManager {
      */
     public void close() {
         try {
-            connection.commit();
-            connection.close();
+            generalConnection.commit();
+            generalConnection.close();
         } catch (SQLException e) {
             // Nah don't bother handling it
             System.err.println(
@@ -142,7 +160,7 @@ public class DatabaseManager {
         byte[] password_hash = sha256(password);
         boolean success = false;
 
-        PreparedStatement statement = connection.prepareStatement(
+        PreparedStatement statement = generalConnection.prepareStatement(
             "SELECT * from CREDENTIALS WHERE USERNAME='"+username+"'"
         );
 
@@ -186,7 +204,7 @@ public class DatabaseManager {
         byte[] password_hash = sha256(password);
         PreparedStatement statement = null;
 
-        statement = connection.prepareStatement(
+        statement = generalConnection.prepareStatement(
             "INSERT INTO CREDENTIALS VALUES (?, ?, 'C')"
         );
 
@@ -198,7 +216,7 @@ public class DatabaseManager {
 
         statement.close();
         // After adding a user, they need to be able to log in again
-        connection.commit();
+        generalConnection.commit();
     }
 
     public void addUser(String username, String password,
@@ -208,7 +226,7 @@ public class DatabaseManager {
         addUser(username, password);
         
         // Now add to customers table
-        PreparedStatement statement = connection.prepareStatement(
+        PreparedStatement statement = generalConnection.prepareStatement(
             // USERNAME, NAME, ADDRESS, PHONE
             "INSERT INTO CUSTOMERS VALUES (?, ?, ?, ?)"
         );
