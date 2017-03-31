@@ -12,7 +12,7 @@ import javafx.stage.Modality;
 import javafx.geometry.Insets;//insets = padding
 
 
-public class Register {
+public class RegisterGUI {
 
 	private static String redBorder = "-fx-border-color: red ; -fx-border-width: 2px ;";
 
@@ -93,6 +93,8 @@ public class Register {
 			@Override
 			public void handle(ActionEvent event) {
 				info.button = RegisterInfo.Buttons.LOGIN;
+				info.username = tfUName.getText();
+				info.password = tfPWord.getText();
 				window.close();
 			}
 		});
