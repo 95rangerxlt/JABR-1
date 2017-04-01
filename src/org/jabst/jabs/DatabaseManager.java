@@ -82,40 +82,24 @@ public class DatabaseManager {
      * @throws HsqlException, SQLException
      */
     public DatabaseManager(String dbfile) throws HsqlException, SQLException {
-         try {
-             this.generalConnection = DriverManager.getConnection(dbfilePrefix+dbfile+";ifexists=true", "sa", "");
-         } catch (HsqlException hse) {
-             System.err.println("HqlException conecting to database: Doesn't exist");
-         }
-
-         catch (SQLException se) {
-            try {
-                generalConnection = DriverManager.getConnection(dbfilePrefix+dbfile, "sa", "");
-            } catch (SQLException sqle) {
-                System.err.println(
-                    "DriverManager: Error: Cannot connect to database file (SQL error) (when trying to open new)"
-                );
-            }
-            if (!createTables()) {
-                System.err.println(
-                    "DriverManager: Error: Cannot create tables in new database"
-                 );
-            }
+         this.generalConnection = openCreateDatabase(dbfile, SQL_TABLES_GENERAL);
+         if (generalConnection == null) {
+             throw new SQLException();
          }
     }
     
-    /** Creates the database tables
+    /** Creates the database tables given
      *  in case the database is being created for the first time
      *  @return whether the tables could be successfully created
      */
-    private boolean createTables() {
+    private boolean createTables(Connection connection, String[] tables) {
         boolean success = false;
-        for (String currTable : SQL_TABLES_GENERAL) {
+        for (String currTable : tables) {
             Statement statement = null;
             try {
-                statement = generalConnection.createStatement();
+                statement = connection.createStatement();
             } catch (SQLException se) {
-                System.err.println("Error creating statement for tables");
+                System.err.println("Error creating statement for table");
                 return false;
             }
             
@@ -123,11 +107,11 @@ public class DatabaseManager {
                 // Statement.execute returns false if no results were returned,
                 // including for CREATE statements
                 statement.execute(currTable);
-                System.out.println("Successfully created tables");
+                System.out.println("Successfully created table");
                 success = true;
             } catch (SQLException se) {
-                System.out.println("Did not successfully create tables");
-                return false;   
+                System.out.println("Failed to create table");
+                return false;
             }
         }
         return success;
@@ -146,6 +130,68 @@ public class DatabaseManager {
                 "DatabaseManager: Error closing database properly. Continuing."
             );
         }
+    }
+    
+    /** Tries to connect to the given database, and create it if it doesn't exist already
+        @param dbFileName The name of the database file to connect to
+        @param tables A string array of SQL statements to execute to make the tables in the
+        new database
+        @return A connection to the database if successful, otherwise null.
+     */
+    private Connection openCreateDatabase(String dbFileName, String[] tables) {
+        Connection c = null;
+         try {
+             c = DriverManager.getConnection(dbfilePrefix+dbFileName+";ifexists=true", "sa", "");
+         } catch (HsqlException hse) {
+             System.err.println("HqlException conecting to database'"+dbFileName+"': Doesn't exist");
+         }
+
+         catch (SQLException se) {
+            try {
+                c = DriverManager.getConnection(dbfilePrefix+dbFileName, "sa", "");
+            } catch (SQLException sqle) {
+                System.err.println(
+                    "DriverManager: Error: Cannot connect to general database file (SQL error) (when trying to open new)"
+                );
+            }
+            if (!createTables(c, tables)) {
+                System.err.println(
+                    "DriverManager: Error: Cannot create tables in database'"+dbFileName+"'"
+                 );
+            }
+         }
+        return c;
+    }
+    
+    /** Opens a connection to the business specified with the username
+      * The database file is located in db/$username
+      * @param String busUsername : The username of the business
+      * @return Whether a connection was sucessfully made
+      */
+    public boolean connectToBusiness(String busUsername) throws SQLException {
+        // Look up the business name in the table of businesses
+        Statement stmt = generalConnection.createStatement();
+        //stmt.execute();
+        
+        ResultSet rs = stmt.executeQuery("SELECT COUNT(USERNAME) FROM BUSINESS WHERE USERNAME="+busUsername);
+        rs.next();
+        switch(rs.getInt(1)){
+            case 0:
+                return false;
+            case 1:
+                break;
+            default:
+                throw new AssertionError("Found 2 of business "+busUsername);
+                // Never happens
+        }
+        
+        // We now know it exists for certain, but not whether it has a database
+        // Open or create the business' database
+        this.businessConnection = openCreateDatabase(busUsername, SQL_TABLES_BUSINESS);
+        if (this.businessConnection == null) {
+            return false;
+        }
+        return true;
     }
     
     public static byte[] sha256(String message) {
