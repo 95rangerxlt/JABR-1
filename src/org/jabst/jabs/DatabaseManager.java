@@ -27,7 +27,6 @@ public class DatabaseManager {
         "CREATE TABLE CREDENTIALS ("
             +"USERNAME VARCHAR(20),"
             +"PASSWORD VARBINARY(32),"
-            +"USERTYPE VARCHAR(1),"
             +"PRIMARY KEY(USERNAME))",
         "CREATE TABLE CUSTOMERS ("
             +"USERNAME VARCHAR(20),"
@@ -271,14 +270,14 @@ public class DatabaseManager {
      * SQLIntegrityConstraintViolationException, give a message about the
      * username already existing
      */
-    public void addUser(String username, String password)
+    private void addUser(String username, String password)
         throws SQLException {
 
         byte[] password_hash = sha256(password);
         PreparedStatement statement = null;
 
         statement = generalConnection.prepareStatement(
-            "INSERT INTO CREDENTIALS VALUES (?, ?, 'C')"
+            "INSERT INTO CREDENTIALS VALUES (?, ?)"
         );
 
         statement.setString(1, username);
@@ -292,6 +291,14 @@ public class DatabaseManager {
         generalConnection.commit();
     }
 
+    /** Adds a user with the given arguments
+        @param username Must be no longer than 40 characters
+        @param password No size limit
+        @param name Must be no longer than 40 character
+        @param address Must be no longer than 255 characters
+        @param phone Must be no longer than 10 characters (no international numbers)
+        @throws SQLException if the database size constraints were exceeded
+      */
     public void addUser(String username, String password,
         String name, String address, String phone) throws SQLException
     {
@@ -352,9 +359,29 @@ public class DatabaseManager {
         );
     }
     
-    public String checkUserType(String username) {
+    /** Checks if there is a business with the given username
+        @param username The username to check
+        @return Whether the username represents a business or not
+        @throws SQLException If the database encountered an error
+      */
+    public boolean isBusiness(String username) throws SQLException {
         // NYI: Check if in Business(name)
-        return "Customer";
+        Statement stmt = generalConnection.createStatement();
+        ResultSet rs = stmt.executeQuery(
+            "SELECT COUNT(USERNAME) FROM BUSINESS WHERE USERNAME="+username
+        );
+        
+        rs.next();
+        switch(rs.getInt(1)) {
+            case 0:
+                return false;
+            case 1:
+                return true;
+            default:
+                throw new AssertionError(
+                    "Found more than one business with username="+username
+                    );
+        }
     }
     
     private void scannerCheckUser(Scanner sc) {
