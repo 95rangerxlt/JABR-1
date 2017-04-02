@@ -27,6 +27,11 @@ public class CustomerMenuGUI {
 		Button bOk = new Button("Ok");
 		bOk.setDefaultButton(true);
 
+		Timetable table = new Timetable();
+		TimetableGUI tableGUI = new TimetableGUI(table);
+		tableGUI.setupSpacing();
+		// tableGUI.update();
+
 		//block events to other window
 		window.initModality(Modality.APPLICATION_MODAL);
 
@@ -48,7 +53,7 @@ public class CustomerMenuGUI {
 		root.setPadding(new Insets(3.0, 3.0, 3.0, 3.0));
 
 		//add elements to the layout
-		root.getChildren().addAll(bOk);
+		root.getChildren().addAll(bOk, tableGUI);
 
 		Scene scene = new Scene(root, 300, 200);//create area inside window
 
