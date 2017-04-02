@@ -21,14 +21,63 @@ import java.io.PrintStream;
 import java.io.InputStream;
 import java.util.Scanner;
 
+// For returning result sets as native objects
+import java.util.ArrayList;
+
 public class DatabaseManager {
     private static final String dbfilePrefix = "jdbc:hsqldb:file:";
-    private static final String[] SQL_TABLES = {
-        "CREATE TABLE CREDENTIALS ( USERNAME VARCHAR(20), PASSWORD VARBINARY(32), USERTYPE VARCHAR(1), PRIMARY KEY(USERNAME))",
-        "CREATE TABLE CUSTOMERS ( USERNAME VARCHAR(20), NAME VARCHAR(40), ADDRESS VARCHAR(255), PHONE VARCHAR(10), PRIMARY KEY(USERNAME), FOREIGN KEY (USERNAME) REFERENCES CREDENTIALS(USERNAME));"
+    private static final String[] SQL_TABLES_GENERAL = {
+        "CREATE TABLE CREDENTIALS ("
+            +"USERNAME VARCHAR(20),"
+            +"PASSWORD VARBINARY(32),"
+            +"PRIMARY KEY(USERNAME))",
+        "CREATE TABLE CUSTOMERS ("
+            +"USERNAME VARCHAR(20),"
+            +"NAME VARCHAR(40),"
+            +"ADDRESS VARCHAR(255),"
+            +"PHONE VARCHAR(10),"
+            +"PRIMARY KEY(USERNAME),"
+            +"FOREIGN KEY (USERNAME) REFERENCES CREDENTIALS(USERNAME));",
+        "CREATE TABLE BUSINESS ("
+            +"USERNAME VARCHAR (40),"
+            +"BUSINESS_NAME VARCHAR(40),"
+            +"OWNER_NAME VARCHAR(40),"
+            +"ADDRESS VARCHAR(255),"
+            +"PHONE VARCHAR(10),"
+            +"PRIMARY KEY (USERNAME))"
     };
-    public static final String dbDefaultFileName = "db/jabs_database";
-    private Connection connection;
+    private static final String[] SQL_TABLES_BUSINESS = {
+        "CREATE TABLE EMPLOYEE ("
+            +    "EMPL_ID INTEGER,"
+            +    "EMPL_NAME VARCHAR(40),"
+            +    "ADDRESS VARCHAR(255),"
+            +    "PHONE VARCHAR(10),"
+            +    "PRIMARY KEY(EMPL_ID)"
+            +" )",
+            
+        "CREATE TABLE APPOINTMENTTYPE ("
+            +    "TYPE_ID INTEGER,"
+            +    "NAME VARCHAR(40),"
+            +    "COST_CENTS INTEGER,"
+            +    "PRIMARY KEY (TYPE_ID)"
+            +")",
+            
+        "CREATE TABLE APPOINTMENT ("
+            +    "APT_ID INTEGER,"
+            +    "DATE_AND_TIME DATETIME,"
+            +    "APPOINTMENT_TYPE INTEGER,"
+            +    "EMPLOYEE INTEGER,"
+            +    "CUSTOMER VARCHAR(20)"
+            +    "PRIMARY KEY (APT_ID),"
+            +    "FOREIGN KEY (APPOINTMENT_TYPE)"
+            +       "REFERENCES APPOINTMENTTYPE (TYPE_ID),"
+            +    "FOREIGN KEY (EMPLOYEE) REFERENCES EMPLOYEE(EMPL_ID)"
+            +    "FOREIGN KEY (CUSTOMER) REFERENCES CUSTOMERS(USERNAME)"
+            +")"
+    };
+    public static final String dbDefaultFileName = "db/credentials_db";
+    private Connection generalConnection;
+    private Connection businessConnection;
     
     /** Creates a new DatabaseManager
      * Always open the DatabaseManager at program start (call the constructor),
@@ -37,40 +86,24 @@ public class DatabaseManager {
      * @throws HsqlException, SQLException
      */
     public DatabaseManager(String dbfile) throws HsqlException, SQLException {
-         try {
-             this.connection = DriverManager.getConnection(dbfilePrefix+dbfile+";ifexists=true", "sa", "");
-         } catch (HsqlException hse) {
-             System.err.println("HqlException conecting to database: Doesn't exist");
-         }
-
-         catch (SQLException se) {
-            try {
-                connection = DriverManager.getConnection(dbfilePrefix+dbfile, "sa", "");
-            } catch (SQLException sqle) {
-                System.err.println(
-                    "DriverManager: Error: Cannot connect to database file (SQL error) (when trying to open new)"
-                );
-            }
-            if (!createTables()) {
-                System.err.println(
-                    "DriverManager: Error: Cannot create tables in new database"
-                 );
-            }
+         this.generalConnection = openCreateDatabase(dbfile, SQL_TABLES_GENERAL);
+         if (generalConnection == null) {
+             throw new SQLException();
          }
     }
     
-    /** Creates the database tables
+    /** Creates the database tables given
      *  in case the database is being created for the first time
      *  @return whether the tables could be successfully created
      */
-    private boolean createTables() {
+    private boolean createTables(Connection connection, String[] tables) {
         boolean success = false;
-        for (String currTable : SQL_TABLES) {
+        for (String currTable : tables) {
             Statement statement = null;
             try {
                 statement = connection.createStatement();
             } catch (SQLException se) {
-                System.err.println("Error creating statement for tables");
+                System.err.println("Error creating statement for table");
                 return false;
             }
             
@@ -78,11 +111,11 @@ public class DatabaseManager {
                 // Statement.execute returns false if no results were returned,
                 // including for CREATE statements
                 statement.execute(currTable);
-                System.out.println("Successfully created tables");
+                System.out.println("Successfully created table");
                 success = true;
             } catch (SQLException se) {
-                System.out.println("Did not successfully create tables");
-                return false;   
+                System.out.println("Failed to create table");
+                return false;
             }
         }
         return success;
@@ -93,14 +126,76 @@ public class DatabaseManager {
      */
     public void close() {
         try {
-            connection.commit();
-            connection.close();
+            generalConnection.commit();
+            generalConnection.close();
         } catch (SQLException e) {
             // Nah don't bother handling it
             System.err.println(
                 "DatabaseManager: Error closing database properly. Continuing."
             );
         }
+    }
+    
+    /** Tries to connect to the given database, and create it if it doesn't exist already
+        @param dbFileName The name of the database file to connect to
+        @param tables A string array of SQL statements to execute to make the tables in the
+        new database
+        @return A connection to the database if successful, otherwise null.
+     */
+    private Connection openCreateDatabase(String dbFileName, String[] tables) {
+        Connection c = null;
+         try {
+             c = DriverManager.getConnection(dbfilePrefix+dbFileName+";ifexists=true", "sa", "");
+         } catch (HsqlException hse) {
+             System.err.println("HqlException conecting to database'"+dbFileName+"': Doesn't exist");
+         }
+
+         catch (SQLException se) {
+            try {
+                c = DriverManager.getConnection(dbfilePrefix+dbFileName, "sa", "");
+            } catch (SQLException sqle) {
+                System.err.println(
+                    "DriverManager: Error: Cannot connect to general database file (SQL error) (when trying to open new)"
+                );
+            }
+            if (!createTables(c, tables)) {
+                System.err.println(
+                    "DriverManager: Error: Cannot create tables in database'"+dbFileName+"'"
+                 );
+            }
+         }
+        return c;
+    }
+    
+    /** Opens a connection to the business specified with the username
+      * The database file is located in db/$username
+      * @param String busUsername : The username of the business
+      * @return Whether a connection was sucessfully made
+      */
+    public boolean connectToBusiness(String busUsername) throws SQLException {
+        // Look up the business name in the table of businesses
+        Statement stmt = generalConnection.createStatement();
+        //stmt.execute();
+        
+        ResultSet rs = stmt.executeQuery("SELECT COUNT(USERNAME) FROM BUSINESS WHERE USERNAME="+busUsername);
+        rs.next();
+        switch(rs.getInt(1)){
+            case 0:
+                return false;
+            case 1:
+                break;
+            default:
+                throw new AssertionError("Found 2 of business "+busUsername);
+                // Never happens
+        }
+        
+        // We now know it exists for certain, but not whether it has a database
+        // Open or create the business' database
+        this.businessConnection = openCreateDatabase(busUsername, SQL_TABLES_BUSINESS);
+        if (this.businessConnection == null) {
+            return false;
+        }
+        return true;
     }
     
     public static byte[] sha256(String message) {
@@ -142,7 +237,7 @@ public class DatabaseManager {
         byte[] password_hash = sha256(password);
         boolean success = false;
 
-        PreparedStatement statement = connection.prepareStatement(
+        PreparedStatement statement = generalConnection.prepareStatement(
             "SELECT * from CREDENTIALS WHERE USERNAME='"+username+"'"
         );
 
@@ -180,14 +275,14 @@ public class DatabaseManager {
      * SQLIntegrityConstraintViolationException, give a message about the
      * username already existing
      */
-    public void addUser(String username, String password)
+    private void addUser(String username, String password)
         throws SQLException {
 
         byte[] password_hash = sha256(password);
         PreparedStatement statement = null;
 
-        statement = connection.prepareStatement(
-            "INSERT INTO CREDENTIALS VALUES (?, ?, 'C')"
+        statement = generalConnection.prepareStatement(
+            "INSERT INTO CREDENTIALS VALUES (?, ?)"
         );
 
         statement.setString(1, username);
@@ -198,9 +293,17 @@ public class DatabaseManager {
 
         statement.close();
         // After adding a user, they need to be able to log in again
-        connection.commit();
+        generalConnection.commit();
     }
 
+    /** Adds a user with the given arguments
+        @param username Must be no longer than 40 characters
+        @param password No size limit
+        @param name Must be no longer than 40 character
+        @param address Must be no longer than 255 characters
+        @param phone Must be no longer than 10 characters (no international numbers)
+        @throws SQLException if the database size constraints were exceeded
+      */
     public void addUser(String username, String password,
         String name, String address, String phone) throws SQLException
     {
@@ -208,7 +311,7 @@ public class DatabaseManager {
         addUser(username, password);
         
         // Now add to customers table
-        PreparedStatement statement = connection.prepareStatement(
+        PreparedStatement statement = generalConnection.prepareStatement(
             // USERNAME, NAME, ADDRESS, PHONE
             "INSERT INTO CUSTOMERS VALUES (?, ?, ?, ?)"
         );
@@ -261,10 +364,80 @@ public class DatabaseManager {
         );
     }
     
-    public String checkUserType(String username) {
+    /** Checks if there is a business with the given username
+        @param username The username to check
+        @return Whether the username represents a business or not
+        @throws SQLException If the database encountered an error
+      */
+    public boolean isBusiness(String username) throws SQLException {
         // NYI: Check if in Business(name)
-        return "Customer";
+        Statement stmt = generalConnection.createStatement();
+        ResultSet rs = stmt.executeQuery(
+            "SELECT COUNT(USERNAME) FROM BUSINESS WHERE USERNAME="+username
+        );
+        
+        rs.next();
+        switch(rs.getInt(1)) {
+            case 0:
+                return false;
+            case 1:
+                return true;
+            default:
+                throw new AssertionError(
+                    "Found more than one business with username="+username
+                    );
+        }
     }
+    
+    
+    /** Gets all of the appointments in the system within the date range of
+     *  7 days starting from today
+     *  @return An ArrayList of Appointment objects representing all the 
+     *  appointments within the date range.
+     */
+    public ArrayList<Appointment> getThisWeeksAppointments() throws SQLException {
+        ArrayList<Appointment> appointments = new ArrayList<Appointment>();
+        Statement stmt = businessConnection.createStatement();
+        ResultSet rs = stmt.executeQuery(            "SELECT * FROM Appointment"
+            +"WHERE ("
+            +"    date_and_time >= DATE_SUB(CURDATE(),  DAYOFWEEK(CURDATE())-1)"
+            +"    AND"
+            +"    date_and_time <= DATE_SUB(CURDATE(),  DAYOFWEEK(CURDATE())-1) + INTERVAL '7' DAY"
+            +")"
+            +"ORDER BY DATE_AND_TIME"
+        );
+        while (rs.next()) {
+            try {
+                appointments.add(
+                    new Appointment(
+                        rs.getDate("DATE_AND_TIME"),
+                        rs.getInt("APPOINTMENT_TYPE"),
+                        rs.getInt("EMPLOYEE"),
+                        rs.getString("CUSTOMER")
+                    )
+                );
+            }
+            catch (SQLException sqle) {
+                System.err.println(
+                    "Error getting appointment. Error code: "+sqle.getErrorCode()
+                ); 
+            }
+        }
+        return appointments;
+    }
+    
+    /*         "CREATE TABLE APPOINTMENT ("
+            +    "APT_ID INTEGER,"
+            +    "DATE_AND_TIME DATETIME,"
+            +    "APPOINTMENT_TYPE INTEGER,"
+            +    "EMPLOYEE INTEGER,"
+            +    "CUSTOMER VARCHAR(20)"
+            +    "PRIMARY KEY (APT_ID),"
+            +    "FOREIGN KEY (APPOINTMENT_TYPE)"
+            +       "REFERENCES APPOINTMENTTYPE (TYPE_ID),"
+            +    "FOREIGN KEY (EMPLOYEE) REFERENCES EMPLOYEE(EMPL_ID)"
+            +    "FOREIGN KEY (CUSTOMER) REFERENCES CUSTOMERS(USERNAME)"
+            +")"*/
     
     private void scannerCheckUser(Scanner sc) {
         String username, password;
