@@ -21,6 +21,9 @@ import java.io.PrintStream;
 import java.io.InputStream;
 import java.util.Scanner;
 
+// For returning result sets as native objects
+import java.util.ArrayList;
+
 public class DatabaseManager {
     private static final String dbfilePrefix = "jdbc:hsqldb:file:";
     private static final String[] SQL_TABLES_GENERAL = {
@@ -64,10 +67,12 @@ public class DatabaseManager {
             +    "DATE_AND_TIME DATETIME,"
             +    "APPOINTMENT_TYPE INTEGER,"
             +    "EMPLOYEE INTEGER,"
+            +    "CUSTOMER VARCHAR(20)"
             +    "PRIMARY KEY (APT_ID),"
             +    "FOREIGN KEY (APPOINTMENT_TYPE)"
             +       "REFERENCES APPOINTMENTTYPE (TYPE_ID),"
             +    "FOREIGN KEY (EMPLOYEE) REFERENCES EMPLOYEE(EMPL_ID)"
+            +    "FOREIGN KEY (CUSTOMER) REFERENCES CUSTOMERS(USERNAME)"
             +")"
     };
     public static final String dbDefaultFileName = "db/credentials_db";
@@ -383,6 +388,56 @@ public class DatabaseManager {
                     );
         }
     }
+    
+    
+    /** Gets all of the appointments in the system within the date range of
+     *  7 days starting from today
+     *  @return An ArrayList of Appointment objects representing all the 
+     *  appointments within the date range.
+     */
+    public ArrayList<Appointment> getThisWeeksAppointments() throws SQLException {
+        ArrayList<Appointment> appointments = new ArrayList<Appointment>();
+        Statement stmt = businessConnection.createStatement();
+        ResultSet rs = stmt.executeQuery(            "SELECT * FROM Appointment"
+            +"WHERE ("
+            +"    date_and_time >= DATE_SUB(CURDATE(),  DAYOFWEEK(CURDATE())-1)"
+            +"    AND"
+            +"    date_and_time <= DATE_SUB(CURDATE(),  DAYOFWEEK(CURDATE())-1) + INTERVAL '7' DAY"
+            +")"
+            +"ORDER BY DATE_AND_TIME"
+        );
+        while (rs.next()) {
+            try {
+                appointments.add(
+                    new Appointment(
+                        rs.getDate("DATE_AND_TIME"),
+                        rs.getInt("APPOINTMENT_TYPE"),
+                        rs.getInt("EMPLOYEE"),
+                        rs.getString("CUSTOMER")
+                    )
+                );
+            }
+            catch (SQLException sqle) {
+                System.err.println(
+                    "Error getting appointment. Error code: "+sqle.getErrorCode()
+                ); 
+            }
+        }
+        return appointments;
+    }
+    
+    /*         "CREATE TABLE APPOINTMENT ("
+            +    "APT_ID INTEGER,"
+            +    "DATE_AND_TIME DATETIME,"
+            +    "APPOINTMENT_TYPE INTEGER,"
+            +    "EMPLOYEE INTEGER,"
+            +    "CUSTOMER VARCHAR(20)"
+            +    "PRIMARY KEY (APT_ID),"
+            +    "FOREIGN KEY (APPOINTMENT_TYPE)"
+            +       "REFERENCES APPOINTMENTTYPE (TYPE_ID),"
+            +    "FOREIGN KEY (EMPLOYEE) REFERENCES EMPLOYEE(EMPL_ID)"
+            +    "FOREIGN KEY (CUSTOMER) REFERENCES CUSTOMERS(USERNAME)"
+            +")"*/
     
     private void scannerCheckUser(Scanner sc) {
         String username, password;
