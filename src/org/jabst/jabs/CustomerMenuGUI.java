@@ -12,13 +12,13 @@ import javafx.stage.Modality;
 import javafx.geometry.Insets;//insets = padding
 
 
-public class BusinessMenuGUI {
+public class CustomerMenuGUI {
 
 	private static String redBorder = "-fx-border-color: red ; -fx-border-width: 2px ;";
 
-	public static BusinessInfo display(SessionManager session) {
+	public static CustomerInfo display(SessionManager session) {
 		// setup object to return
-		BusinessInfo info = new BusinessInfo();
+		CustomerInfo info = new CustomerInfo();
 
 		// create the window
 		Stage window = new Stage();
@@ -36,7 +36,7 @@ public class BusinessMenuGUI {
 			// handle method is called when the button is pressed
 			@Override
 			public void handle(ActionEvent event) {
-				info.button = BusinessInfo.Buttons.OK;
+				info.button = CustomerInfo.Buttons.OK;
 				window.close();
 			}
 		});
@@ -52,7 +52,7 @@ public class BusinessMenuGUI {
 
 		Scene scene = new Scene(root, 300, 200);//create area inside window
 
-		window.setTitle("Business GUI -placeholder-");//text at the top of the window
+		window.setTitle("Customer GUI -placeholder-");//text at the top of the window
 		window.setScene(scene);//add scene to window
 		window.showAndWait();//put the window on the desktop
 

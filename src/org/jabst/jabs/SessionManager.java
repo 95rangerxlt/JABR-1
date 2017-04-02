@@ -12,7 +12,7 @@ public class SessionManager extends Application {
 	private DatabaseManager dbm;
 
 	public enum Window {
-		LOGIN, REGISTER, BUSINESSMENU
+		LOGIN, REGISTER, BUSINESSMENU, CUSTOMERMENU
 	}
 
 	// ++++++++++++THIS IS YOUR NEW MAIN++++++++++++++++
@@ -31,6 +31,8 @@ public class SessionManager extends Application {
 					if(lInfo.button == LoginInfo.Buttons.LOGIN) {
 						// open respective window
 						currentWindow = Window.BUSINESSMENU;
+						currentWindow = Window.CUSTOMERMENU;
+// TODO: select the correct window for the user
 					} else if(lInfo.button == LoginInfo.Buttons.REGISTER) {
 						// open register window
 						currentWindow = Window.REGISTER;
@@ -52,6 +54,13 @@ public class SessionManager extends Application {
 				case BUSINESSMENU:
 					BusinessInfo bInfo = BusinessMenuGUI.display(this);
 					if(bInfo.button == BusinessInfo.Buttons.OK) {
+						System.exit(0);
+						return;
+					}
+				break;
+				case CUSTOMERMENU:
+					CustomerInfo cInfo = CustomerMenuGUI.display(this);
+					if(cInfo.button == CustomerInfo.Buttons.OK) {
 						System.exit(0);
 						return;
 					}
