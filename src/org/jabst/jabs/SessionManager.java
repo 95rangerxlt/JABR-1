@@ -18,7 +18,7 @@ public class SessionManager extends Application {
 	// ++++++++++++THIS IS YOUR NEW MAIN++++++++++++++++
 	@Override
 	public void start(Stage primaryStage) {
-		Window currentWindow = Window.CUSTOMERMENU;
+		Window currentWindow = Window.LOGIN;
 		String username = "";
 		String password = "";
 
@@ -28,12 +28,23 @@ public class SessionManager extends Application {
 					LoginInfo lInfo = LoginGUI.display(this, username, password);
 					username = lInfo.username;
 					password = lInfo.password;
+					// open respective window
 					if(lInfo.button == LoginInfo.Buttons.LOGIN) {
-						// open respective window
-						currentWindow = Window.BUSINESSMENU;
-						currentWindow = Window.CUSTOMERMENU;
-// TODO: select the correct window for the user
-					} else if(lInfo.button == LoginInfo.Buttons.REGISTER) {
+						// Open business menu for business,
+						// customer menu for customer
+						try {
+							if (dbm.isBusiness(lInfo.username)) {
+								currentWindow = Window.BUSINESSMENU;
+							} else {
+								currentWindow = Window.CUSTOMERMENU;
+							}
+						} catch (SQLException sqle) {
+							// TODO: Handle updating interface to show database error
+							sqle.printStackTrace();
+							currentWindow = Window.LOGIN;
+						}
+					}
+					else if(lInfo.button == LoginInfo.Buttons.REGISTER) {
 						// open register window
 						currentWindow = Window.REGISTER;
 					}
@@ -54,21 +65,24 @@ public class SessionManager extends Application {
 				case BUSINESSMENU:
 					BusinessInfo bInfo = BusinessMenuGUI.display(this);
 					if(bInfo.button == BusinessInfo.Buttons.OK) {
-						System.exit(0);
-						return;
+						shutdown();
 					}
 				break;
 				case CUSTOMERMENU:
 					CustomerInfo cInfo = CustomerMenuGUI.display(this);
 					if(cInfo.button == CustomerInfo.Buttons.OK) {
-						System.exit(0);
-						return;
+						shutdown();
 					}
 				break;
 			}
 		}
 
 	}
+	
+	private void shutdown() {
+		dbm.close();
+		System.exit(0);
+	}	
 	
 	public void load_database() {
 		try {

@@ -408,7 +408,7 @@ public class DatabaseManager {
         // NYI: Check if in Business(name)
         Statement stmt = generalConnection.createStatement();
         ResultSet rs = stmt.executeQuery(
-            "SELECT COUNT(USERNAME) FROM BUSINESS WHERE USERNAME="+username
+            "SELECT COUNT(USERNAME) FROM BUSINESS WHERE USERNAME='"+username+"'"
         );
         
         rs.next();
