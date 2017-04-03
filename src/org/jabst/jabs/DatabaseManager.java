@@ -44,7 +44,9 @@ public class DatabaseManager {
             +"OWNER_NAME VARCHAR(40),"
             +"ADDRESS VARCHAR(255),"
             +"PHONE VARCHAR(10),"
-            +"PRIMARY KEY (USERNAME))"
+            +"PRIMARY KEY (USERNAME))",
+        "INSERT INTO CREDENTIALS VALUES('default_business','37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f')",
+        "INSERT INTO BUSINESS VALUES('default_business', 'default business', 'default_owner', 'default_addr', '0420123456')"
     };
     private static final String[] SQL_TABLES_BUSINESS = {
         "CREATE TABLE EMPLOYEE ("
@@ -75,7 +77,9 @@ public class DatabaseManager {
             +    "FOREIGN KEY (CUSTOMER) REFERENCES CUSTOMERS(USERNAME)"
             +")"
     };
+    
     public static final String dbDefaultFileName = "db/credentials_db";
+    public static final String defaultBusinessName = "default_business";
     private Connection generalConnection;
     private Connection businessConnection;
     
@@ -167,6 +171,11 @@ public class DatabaseManager {
         return c;
     }
     
+    /** Opens the default business database */
+    public boolean connectToBusiness() throws SQLException {
+        return connectToBusiness(defaultBusinessName);
+    }
+    
     /** Opens a connection to the business specified with the username
       * The database file is located in db/$username
       * @param String busUsername : The username of the business
@@ -196,6 +205,32 @@ public class DatabaseManager {
             return false;
         }
         return true;
+    }
+    
+    /** Gets the business associated with the username
+      * @param businessUsername the username of the business account
+      * @return A Business object representing the business, or null if
+      * it does not exist or the database encountered an error.
+      */
+    public Business getBusiness(String businessUsername) {
+        try {
+            Statement stmt = generalConnection.createStatement();
+            ResultSet rs = stmt.executeQuery(
+                "SELECT * FROM BUSINESS "
+            +"WHERE USERNAME='"+businessUsername+"'"
+            );
+            
+            rs.next();
+            return new Business (
+                rs.getString("BUSINESS_NAME"),
+                rs.getString("OWNER_NAME"),
+                rs.getString("ADDRESS"),
+                rs.getString("PHONE")
+            );
+        }
+        catch (SQLException sqle) {
+            return null;
+        }
     }
     
     public static byte[] sha256(String message) {
@@ -426,19 +461,6 @@ public class DatabaseManager {
         return appointments;
     }
     
-    /*         "CREATE TABLE APPOINTMENT ("
-            +    "APT_ID INTEGER,"
-            +    "DATE_AND_TIME DATETIME,"
-            +    "APPOINTMENT_TYPE INTEGER,"
-            +    "EMPLOYEE INTEGER,"
-            +    "CUSTOMER VARCHAR(20)"
-            +    "PRIMARY KEY (APT_ID),"
-            +    "FOREIGN KEY (APPOINTMENT_TYPE)"
-            +       "REFERENCES APPOINTMENTTYPE (TYPE_ID),"
-            +    "FOREIGN KEY (EMPLOYEE) REFERENCES EMPLOYEE(EMPL_ID)"
-            +    "FOREIGN KEY (CUSTOMER) REFERENCES CUSTOMERS(USERNAME)"
-            +")"*/
-    
     private void scannerCheckUser(Scanner sc) {
         String username, password;
         byte[] digest;
@@ -489,6 +511,9 @@ public class DatabaseManager {
                 case "quit":
                     dbm.close();
                     return;
+                case "default_business":
+                    System.out.println(dbm.getBusiness(defaultBusinessName));
+                    break;
                 default:
                     System.out.println("Not a valid command. Received:"+input);
             }

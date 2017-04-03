@@ -1,12 +1,13 @@
+package org.jabst.jabs;
 
 public class Business {
 
 	// Variables
-	private String businessName;
-	private String businessOwner;
-	private String address;
-	private String phone;
-	
+	String businessName;
+	String businessOwner;
+	String address;
+	String phone;
+
 	// Methods
 		Business(String businessName, String businessOwner, String address, String phone){
 			this.businessName = businessName;
@@ -14,4 +15,14 @@ public class Business {
 			this.address = address;
 			this.phone = phone;
 		}
+
+	
+	public String toString() {
+		return (
+			"businessName="+businessName
+		   +"\nbusinessOwner="+businessOwner
+		   +"\naddress="+address
+		   +"\nphone="+phone
+		);
+	}
 }
