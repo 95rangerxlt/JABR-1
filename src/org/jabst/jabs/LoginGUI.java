@@ -8,9 +8,9 @@ import javafx.scene.control.*;//buttons, labels  etc.
 import javafx.scene.layout.VBox;//layout manager
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;//window
-import javafx.stage.Modality;
+import javafx.stage.Modality;//pauses other window when this one is open
+import javafx.stage.WindowEvent;//when the window is closed
 import javafx.geometry.Insets;//insets = padding
-
 
 public class LoginGUI {
 
@@ -71,6 +71,13 @@ public class LoginGUI {
 				info.username = tfUName.getText();
 				info.password = tfPWord.getText();
 				window.close();
+			}
+		});
+
+		// when the window is closed
+		window.setOnCloseRequest(new EventHandler<WindowEvent>() {
+			public void handle(WindowEvent we) {
+				System.out.println("Login window Closed");
 			}
 		});
 

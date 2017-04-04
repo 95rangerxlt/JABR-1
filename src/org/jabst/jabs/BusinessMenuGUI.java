@@ -9,6 +9,7 @@ import javafx.scene.layout.VBox;//layout manager
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;//window
 import javafx.stage.Modality;
+import javafx.stage.WindowEvent;//when window closes
 import javafx.geometry.Insets;//insets = padding
 
 
@@ -38,6 +39,13 @@ public class BusinessMenuGUI {
 			public void handle(ActionEvent event) {
 				info.button = BusinessInfo.Buttons.OK;
 				window.close();
+			}
+		});
+
+		// when the window is closed
+		window.setOnCloseRequest(new EventHandler<WindowEvent>() {
+			public void handle(WindowEvent we) {
+				System.out.println("Business Menu window Closed");
 			}
 		});
 		

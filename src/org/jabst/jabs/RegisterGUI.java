@@ -9,6 +9,7 @@ import javafx.scene.layout.VBox;//layout manager
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;//window
 import javafx.stage.Modality;
+import javafx.stage.WindowEvent;//when window closes
 import javafx.geometry.Insets;//insets = padding
 
 
@@ -96,6 +97,13 @@ public class RegisterGUI {
 				info.username = tfUName.getText();
 				info.password = tfPWord.getText();
 				window.close();
+			}
+		});
+
+		// when the window is closed
+		window.setOnCloseRequest(new EventHandler<WindowEvent>() {
+			public void handle(WindowEvent we) {
+				System.out.println("Register window Closed");
 			}
 		});
 

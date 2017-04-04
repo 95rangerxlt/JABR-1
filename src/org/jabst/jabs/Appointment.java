@@ -6,7 +6,7 @@ import java.util.Date;
 public class Appointment {
     
     private Date dateAndTime;
-    private int appointmentType;
+    private int appointmentType;// that enum tho
     private int employee;
     private String customer;
     

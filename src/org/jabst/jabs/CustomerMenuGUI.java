@@ -9,6 +9,7 @@ import javafx.scene.layout.VBox;//layout manager
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;//window
 import javafx.stage.Modality;
+import javafx.stage.WindowEvent;//when window closes
 import javafx.geometry.Insets;//insets = padding
 
 
@@ -45,6 +46,13 @@ public class CustomerMenuGUI {
 				window.close();
 			}
 		});
+
+		// when the window is closed
+		window.setOnCloseRequest(new EventHandler<WindowEvent>() {
+			public void handle(WindowEvent we) {
+				System.out.println("Customer Menu window Closed");
+			}
+		});
 		
 		// Setup Window and layout
  		VBox root = new VBox();//layout manager
@@ -55,7 +63,9 @@ public class CustomerMenuGUI {
 		//add elements to the layout
 		root.getChildren().addAll(bOk, tableGUI);
 
-		Scene scene = new Scene(root, 300, 200);//create area inside window
+		Scene scene = new Scene(root, 600, 200);//create area inside window
+
+		tableGUI.update();
 
 		window.setTitle("Customer GUI -placeholder-");//text at the top of the window
 		window.setScene(scene);//add scene to window
