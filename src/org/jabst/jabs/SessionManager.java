@@ -12,13 +12,13 @@ public class SessionManager extends Application {
 	private DatabaseManager dbm;
 
 	public enum Window {
-		LOGIN, REGISTER, BUSINESSMENU, CUSTOMERMENU
+		LOGIN, REGISTER, BUSINESSMENU, CUSTOMERMENU, ADDEMPLOYEE
 	}
 
 	// ++++++++++++THIS IS YOUR NEW MAIN++++++++++++++++
 	@Override
 	public void start(Stage primaryStage) {
-		Window currentWindow = Window.CUSTOMERMENU;
+		Window currentWindow = Window.ADDEMPLOYEE;
 		String username = "";
 		String password = "";
 
@@ -61,6 +61,13 @@ public class SessionManager extends Application {
 				case CUSTOMERMENU:
 					CustomerInfo cInfo = CustomerMenuGUI.display(this);
 					if(cInfo.button == CustomerInfo.Buttons.OK) {
+						System.exit(0);
+						return;
+					}
+				break;
+				case ADDEMPLOYEE:
+					AddEmployeeInfo aInfo = AddEmployeeGUI.display(this);
+					if(aInfo.button == AddEmployeeInfo.Buttons.SAVE) {
 						System.exit(0);
 						return;
 					}
