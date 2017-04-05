@@ -18,7 +18,9 @@ public class SessionManager extends Application {
 	// ++++++++++++THIS IS YOUR NEW MAIN++++++++++++++++
 	@Override
 	public void start(Stage primaryStage) {
-		Window currentWindow = Window.LOGIN;
+		Window currentWindow = Window.ADDEMPLOYEE;
+		String username = "";
+		String password = "";
 		for(;;) {
 			switch(currentWindow) {
 				case LOGIN:
