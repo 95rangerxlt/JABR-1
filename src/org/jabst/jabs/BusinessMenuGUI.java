@@ -15,8 +15,6 @@ import javafx.geometry.Insets;//insets = padding
 
 public class BusinessMenuGUI {
 
-	private static String redBorder = "-fx-border-color: red ; -fx-border-width: 2px ;";
-
 	public static BusinessInfo display(SessionManager session) {
 		// setup object to return
 		BusinessInfo info = new BusinessInfo();
@@ -38,15 +36,38 @@ public class BusinessMenuGUI {
 		//block events to other window
 		window.initModality(Modality.APPLICATION_MODAL);
 
-		miFileQuit.setOnAction(new EventHandler<ActionEvent>() {
-			// Quit
-			
+		miFileSave.setOnAction(new EventHandler<ActionEvent>() {
+			// Ask the SessionManager to save
 			@Override
 			public void handle(ActionEvent event) {
-				info.button = BusinessInfo.button.QUIT;
+				session.save();
+			}
+		});
+
+		miFileLogout.setOnAction(new EventHandler<ActionEvent>() {
+			// Save and go to Login
+			@Override
+			public void handle(ActionEvent event) {
+				session.save();
+				info.button = BusinessInfo.button.LOGOUT;
 				window.close();
 			}
 		});
+
+		miFileQuit.setOnAction(new EventHandler<ActionEvent>() {
+			// Quit program
+			@Override
+			public void handle(ActionEvent event) {
+				session.shutdown();
+			}
+		});
+        
+        miEditEmployee.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                AddEmployeeGUI.display(session);
+            }
+        });
 
 		// when the window is closed
 		window.setOnCloseRequest(new EventHandler<WindowEvent>() {

@@ -146,6 +146,18 @@ public class DatabaseManager {
         return success;
     }
     
+    public void commit() {
+        try {
+            generalConnection.commit();
+            if (businessConnection != null && !businessConnection.isClosed()) {
+                businessConnection.commit();
+            }
+        } catch (SQLException e) {
+            System.err.println("DatabaseManager: Error commiting");
+            e.printStackTrace();
+        }
+    }
+
     /** Closes the database connection associated with the manager
         You MUST do this, or data will not be saved on program exit
      */

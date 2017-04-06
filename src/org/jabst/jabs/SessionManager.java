@@ -23,11 +23,11 @@ public class SessionManager extends Application {
 		String password = "";
 		for(;;) {
 			switch(currentWindow) {
+				// open respective window based on previous input
 				case LOGIN:
 					LoginInfo lInfo = LoginGUI.display(this, username, password);
 					username = lInfo.username;
 					password = lInfo.password;
-					// open respective window
 					if(lInfo.button == LoginInfo.Buttons.LOGIN) {
 						// Open business menu for business,
 						// customer menu for customer
@@ -68,7 +68,7 @@ public class SessionManager extends Application {
 					username = "";
 					password = "";
 					BusinessInfo bInfo = BusinessMenuGUI.display(this);
-					if(bInfo.button == BusinessInfo.Buttons.QUIT) {
+					if(bInfo.button == BusinessInfo.Buttons.LOGOUT) {
 						currentWindow = Window.LOGIN;
 					}
 				break;
@@ -89,10 +89,14 @@ public class SessionManager extends Application {
 
 	}
 	
-	private void shutdown() {
+	void shutdown() {
 		dbm.close();
 		System.exit(0);
-	}	
+	}
+	
+	public void save() {
+		dbm.commit();
+	}
 	
 	public void load_database() {
 		try {
