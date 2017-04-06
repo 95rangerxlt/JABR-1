@@ -25,19 +25,25 @@ public class BusinessMenuGUI {
 		Stage window = new Stage();
 
 		// create all elements
-		Button bOk = new Button("Ok");
-		bOk.setDefaultButton(true);
+		MenuBar mb = new MenuBar();
+		Menu mFileMenu = new Menu("File");
+			MenuItem miFileSave = new MenuItem("Save");
+			MenuItem miFileLogout = new MenuItem("Logout");
+			MenuItem miFileQuit = new MenuItem("Quit");
+		Menu mEmployeesMenu = new Menu("Employees");
+			MenuItem miEditEmployee = new MenuItem("Edit Employee");
+		Menu mBusinessMenu = new Menu("Business");
+			MenuItem miEditBusInfo = new MenuItem("Edit Info"); 
 
 		//block events to other window
 		window.initModality(Modality.APPLICATION_MODAL);
 
-		// event handlers
-		bOk.setOnAction(new EventHandler<ActionEvent>() {
+		miFileQuit.setOnAction(new EventHandler<ActionEvent>() {
+			// Quit
 			
-			// handle method is called when the button is pressed
 			@Override
 			public void handle(ActionEvent event) {
-				info.button = BusinessInfo.Buttons.OK;
+				info.button = BusinessInfo.button.QUIT;
 				window.close();
 			}
 		});
@@ -56,11 +62,15 @@ public class BusinessMenuGUI {
 		root.setPadding(new Insets(3.0, 3.0, 3.0, 3.0));
 
 		//add elements to the layout
-		root.getChildren().addAll(bOk);
+		root.getChildren().addAll(mb);
+		mb.getMenus().addAll(mFileMenu, mEmployeesMenu, mBusinessMenu);
+		mFileMenu.getItems().addAll(miFileSave, miFileLogout, miFileQuit);
+		mEmployeesMenu.getItems().add(miEditEmployee);
+		mBusinessMenu.getItems().add(miEditBusInfo);
 
 		Scene scene = new Scene(root, 300, 200);//create area inside window
 
-		window.setTitle("Business GUI -placeholder-");//text at the top of the window
+		window.setTitle("Business GUI");//text at the top of the window
 		window.setScene(scene);//add scene to window
 		window.showAndWait();//put the window on the desktop
 

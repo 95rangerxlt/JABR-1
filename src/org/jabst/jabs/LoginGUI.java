@@ -77,7 +77,7 @@ public class LoginGUI {
 		// when the window is closed
 		window.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			public void handle(WindowEvent we) {
-				System.out.println("Login window Closed");
+				info.button = LoginInfo.Buttons.CLOSE;
 			}
 		});
 

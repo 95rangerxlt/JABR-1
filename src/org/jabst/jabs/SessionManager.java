@@ -18,7 +18,7 @@ public class SessionManager extends Application {
 	// ++++++++++++THIS IS YOUR NEW MAIN++++++++++++++++
 	@Override
 	public void start(Stage primaryStage) {
-		Window currentWindow = Window.ADDEMPLOYEE;
+		Window currentWindow = Window.LOGIN;
 		String username = "";
 		String password = "";
 		for(;;) {
@@ -47,6 +47,9 @@ public class SessionManager extends Application {
 						// open register window
 						currentWindow = Window.REGISTER;
 					}
+					else if (lInfo.button == LoginInfo.Buttons.CLOSE) {
+						shutdown();
+					}
 				break;
 				case REGISTER:
 					RegisterInfo rInfo = RegisterGUI.display(this, username, password);
@@ -62,9 +65,11 @@ public class SessionManager extends Application {
 					}
 				break;
 				case BUSINESSMENU:
+					username = "";
+					password = "";
 					BusinessInfo bInfo = BusinessMenuGUI.display(this);
-					if(bInfo.button == BusinessInfo.Buttons.OK) {
-						shutdown();
+					if(bInfo.button == BusinessInfo.Buttons.QUIT) {
+						currentWindow = Window.LOGIN;
 					}
 				break;
 				case CUSTOMERMENU:
@@ -76,8 +81,7 @@ public class SessionManager extends Application {
 				case ADDEMPLOYEE:
 					AddEmployeeInfo aInfo = AddEmployeeGUI.display(this);
 					if(aInfo.button == AddEmployeeInfo.Buttons.SAVE) {
-						System.exit(0);
-						return;
+						shutdown();
 					}
 				break;
 			}

@@ -6,7 +6,7 @@ public class LoginInfo {
 	public static String password;
 
 	public static enum Buttons {
-		LOGIN, REGISTER
+		LOGIN, REGISTER, CLOSE
 	}
 
 	public static Buttons button;
