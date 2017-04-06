@@ -8,13 +8,17 @@ import java.util.concurrent.TimeUnit;
 public class Employee {
 
 	public long id;
-	private String name;
-	private ArrayList<Date> workingHours;
-	private Calendar startDate;
-	private Timetable table;
+	String name;
+	ArrayList<Date> workingHours;
+	Calendar startDate;
+	Timetable table;
 	public int hoursInADay = 8;
 	public int startingHour = 9;
 
+	public Employee(String name) {
+		this.name = name;
+	}
+	
 	public Employee(String name, ArrayList<Date> hours) {
 		this.name = name;
 		this.workingHours = hours;
@@ -25,8 +29,8 @@ public class Employee {
 	}
 
 	public Employee(long id, String name, ArrayList<Date> hours) {
-		this.id = id;
 		this(name, hours);
+		this.id = id;
 	}
 
 	public Employee() {

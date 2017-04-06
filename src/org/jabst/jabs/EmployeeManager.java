@@ -39,7 +39,7 @@ public class EmployeeManager {
 				return employees.get(i).id;
 			}		
 		}
-		return null;
+		return -1;
 	}
 	
 	/** Removes employee from the ArrayList
@@ -48,7 +48,7 @@ public class EmployeeManager {
 	 */
 	public void removeEmployee(String employeeID){
 		for(int i = 0; i < employees.size(); i++){
-			if (employeeName.equals(employees.get(i).name)){
+			if (employees.get(i).name.equals(employees.get(i).name)){
 				employees.remove(i);
 			}		
 		}
@@ -75,9 +75,10 @@ public class EmployeeManager {
 	public ArrayList<Date> getWorkingHours(long employeeID){
 		for(int i = 0; i < employees.size(); i++){
 			if(employeeID == employees.get(i).id){
-				return employees.get(i).getWorkingHours();
+				return (employees.get(i).workingHours);
 			}
 		}
+		return null;
 	}
 
 }
