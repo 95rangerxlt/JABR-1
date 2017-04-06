@@ -25,6 +25,9 @@ import java.util.Date;
 // For returning result sets as native objects
 import java.util.ArrayList;
 
+import java.util.Calendar;
+import java.time.DateTimeException;
+
 public class DatabaseManager {
     private static final String dbfilePrefix = "jdbc:hsqldb:file:";
     private static final String[] SQL_TABLES_GENERAL = {
@@ -555,6 +558,68 @@ public class DatabaseManager {
         return availDates;
     }
     
+    /** Marks the employee available or unavailable at the given dates and times
+     *  @param employeeID The ID of the employee to mark availabilty for
+     *  @param dates An ArrayList of dates representing times the employee is
+     *  available for
+     *  @param available An ArrayList of same size as dates, representing the
+     *  whether the employee is available at the given date
+     */
+    public boolean setEmployeeAvailability(int employeeID,
+        ArrayList<Date> dates,
+        ArrayList<Boolean> availability)
+        throws SQLException, DateTimeException
+    {
+        if (businessConnection == null || businessConnection.isClosed()) {
+            throw new SQLException ("The business connection is closed.");
+        }
+        
+        int resultUpdates = 0;
+        Date givenDate;
+        for (int dateIdx = 0; dateIdx < dates.size(); ++dateIdx) {
+            givenDate = dates.get(dateIdx);
+            // Available
+            if (availability.get(dateIdx) == true) {
+                PreparedStatement pstmt = businessConnection.prepareStatement(
+                    "INSERT INTO AVAILABILITY VALUES(?, ?)"
+                );
+                pstmt.setInt(1, employeeID);
+                pstmt.setTimestamp(2, new java.sql.Timestamp(givenDate.getTime()));
+                try {
+                    resultUpdates += pstmt.executeUpdate();
+                } catch (SQLException sqle) {
+                    System.err.println("DatabaseManager: Error inserting appointment");
+                    System.err.println("date="+givenDate.toString() + ";empl_id=" + employeeID);
+                    sqle.printStackTrace();
+                    throw sqle;
+                }
+            }
+            // Unavailable
+            else {
+                PreparedStatement pstmt = businessConnection.prepareStatement(
+                    "DELETE FROM AVAILABILITY "+
+                    "WHERE EMPLOYEE = ? AND AVAILABLE_TIME = ?"
+                );
+                pstmt.setInt(1, employeeID);
+                pstmt.setTimestamp(2, new java.sql.Timestamp(givenDate.getTime()));
+                System.out.format("Deleting values(%d,%s)\n", employeeID, givenDate.toString());
+                try {
+                    resultUpdates += pstmt.executeUpdate();
+                    System.out.println("resultUpdates:"+resultUpdates);
+                } catch (SQLException sqle) {
+                    System.err.println("DatabaseManager: Error deleting appointment");
+                    System.err.println("date="+givenDate.toString() + ";empl_id=" + employeeID);
+                    sqle.printStackTrace();
+                    throw sqle;
+                }
+            }
+            
+        }
+        
+        System.out.println("resultUpdates:"+resultUpdates);
+        return (resultUpdates > 0 ? true : false);
+    }
+    
     private void scannerCheckUser(Scanner sc) {
         String username, password;
         byte[] digest;
@@ -595,6 +660,7 @@ public class DatabaseManager {
             System.out.print("> ");
             input = sc.next();
             sc.nextLine();
+            int employee;
             switch (input) {
                 case "add":
                     dbm.scannerAddUser(sc);
@@ -619,8 +685,8 @@ public class DatabaseManager {
                         +("to business:"+business+"\n")
                     );
                     break;
-                case "availability":
-                    int employee = sc.nextInt();
+                case "get_availability":
+                    employee = sc.nextInt();
                     ArrayList<Date> availability = null;
                     try {
                         availability = dbm.getEmployeeAvailability(1);
@@ -631,6 +697,46 @@ public class DatabaseManager {
                     }
                     for (Date d : availability) {
                         System.out.println(d);
+                    }
+                    break;
+                case "set_availability":
+                    employee = sc.nextInt();
+                    ArrayList<Date> availableDates = new ArrayList<Date>();
+                    Date today00 = new Date();
+                    /*today00.setHours(0);
+                    today00.setHours(today00.getHours()+10);
+                    today00.setMinutes(0);
+                    today00.setSeconds(0);*/
+                    availableDates.add(today00);
+                    ArrayList<Boolean> availabilities = new ArrayList<Boolean>();
+                    availabilities.add(sc.nextBoolean());
+                    try {
+                        dbm.setEmployeeAvailability(employee, availableDates, availabilities);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case "reset_availability":
+                    employee = sc.nextInt();
+                    availability = null;
+                    try {
+                        availability = dbm.getEmployeeAvailability(1);
+                    } catch (SQLException sqle) {
+                        System.out.println("Couldn't get availability for employee:"+employee);
+                        sqle.printStackTrace();
+                        break;
+                    }
+                    /*ArrayList<Boolean>*/ availabilities = new ArrayList<Boolean>();
+                    for (Date d : availability) {
+                        System.out.println(d);
+                        availabilities.add(false);
+                    }
+                    employee = sc.nextInt();
+                    availabilities.add(sc.nextBoolean());
+                    try {
+                        dbm.setEmployeeAvailability(employee, availability, availabilities);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                     break;
                 case "default_business":
