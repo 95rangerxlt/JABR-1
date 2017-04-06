@@ -505,6 +505,10 @@ public class DatabaseManager {
     }
     
     public ArrayList<String> getEmployeeNameIDs() throws SQLException {
+        if (businessConnection == null || businessConnection.isClosed()) {
+            throw new SQLException("Not connected to a business");
+        }
+        
         ArrayList<String> emplNames = new ArrayList<String>();
         Statement stmt = businessConnection.createStatement();
         ResultSet rs = null;
@@ -519,7 +523,7 @@ public class DatabaseManager {
         }
         
         while(rs.next()) {
-            emplNames.add(rs.getString("EMPL_NAME") + rs.getString("EMPL_ID"));
+            emplNames.add(rs.getString("EMPL_NAME") +" #"+ rs.getString("EMPL_ID"));
         }
         
         return emplNames;
@@ -553,6 +557,39 @@ public class DatabaseManager {
             availDates.add(rs.getDate(1));
         }
         return availDates;
+    }
+
+    public boolean addEmployee(String name) throws SQLException {
+        if (businessConnection == null || businessConnection.isClosed()) {
+            throw new SQLException("Not connected to a business");
+        }
+        Statement stmt = businessConnection.createStatement();
+        ResultSet rs = null;
+        int maxId;
+        try {
+            rs = stmt.executeQuery (
+                "SELECT MAX(EMPL_ID) FROM EMPLOYEE"
+            );
+            maxId = rs.getInt(1);
+        } catch (SQLException sqle) {
+            System.err.println(
+                "Error getting max employee_id (EMPL_ID) from database:"
+            );
+            sqle.printStackTrace();
+            throw sqle;
+        }
+        try {
+            return stmt.execute (
+                "INSERT INTO EMPLOYEE (EMPL_ID, EMPL_NAME) "
+               +"VALUES ("+maxId+", '"+name+"')"
+            );
+        } catch (SQLException sqle) {
+            System.err.println(
+                "Error creating employee(name=)"+name+"):"
+            );
+            sqle.printStackTrace();
+            throw sqle;
+        }
     }
     
     private void scannerCheckUser(Scanner sc) {

@@ -3,10 +3,17 @@ package org.jabst.jabs;
 import java.util.ArrayList;
 import java.util.Date;
 
+import java.sql.SQLException;
+
 public class EmployeeManager {
 	//Fields
 	ArrayList<Employee> employees = new ArrayList<Employee>();
+	private DatabaseManager dbm;
 	
+	// Constructor
+	public EmployeeManager(SessionManager sm) {
+		this.dbm = sm.getDatabaseManager();
+	}
 	
 	//Methods
 	
@@ -79,6 +86,16 @@ public class EmployeeManager {
 			}
 		}
 		return null;
+	}
+	
+	public ArrayList<String> getEmployeeNameIDs() {
+		try {
+			return dbm.getEmployeeNameIDs();
+		} catch (SQLException sqle) {
+			ArrayList<String> err = new ArrayList<String>();
+			err.add("DB Error");
+			return err;
+		}
 	}
 
 }

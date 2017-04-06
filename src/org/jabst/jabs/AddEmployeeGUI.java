@@ -19,6 +19,7 @@ public class AddEmployeeGUI {
 	public static AddEmployeeInfo display(SessionManager session) {
 		// setup object to return
 		AddEmployeeInfo info = new AddEmployeeInfo();
+		EmployeeManager employeeManager = session.getEmployeeManager();
 
 		// create the window
 		Stage window = new Stage();
@@ -34,18 +35,23 @@ public class AddEmployeeGUI {
 		tfName.setPrefWidth(500);
 
 		ComboBox cbEmployeeSelect = new ComboBox();
+		cbEmployeeSelect.getItems().add("Select Employee");
 		cbEmployeeSelect.getItems().addAll(
-			"Select Employee",
-			"Joe",
-			"Ann",
-			"Jasonface"
+			employeeManager.getEmployeeNameIDs()
 		);
 		cbEmployeeSelect.setValue("Select Employee");
 
-		TimetableGUI table = new TimetableGUI(/*TODO: put timetable to use here*/);
+		TimetableGUI table = new TimetableGUI(new Timetable(true));
 
 		//block events to other window
 		window.initModality(Modality.APPLICATION_MODAL);
+		
+		// Close on request
+		window.setOnCloseRequest(new EventHandler<WindowEvent>() {
+			public void handle(WindowEvent we) {
+				window.close();
+			}
+		});
 
 		// event handlers
 		bSave.setOnAction(new EventHandler<ActionEvent>() {
@@ -54,7 +60,6 @@ public class AddEmployeeGUI {
 			@Override
 			public void handle(ActionEvent event) {
 				info.button = AddEmployeeInfo.Buttons.SAVE;
-				window.close();
 			}
 		});
 
@@ -63,7 +68,6 @@ public class AddEmployeeGUI {
 			@Override
 			public void handle(ActionEvent event) {
 				info.button = AddEmployeeInfo.Buttons.NEW;
-				window.close();
 			}
 		});
 
@@ -72,7 +76,6 @@ public class AddEmployeeGUI {
 			@Override
 			public void handle(ActionEvent event) {
 				info.button = AddEmployeeInfo.Buttons.DELETE;
-				window.close();
 			}
 		});
 

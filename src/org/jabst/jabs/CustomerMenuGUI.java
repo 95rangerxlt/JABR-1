@@ -28,7 +28,7 @@ public class CustomerMenuGUI {
 		Button bOk = new Button("Ok");
 		bOk.setDefaultButton(true);
 
-		Timetable table = new Timetable();
+		Timetable table = new Timetable(true);
 		TimetableGUI tableGUI = new TimetableGUI(table);
 		tableGUI.setupSpacing();
 		// tableGUI.update();

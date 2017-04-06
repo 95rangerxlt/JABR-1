@@ -14,11 +14,12 @@ class TimetableGUI extends GridPane {
 	public TimetableCellGUI.Type type;
 
 	public TimetableGUI() {
-		this(new Timetable());
+		this(new Timetable(true));
 	}
 	
 	public TimetableGUI(Timetable table) {
 		this.table = table.table;
+		System.out.println("TimetableGUI:table.table.size="+table.table.size());
 		if(table.table.size() > 0)
 			cells = new TimetableCellGUI[this.table.size()][this.table.get(0).size()];
 		else

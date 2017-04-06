@@ -58,7 +58,7 @@ public class Employee {
 	}
 
 	public void createTableFromDates() {
-		table = new Timetable();
+		table = new Timetable(true);
 		ArrayList<Calendar> hoursCalendar = getCalendars(workingHours);
 		Calendar min = minDate(hoursCalendar);
 		startDate = (Calendar)min.clone();
