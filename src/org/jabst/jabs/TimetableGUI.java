@@ -5,9 +5,11 @@ import javafx.scene.control.*;//buttons, labels  etc.
 import javafx.geometry.Insets;//insets = padding
 import javafx.scene.paint.Color;
 
+import java.util.ArrayList;
+
 class TimetableGUI extends GridPane {
 
-	public Timetable.CellStatus table[][];
+	public ArrayList<ArrayList<Timetable.CellStatus>> table;
 	public TimetableCellGUI cells[][];
 	public TimetableCellGUI.Type type;
 
@@ -17,16 +19,30 @@ class TimetableGUI extends GridPane {
 	
 	public TimetableGUI(Timetable table) {
 		this.table = table.table;
-		cells = new TimetableCellGUI[this.table.length][this.table[0].length];
+		if(table.table.size() > 0)
+			cells = new TimetableCellGUI[this.table.size()][this.table.get(0).size()];
+		else
+			cells = new TimetableCellGUI[0][0];
 		type = TimetableCellGUI.Type.CHECKBOX;
 		setupSpacing();
 		update();
 	}
 
+	public void setTable(ArrayList<ArrayList<Timetable.CellStatus>> table) {
+		this.table = table;
+		update();
+	}
+
+	public ArrayList<ArrayList<Timetable.CellStatus>> getTable() {
+		return this.table;
+	}
+
 	public void update() {
-		for(int j = 0; j < this.table[0].length; j++) {
-			for(int i = 0; i < this.table.length; i++) {
-				switch(this.table[i][j]) {
+		if(this.table.size() == 0)
+			return;
+		for(int j = 0; j < this.table.get(0).size(); j++) {
+			for(int i = 0; i < this.table.size(); i++) {
+				switch(this.table.get(i).get(j)) {
 					case FREE:
 						cells[i][j] = new TimetableCellGUI(type, "FREE", 120, 40);
 						cells[i][j].border.setFill(Color.WHITE);
