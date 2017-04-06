@@ -492,6 +492,27 @@ public class DatabaseManager {
         return appointments;
     }
     
+    public ArrayList<String> getEmployeeNameIDs() throws SQLException {
+        ArrayList<String> emplNames = new ArrayList<String>();
+        Statement stmt = businessConnection.createStatement();
+        ResultSet rs = null;
+        try {
+            rs = stmt.executeQuery(
+                "SELECT EMPL_NAME, EMPL_ID FROM EMPLOYEE"
+            );
+        } catch (SQLException sqle) {
+            System.err.println("SQL Error getting employee names and IDs:");
+            sqle.printStackTrace();
+            throw sqle;
+        }
+        
+        while(rs.next()) {
+            emplNames.add(rs.getString("EMPL_NAME") + rs.getString("EMPL_ID"));
+        }
+        
+        return emplNames;
+    }
+    
     /** Gets the given employee's available dates for the next 7 days
       * @return ArrayList<Date> representing the availability
       * @throws SQLException if the employee doesn't exist, or a database
