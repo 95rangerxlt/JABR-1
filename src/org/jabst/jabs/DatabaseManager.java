@@ -20,6 +20,7 @@ import java.security.NoSuchAlgorithmException;
 import java.io.PrintStream;
 import java.io.InputStream;
 import java.util.Scanner;
+import java.util.Date;
 
 // For returning result sets as native objects
 import java.util.ArrayList;
@@ -29,53 +30,73 @@ public class DatabaseManager {
     private static final String[] SQL_TABLES_GENERAL = {
         "CREATE TABLE CREDENTIALS ("
             +"USERNAME VARCHAR(20),"
-            +"PASSWORD VARBINARY(32),"
+            +"PASSWORD VARBINARY(32) NOT NULL,"
             +"PRIMARY KEY(USERNAME))",
         "CREATE TABLE CUSTOMERS ("
             +"USERNAME VARCHAR(20),"
-            +"NAME VARCHAR(40),"
-            +"ADDRESS VARCHAR(255),"
-            +"PHONE VARCHAR(10),"
+            +"NAME VARCHAR(40) NOT NULL,"
+            +"ADDRESS VARCHAR(255) NOT NULL,"
+            +"PHONE VARCHAR(10) NOT NULL,"
             +"PRIMARY KEY(USERNAME),"
             +"FOREIGN KEY (USERNAME) REFERENCES CREDENTIALS(USERNAME));",
         "CREATE TABLE BUSINESS ("
             +"USERNAME VARCHAR (40),"
-            +"BUSINESS_NAME VARCHAR(40),"
-            +"OWNER_NAME VARCHAR(40),"
-            +"ADDRESS VARCHAR(255),"
-            +"PHONE VARCHAR(10),"
+            +"BUSINESS_NAME VARCHAR(40) NOT NULL,"
+            +"OWNER_NAME VARCHAR(40) NOT NULL,"
+            +"ADDRESS VARCHAR(255) NOT NULL,"
+            +"PHONE VARCHAR(10) NOT NULL,"
             +"PRIMARY KEY (USERNAME))",
+            
+        // Default data
+        // password = default
         "INSERT INTO CREDENTIALS VALUES('default_business','37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f')",
-        "INSERT INTO BUSINESS VALUES('default_business', 'default business', 'default_owner', 'default_addr', '0420123456')"
+        "INSERT INTO CREDENTIALS VALUES('default_customer','37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f')",
+        "INSERT INTO BUSINESS VALUES('default_business', 'default business', 'default_owner', 'default_addr', '0420123456')",
+        "INSERT INTO CUSTOMERS VALUES('default_customer','default customer','default','0420123546')"
     };
     private static final String[] SQL_TABLES_BUSINESS = {
         "CREATE TABLE EMPLOYEE ("
             +    "EMPL_ID INTEGER,"
-            +    "EMPL_NAME VARCHAR(40),"
+            +    "EMPL_NAME VARCHAR(40) NOT NULL,"
             +    "ADDRESS VARCHAR(255),"
             +    "PHONE VARCHAR(10),"
             +    "PRIMARY KEY(EMPL_ID)"
             +" )",
             
+        "CREATE TABLE AVAILABILITY ("
+            +   "EMPLOYEE INTEGER,"
+            +   "AVAILABLE_TIME DATETIME,"
+            +   "FOREIGN KEY (EMPLOYEE) REFERENCES EMPLOYEE(EMPL_ID),"
+            +   "PRIMARY KEY(EMPLOYEE, AVAILABLE_TIME)"
+        +")",
+        
         "CREATE TABLE APPOINTMENTTYPE ("
-            +    "TYPE_ID INTEGER,"
-            +    "NAME VARCHAR(40),"
-            +    "COST_CENTS INTEGER,"
-            +    "PRIMARY KEY (TYPE_ID)"
-            +")",
-            
+            +   "TYPE_ID INTEGER,"
+            +   "NAME VARCHAR(40) NOT NULL,"
+            +   "COST_CENTS INTEGER NOT NULL,"
+            +   "PRIMARY KEY (TYPE_ID)"
+        +")",
+        
         "CREATE TABLE APPOINTMENT ("
-            +    "APT_ID INTEGER,"
-            +    "DATE_AND_TIME DATETIME,"
-            +    "APPOINTMENT_TYPE INTEGER,"
-            +    "EMPLOYEE INTEGER,"
-            +    "CUSTOMER VARCHAR(20)"
-            +    "PRIMARY KEY (APT_ID),"
-            +    "FOREIGN KEY (APPOINTMENT_TYPE)"
-            +       "REFERENCES APPOINTMENTTYPE (TYPE_ID),"
-            +    "FOREIGN KEY (EMPLOYEE) REFERENCES EMPLOYEE(EMPL_ID)"
-            +    "FOREIGN KEY (CUSTOMER) REFERENCES CUSTOMERS(USERNAME)"
-            +")"
+            +   "APT_ID INTEGER,"
+            +   "DATE_AND_TIME DATETIME NOT NULL,"
+            +   "APPOINTMENT_TYPE INTEGER NOT NULL,"
+            +   "EMPLOYEE INTEGER NOT NULL,"
+            +   "CUSTOMER VARCHAR(20) NOT NULL,"
+            +   "PRIMARY KEY (APT_ID),"
+            +   "FOREIGN KEY (APPOINTMENT_TYPE)"
+            +   "    REFERENCES APPOINTMENTTYPE (TYPE_ID),"
+            +   "FOREIGN KEY (EMPLOYEE, DATE_AND_TIME)"
+            +   "    REFERENCES AVAILABILITY(EMPLOYEE, AVAILABLE_TIME),"
+        +")",
+        // Default data
+        "INSERT INTO EMPLOYEE VALUES (1, 'default_employee', 'default', '0420123456')",
+        "INSERT INTO AVAILABILITY VALUES(1, CURDATE);",
+        "INSERT INTO APPOINTMENTTYPE VALUES (0, 'DEFAULT_APPOINTMENT_TYPE', 99);",
+        "INSERT INTO"
+            +" APPOINTMENT (APT_ID, DATE_AND_TIME, APPOINTMENT_TYPE,"
+            +" EMPLOYEE, CUSTOMER)"
+            +" VALUES(1, CURDATE, 0, 1, 'default_customer')"
     };
     
     public static final String dbDefaultFileName = "db/credentials_db";
@@ -132,6 +153,10 @@ public class DatabaseManager {
         try {
             generalConnection.commit();
             generalConnection.close();
+            if (businessConnection != null && !businessConnection.isClosed()) {
+                businessConnection.commit();
+                businessConnection.close();
+            }
         } catch (SQLException e) {
             // Nah don't bother handling it
             System.err.println(
@@ -182,13 +207,19 @@ public class DatabaseManager {
       * @return Whether a connection was sucessfully made
       */
     public boolean connectToBusiness(String busUsername) throws SQLException {
+        // Close any existing connection
+        if (businessConnection != null && !businessConnection.isClosed()) {
+            businessConnection.close();
+        }
+    
         // Look up the business name in the table of businesses
         Statement stmt = generalConnection.createStatement();
-        //stmt.execute();
         
-        ResultSet rs = stmt.executeQuery("SELECT COUNT(USERNAME) FROM BUSINESS WHERE USERNAME="+busUsername);
+        ResultSet rs = stmt.executeQuery(
+            "SELECT COUNT(USERNAME) FROM BUSINESS WHERE USERNAME='"+busUsername+"'"
+            );
         rs.next();
-        switch(rs.getInt(1)){
+        switch(rs.getInt(1)) {
             case 0:
                 return false;
             case 1:
@@ -200,7 +231,7 @@ public class DatabaseManager {
         
         // We now know it exists for certain, but not whether it has a database
         // Open or create the business' database
-        this.businessConnection = openCreateDatabase(busUsername, SQL_TABLES_BUSINESS);
+        this.businessConnection = openCreateDatabase("db/"+busUsername, SQL_TABLES_BUSINESS);
         if (this.businessConnection == null) {
             return false;
         }
@@ -461,6 +492,36 @@ public class DatabaseManager {
         return appointments;
     }
     
+    /** Gets the given employee's available dates for the next 7 days
+      * @return ArrayList<Date> representing the availability
+      * @throws SQLException if the employee doesn't exist, or a database
+      * error occurs
+     */
+    public ArrayList<Date> getEmployeeAvailability(int employeeID) throws SQLException{
+        ArrayList<Date> availDates = new ArrayList<Date>();
+        if (businessConnection == null || businessConnection.isClosed()) {
+            throw new SQLException("Not connected to a business");
+        }
+        Statement stmt = businessConnection.createStatement();
+        ResultSet rs = null;
+        try {
+            rs = stmt.executeQuery(
+                "SELECT AVAILABLE_TIME FROM AVAILABILITY "
+                    +"WHERE EMPLOYEE="+employeeID
+                    +" AND (AVAILABLE_TIME >= CURDATE) "
+                    +" AND (AVAILABLE_TIME <= CURDATE() + INTERVAL '7' DAY)"
+            );
+        } catch (SQLException sqle) {
+            System.err.println("SQL Error in getEmployeeAvailability:");
+            sqle.printStackTrace();
+            throw sqle;
+        }
+        while (rs.next()) {
+            availDates.add(rs.getDate(1));
+        }
+        return availDates;
+    }
+    
     private void scannerCheckUser(Scanner sc) {
         String username, password;
         byte[] digest;
@@ -511,6 +572,34 @@ public class DatabaseManager {
                 case "quit":
                     dbm.close();
                     return;
+                case "business":
+                    String business = sc.next();
+                    boolean success = false;
+                    try {
+                        success = dbm.connectToBusiness(business);
+                    } catch (SQLException sqle) {
+                        System.out.println("Couldn't connect to business:"+business);
+                        sqle.printStackTrace();
+                    }
+                    System.out.println(
+                        (success ? "Successfully connected " : "Did not successfully connect ")
+                        +("to business:"+business+"\n")
+                    );
+                    break;
+                case "availability":
+                    int employee = sc.nextInt();
+                    ArrayList<Date> availability = null;
+                    try {
+                        availability = dbm.getEmployeeAvailability(1);
+                    } catch (SQLException sqle) {
+                        System.out.println("Couldn't get availability for employee:"+employee);
+                        sqle.printStackTrace();
+                        break;
+                    }
+                    for (Date d : availability) {
+                        System.out.println(d);
+                    }
+                    break;
                 case "default_business":
                     System.out.println(dbm.getBusiness(defaultBusinessName));
                     break;
