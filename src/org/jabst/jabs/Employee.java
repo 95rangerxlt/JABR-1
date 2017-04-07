@@ -10,16 +10,17 @@ public class Employee {
 	public long id;
 	String name;
 	ArrayList<Date> workingHours;
+	ArrayList<Date> appointmentHours;
 	Calendar startDate;
 	Timetable table;
 	public int hoursInADay = 8;
 	public int startingHour = 9;
-
+/*
 	public Employee(String name) {
 		this.name = name;
 	}
 	
-	public Employee(String name, ArrayList<Date> hours) {
+	public Employee(String name, ArrayList<Date> hours, ) {
 		this.name = name;
 		this.workingHours = hours;
 
@@ -27,15 +28,22 @@ public class Employee {
 			createTableFromDates();
 		}
 	}
-
-	public Employee(long id, String name, ArrayList<Date> hours) {
-		this(name, hours);
+*/
+	public Employee(long id, String name,
+		ArrayList<Date> workingHours, ArrayList<Date> appointmentHours) {
+		this.name = name;
 		this.id = id;
-	}
+		this.workingHours = workingHours;
+		this.appointmentHours = appointmentHours;
 
+		if(workingHours.size() > 0) {
+			table = createTableFromDates();
+		}
+	}
+/*
 	public Employee() {
 		this("Joe", new ArrayList<Date>());
-	}
+	}*/
 
 	public void createDatesFromTable() {
 		workingHours = new ArrayList<Date>();//reset data
@@ -57,7 +65,7 @@ public class Employee {
 		}
 	}
 
-	public void createTableFromDates() {
+	public Timetable createTableFromDates() {
 		table = new Timetable(true);
 		ArrayList<Calendar> hoursCalendar = getCalendars(workingHours);
 		Calendar min = minDate(hoursCalendar);
@@ -76,9 +84,42 @@ public class Employee {
 		}
 
 		// fill tables
+		System.out.println("Filling tables...");
 		for(int i = 0; i < hoursCalendar.size(); i++) {
-			table.table.get(hoursCalendar.get(i).get(Calendar.DAY_OF_YEAR) - min.get(Calendar.DAY_OF_YEAR)).set(hoursCalendar.get(i).get(Calendar.HOUR_OF_DAY)-startingHour, Timetable.CellStatus.BOOKED_BY_YOU);
+			System.out.println("i="+i);
+			System.out.println("hoursCalendar.get(i).get(Calendar.DAY_OF_YEAR) - min.get(Calendar.DAY_OF_YEAR) = "
+				+hoursCalendar.get(i).get(Calendar.DAY_OF_YEAR) +"-"
+				+min.get(Calendar.DAY_OF_YEAR)+"="
+				+(hoursCalendar.get(i).get(Calendar.DAY_OF_YEAR)-min.get(Calendar.DAY_OF_YEAR))
+			);
+			
+			ArrayList<Timetable.CellStatus> row =
+			table.table.get(
+				hoursCalendar.get(i).get(Calendar.DAY_OF_YEAR) - min.get(Calendar.DAY_OF_YEAR)
+			);
+			
+			System.out.println("hoursCalendar.get(i).get(Calendar.HOUR_OF_DAY)="+hoursCalendar.get(i).get(Calendar.HOUR_OF_DAY));
+			System.out.println("startingHour="+startingHour);
+			
+			System.out.println(
+			"hoursCalendar.get(i).get(Calendar.HOUR_OF_DAY)-startingHour="
+				+(hoursCalendar.get(i).get(Calendar.HOUR_OF_DAY)-startingHour)
+			);
+			
+			
+			int cellIdx = hoursCalendar.get(i).get(Calendar.HOUR_OF_DAY)-startingHour;
+			
+			if (cellIdx < 0) {
+				System.out.println(
+					"Discarding out of hours entry for employee hours:"
+					+hoursCalendar.get(i).toString()
+				);
+				continue;
+			}
+			
+			row.set(cellIdx, Timetable.CellStatus.BOOKED_BY_YOU);
 		}
+		return table;
 	}
 
 	private ArrayList<Calendar> getCalendars(ArrayList<Date> list) {

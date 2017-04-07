@@ -22,17 +22,26 @@ public class EmployeeManager {
 	 * @param employeeName : the name of the new employee
 	 */
 	public void createEmployee(String employeeName){
-		Employee employee = new Employee(employeeName);
-		employees.add(employee);
-		// dbm.addEmployee();
+		//NYI
 	}
 
 	/** Adds employee objects to the ArrayList
 	 * Designed to accept input from the database
 	 * @param employee : The employee object to add
 	 */
-	public void loadEmployee(Employee employee){
-		employees.add(employee);
+	public void loadEmployee(int employeeID){
+		
+	}
+	
+	/** Asks the database for just this employee, and passes
+	 *  it back to the caller
+	*/
+	public Employee getEmployee(long employeeID) {
+		try {
+			return dbm.getEmployee(employeeID);
+		} catch (SQLException sqle) {
+			return null;
+		}
 	}
 	
 	/** Returns the unique ID of an employee

@@ -20,6 +20,7 @@ public class AddEmployeeGUI {
 		// setup object to return
 		AddEmployeeInfo info = new AddEmployeeInfo();
 		EmployeeManager employeeManager = session.getEmployeeManager();
+		Employee currEmployee = null;
 
 		// create the window
 		Stage window = new Stage();
@@ -41,7 +42,7 @@ public class AddEmployeeGUI {
 		);
 		cbEmployeeSelect.setValue("Select Employee");
 
-		TimetableGUI table = new TimetableGUI(new Timetable(true));
+		TimetableGUI table = new TimetableGUI(/*Set timetable on combobox update*/);
 
 		//block events to other window
 		window.initModality(Modality.APPLICATION_MODAL);
@@ -52,6 +53,16 @@ public class AddEmployeeGUI {
 				window.close();
 			}
 		});
+		
+		cbEmployeeSelect.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				handleEmployeeSelect(cbEmployeeSelect, tfName, employeeManager,
+				currEmployee, table);
+			}
+		});
+		
+
 
 		// event handlers
 		bSave.setOnAction(new EventHandler<ActionEvent>() {
@@ -113,6 +124,29 @@ public class AddEmployeeGUI {
 		window.showAndWait();//put the window on the desktop
 
 		return info;
+	}
+	
+	public static void handleEmployeeSelect(ComboBox cbEmployeeSelect,
+		TextField tfName,
+		EmployeeManager employeeManager,
+		Employee currEmployee,
+		TimetableGUI table)
+	{
+		String [] employeeFields = cbEmployeeSelect.getValue().toString().split(" #");
+		String employeeName = employeeFields[0];
+		long employeeID = Long.parseLong(employeeFields[1]);
+		if (employeeName.equals("Select Employee")) {
+			tfName.setText("");
+		}
+		else {
+			tfName.setText(employeeName);
+		}
+		
+		currEmployee = employeeManager.getEmployee(employeeID);
+		if (currEmployee == null) {
+			System.err.println("Cannot find employee "+cbEmployeeSelect.getValue());
+		}
+		table = new TimetableGUI(currEmployee.table);
 	}
 
 }

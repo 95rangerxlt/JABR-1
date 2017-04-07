@@ -528,6 +528,71 @@ public class DatabaseManager {
         
         return emplNames;
     }
+
+    public Employee getEmployee(long empl_id) throws SQLException {
+        if (businessConnection == null || businessConnection.isClosed()) {
+            throw new SQLException("Not connected to a business");
+        }
+        
+        // Data needed for an employee
+        Employee employee;
+        String empl_name;
+        ArrayList<Date> available_hours = new ArrayList<Date>();
+        ArrayList<Date> appointment_hours = new ArrayList<Date>();
+        
+        Statement stmt = businessConnection.createStatement();
+        ResultSet rs = null;
+        
+        // Get name
+        try {
+            rs = stmt.executeQuery(
+                "SELECT EMPL_NAME FROM EMPLOYEE WHERE EMPL_ID = "+empl_id
+            );
+            
+            rs.next();
+            empl_name = (rs.getString(1));
+        } catch (SQLException sqle) {
+            sqle.printStackTrace();
+            throw sqle;
+        }
+            
+        // Get times
+        try {
+            rs = stmt.executeQuery (
+                "SELECT AVAILABLE_TIME "+
+                "FROM EMPLOYEE EMP JOIN AVAILABILITY AVA "+
+                "ON EMP.EMPL_ID = AVA.EMPLOYEE "+
+                "WHERE EMPL_ID = "+empl_id+
+                " AND AVAILABLE_TIME >= CURDATE"
+            );
+            
+            while (rs.next()) {
+                System.out.println("Found available date: "+rs.getDate(1));
+                available_hours.add(rs.getDate(1));
+            }
+        } catch (SQLException sqle) {
+            sqle.printStackTrace();
+            throw sqle;
+        }
+        
+        try {
+            rs = stmt.executeQuery (
+                "SELECT APT.DATE_AND_TIME"
+                +" FROM EMPLOYEE EMP INNER JOIN APPOINTMENT APT"
+                +" ON EMP.EMPL_ID = APT.EMPLOYEE"
+                +" WHERE EMP.EMPL_ID = "+empl_id);
+
+            while (rs.next()) {
+            System.out.println("Found appointment date: "+rs.getDate(1));
+                appointment_hours.add(rs.getDate(1));
+            }
+        } catch (SQLException sqle) {
+            sqle.printStackTrace();
+            throw sqle;
+        }
+        
+        return new Employee(empl_id, empl_name, available_hours, appointment_hours);
+    }
     
     /** Gets the given employee's available dates for the next 7 days
       * @return ArrayList<Date> representing the availability
