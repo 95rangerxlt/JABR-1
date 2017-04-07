@@ -24,9 +24,14 @@ public class Employee {
 		}
 	}
 
+	public Employee(String name) {
+		this.name = name;
+		this.workingHours = new ArrayList<Date>();
+	}
+
 	public Employee(long id, String name, ArrayList<Date> hours) {
-		this.id = id;
 		this(name, hours);
+		this.id = id;
 	}
 
 	public Employee() {
@@ -125,5 +130,12 @@ public class Employee {
 		this.workingHours = workingHours;
 	}
 
+	public int getId() {
+		return (int)this.id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
 
 }

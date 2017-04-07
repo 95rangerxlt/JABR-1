@@ -20,6 +20,34 @@ public class EmployeeManager {
 		// dbm.addEmployee();
 	}
 
+	/** Gets Employee by name
+	*
+	* @param employeeName : name of the employee you are looking for
+	*/
+	public Employee getEmployee(String employeeName) {
+		for(int i = 0; i < employees.size(); i++) {
+			if(employees.get(i).getName().equals(employeeName)) {
+				return employees.get(i);
+			}
+		}
+		// if it gets here, shits fucked
+		return new Employee();
+	}
+
+	/** Gets Employee by id
+	*
+	* @param id : the id of the emplyee you are looking for
+	*/
+	public Employee getEmployee(int id) {
+		for(int i = 0; i < employees.size(); i++) {
+			if(employees.get(i).getId() == id) {
+				return employees.get(i);
+			}
+		}
+		// if it gets here, shits fucked
+		return new Employee();
+	}
+
 	/** Adds employee objects to the ArrayList
 	 * Designed to accept input from the database
 	 * @param employee : The employee object to add
@@ -35,20 +63,20 @@ public class EmployeeManager {
 	 */
 	public long getEmployeeID(String employeeName){
 		for(int i = 0; i < employees.size(); i++){
-			if (employeeName.equals(employees.get(i).name)){
+			if (employeeName.equals(employees.get(i).getName())){
 				return employees.get(i).id;
 			}		
 		}
-		return null;
+		return 0;
 	}
 	
 	/** Removes employee from the ArrayList
 	 * 
 	 * @param employeeName : use getEmployeeID(String employeeName) to ensure valid ID
 	 */
-	public void removeEmployee(String employeeID){
-		for(int i = 0; i < employees.size(); i++){
-			if (employeeName.equals(employees.get(i).name)){
+	public void removeEmployee(long employeeID) {
+		for(int i = 0; i < employees.size(); i++) {
+			if (employeeID == employees.get(i).getId()) {
 				employees.remove(i);
 			}		
 		}
@@ -78,6 +106,7 @@ public class EmployeeManager {
 				return employees.get(i).getWorkingHours();
 			}
 		}
+		return new ArrayList<Date>();
 	}
 
 }
