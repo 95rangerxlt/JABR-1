@@ -6,21 +6,20 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 
 import org.hsqldb.HsqlException;
 
-// MessageDigest for SHA256 hash
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
 // I/O Imports
 import java.io.PrintStream;
 import java.io.InputStream;
 import java.util.Scanner;
 import java.util.Date;
+
+import org.jabst.jabs.util.Digest;
 
 // For returning result sets as native objects
 import java.util.ArrayList;
@@ -117,10 +116,13 @@ public class DatabaseManager {
          }
     }
     
-    /** Creates the database tables given
-     *  in case the database is being created for the first time
-     *  @return whether the tables could be successfully created
-     */
+    /** Creates the database tables in case the database is being
+      * created for the first time
+      * @param connection The connection: Either businessConnection or generalConnection
+      * @param tables An array of strings which are SQL statements to be executed
+      * to set up the database. Not necessarily all CREATE statements.
+      * @return whether the tables were successfully created
+      */
     private boolean createTables(Connection connection, String[] tables) {
         boolean success = false;
         for (String currTable : tables) {
@@ -146,6 +148,7 @@ public class DatabaseManager {
         return success;
     }
     
+    /** Asks the database to save the data it has now */
     public void commit() {
         try {
             generalConnection.commit();
@@ -276,43 +279,12 @@ public class DatabaseManager {
         }
     }
     
-    public static byte[] sha256(String message) {
-        MessageDigest md = null;
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            System.err.println("No such algorith as SHA-256?");
-            e.printStackTrace(System.err);
-            return null;
-        }
-        return md.digest(message.getBytes());
-    }
-    
-    public static void printDigest(byte[] digest, PrintStream ps) {
-        for (int i = 0; i < digest.length; ++i) {
-            ps.format("%x", digest[i]);
-        } ps.println();
-    }
-    
-    /**
-     * Not currently used
-     * @param digest the digest to convert to a hexadecimal string
-     * @return A string representing the byte[] in hexadecimal text
-     */
-    public static String digestToHexString(byte[] digest) {
-        StringBuffer s = new StringBuffer();
-        for (int i = 0; i < digest.length; ++i) {
-            s.append(String.format("%x", digest[i]));
-        }
-        return s.toString();
-    }
-    
     /** Asks the database to check if there is a user with the given
       * username and password
       */
     public boolean checkUser (String username, String password)
         throws SQLException {
-        byte[] password_hash = sha256(password);
+        byte[] password_hash = Digest.sha256(password);
         boolean success = false;
 
         PreparedStatement statement = generalConnection.prepareStatement(
@@ -324,10 +296,10 @@ public class DatabaseManager {
             String result_username = rs.getString("username");
             byte[] result_password = rs.getBytes("password");
             System.out.format("Input: username,password = %s,%s\n",
-                username, digestToHexString(password_hash)
+                username, Digest.digestToHexString(password_hash)
             );
             System.out.format("Result:username,password = %s,%s\n",
-                result_username, digestToHexString(result_password)
+                result_username, Digest.digestToHexString(result_password)
             );
             
             for (int i = 0; i < result_password.length; ++i) {
@@ -356,7 +328,7 @@ public class DatabaseManager {
     private void addUser(String username, String password)
         throws SQLException {
 
-        byte[] password_hash = sha256(password);
+        byte[] password_hash = Digest.sha256(password);
         PreparedStatement statement = null;
 
         statement = generalConnection.prepareStatement(
@@ -504,6 +476,11 @@ public class DatabaseManager {
         return appointments;
     }
     
+    /** Gets an ArrayList containg all the names and IDs of all employees
+      * as preformatted Strings.
+      * @return All employees listed in the form name+" #"+employee_Id
+      * e.g. Joe Blogs #9
+      */
     public ArrayList<String> getEmployeeNameIDs() throws SQLException {
         if (businessConnection == null || businessConnection.isClosed()) {
             throw new SQLException("Not connected to a business");
@@ -529,6 +506,11 @@ public class DatabaseManager {
         return emplNames;
     }
 
+    /** Gets the employee with the given employee id as an object
+      * @param empl_id The employee id
+      * @return The employee as an object with associated working
+      * hours and appointment hours
+      */
     public Employee getEmployee(long empl_id) throws SQLException {
         if (businessConnection == null || businessConnection.isClosed()) {
             throw new SQLException("Not connected to a business");
@@ -624,6 +606,10 @@ public class DatabaseManager {
         return availDates;
     }
 
+    /** Adds an employee with the given name. The ID is generated automatically
+        @param name The name of a new employee to add
+        @return whether the database sucessfully added the employee
+    */
     public boolean addEmployee(String name) throws SQLException {
         if (businessConnection == null || businessConnection.isClosed()) {
             throw new SQLException("Not connected to a business");
@@ -654,6 +640,50 @@ public class DatabaseManager {
             );
             sqle.printStackTrace();
             throw sqle;
+        }
+    }
+    
+    public boolean updateEmployee(Employee employee) throws SQLException {
+        if (businessConnection == null || businessConnection.isClosed()) {
+            throw new SQLException("Not connected to a business");
+        }
+        int updateCount = 0;
+        Statement stmt = businessConnection.createStatement();
+        
+        /* Update name */
+        try {
+            updateCount = stmt.executeUpdate(
+                "UPDATE EMPLOYEE"
+                +" SET EMPL_NAME = "+employee.name
+                +" WHERE EMPL_ID = "+employee.id
+            );
+
+        } catch (SQLException sqle) {
+            System.err.println("Error updating employee:"+employee);
+            sqle.printStackTrace();
+        }
+        
+        /* Update availability / working hours */
+        PreparedStatement pstmt;
+        for (Date currDate : employee.workingHours) {
+            try {
+                pstmt = businessConnection.prepareStatement(
+                    "INSERT INTO AVAILABILITY VALUES (?, ?)"
+                );
+                pstmt.setLong(1, employee.id);
+                pstmt.setTimestamp(2, new Timestamp(currDate.getTime()));
+                
+                updateCount += pstmt.executeUpdate();
+            } catch (SQLIntegrityConstraintViolationException sqle) {
+                // Already exists, ignore it
+            }
+        }
+        
+        if (updateCount > 0) {
+            return true;
+        }
+        else {
+            return false;
         }
     }
     
