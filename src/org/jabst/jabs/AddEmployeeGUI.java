@@ -62,7 +62,6 @@ public class AddEmployeeGUI {
 				}
 				handleEmployeeSelect(cbEmployeeSelect, tfName, employeeManager,
 				currEmployee, table);
-				
 			}
 		});
 		
@@ -155,7 +154,8 @@ public class AddEmployeeGUI {
 		currEmployee.table = currEmployee.createTableFromDates();
 		System.out.println("...Success!");
 
-		table = new TimetableGUI(currEmployee.table);
+		table.table = currEmployee.table.table;
+		table.update();
 	}
 
 	public void setupTable(TimetableGUI table) {
