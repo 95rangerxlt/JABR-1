@@ -57,6 +57,9 @@ public class AddEmployeeGUI {
 		cbEmployeeSelect.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
+				if (cbEmployeeSelect.getValue().equals("Select Employee")) {
+					return;
+				}
 				handleEmployeeSelect(cbEmployeeSelect, tfName, employeeManager,
 				currEmployee, table);
 				

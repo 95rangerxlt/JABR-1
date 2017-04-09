@@ -550,7 +550,7 @@ public class DatabaseManager {
             
             while (rs.next()) {
                 System.out.println("Found available date: "+rs.getDate(1));
-                available_hours.add(rs.getDate(1));
+                available_hours.add(new Date(rs.getTimestamp(1).getTime()));
             }
         } catch (SQLException sqle) {
             sqle.printStackTrace();
@@ -566,7 +566,7 @@ public class DatabaseManager {
 
             while (rs.next()) {
             System.out.println("Found appointment date: "+rs.getDate(1));
-                appointment_hours.add(rs.getDate(1));
+                appointment_hours.add(new Date(rs.getTimestamp(1).getTime()));
             }
         } catch (SQLException sqle) {
             sqle.printStackTrace();
