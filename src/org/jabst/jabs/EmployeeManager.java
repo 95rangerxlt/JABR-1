@@ -37,10 +37,22 @@ public class EmployeeManager {
 	 *  it back to the caller
 	*/
 	public Employee getEmployee(long employeeID) {
-		try {
-			return dbm.getEmployee(employeeID);
-		} catch (SQLException sqle) {
-			return null;
+		if(employeeID == -1) {
+			// get all employees
+			try {
+				ArrayList<Date> availability = dbm.getSevenDayEmployeeAvailability();
+				Employee emp = new Employee(-1, "allEmployees", availability, new ArrayList<Date>());
+				return emp;
+			} catch (SQLException sqle) {
+				return null;
+			}
+		} else {
+			try {
+				System.out.println("getting Employee: " + employeeID);
+				return dbm.getEmployee(employeeID);
+			} catch (SQLException sqle) {
+				return null;
+			}
 		}
 	}
 	

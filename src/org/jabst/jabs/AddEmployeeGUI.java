@@ -146,6 +146,7 @@ public class AddEmployeeGUI {
 		}
 		
 		currEmployee = employeeManager.getEmployee(employeeID);
+		System.out.println("currEmployee.workingHours.size(): " + currEmployee.workingHours.size());
 		if (currEmployee == null) {
 			System.err.println("Cannot find employee "+cbEmployeeSelect.getValue());
 		}
@@ -156,10 +157,6 @@ public class AddEmployeeGUI {
 
 		table.table = currEmployee.table.table;
 		table.update();
-	}
-
-	public void setupTable(TimetableGUI table) {
-
 	}
 
 }
