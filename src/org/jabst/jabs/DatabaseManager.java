@@ -95,7 +95,11 @@ public class DatabaseManager {
         "INSERT INTO"
             +" APPOINTMENT (APT_ID, DATE_AND_TIME, APPOINTMENT_TYPE,"
             +" EMPLOYEE, CUSTOMER)"
-            +" VALUES(1, CURDATE, 0, 1, 'default_customer')"
+            +" VALUES(1, CURDATE, 0, 1, 'default_customer')",
+        "INSERT INTO AVAILABILITY VALUES (1, CURDATE+INTERVAL '10' HOUR)",
+        "INSERT INTO AVAILABILITY VALUES (1, CURDATE+INTERVAL '9' HOUR)",
+        "INSERT INTO APPOINTMENT VALUES (2,CURDATE+INTERVAL '9' HOUR, 0, 1, 'default_customer')",
+        "INSERT INTO APPOINTMENT VALUES (3,CURDATE+INTERVAL '10' HOUR, 0, 1, 'default_customer')"
     };
     
     public static final String dbDefaultFileName = "db/credentials_db";
