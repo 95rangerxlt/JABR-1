@@ -59,6 +59,7 @@ public class AddEmployeeGUI {
 			public void handle(ActionEvent event) {
 				handleEmployeeSelect(cbEmployeeSelect, tfName, employeeManager,
 				currEmployee, table);
+				
 			}
 		});
 		
@@ -146,7 +147,16 @@ public class AddEmployeeGUI {
 		if (currEmployee == null) {
 			System.err.println("Cannot find employee "+cbEmployeeSelect.getValue());
 		}
+
+		System.out.println("creating table from dates...");
+		currEmployee.table = currEmployee.createTableFromDates();
+		System.out.println("...Success!");
+
 		table = new TimetableGUI(currEmployee.table);
+	}
+
+	public void setupTable(TimetableGUI table) {
+
 	}
 
 }

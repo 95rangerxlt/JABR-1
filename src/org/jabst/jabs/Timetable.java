@@ -53,4 +53,16 @@ public class Timetable {
 			table.add(r5);
 		}
 	}
+
+	void createBlankTables() {
+		table = new ArrayList<ArrayList<CellStatus>>();
+		ArrayList<CellStatus> row;
+		for (int rowIdx = 0; rowIdx < 7; ++rowIdx) {
+			row = new ArrayList<CellStatus>();
+			for (int cell = 0; cell < 8; ++cell) {
+				row.add(CellStatus.FREE);
+			}
+			table.add(row);
+		}
+	}
 }

@@ -71,54 +71,67 @@ public class Employee {
 		Calendar min = minDate(hoursCalendar);
 		startDate = (Calendar)min.clone();
 		Calendar max = maxDate(hoursCalendar);
-		long diff = max.getTimeInMillis() - min.getTimeInMillis();
-		int days = (int)TimeUnit.MILLISECONDS.toDays(Math.abs(diff));
-		table.table = new ArrayList<ArrayList<Timetable.CellStatus>>();
+		int days = max.get(Calendar.DAY_OF_YEAR) - min.get(Calendar.DAY_OF_YEAR);
+		table.createBlankTables();
 
 		// create tables
-		for(int d = 0; d < days; d++) {
-			table.table.add(new ArrayList<Timetable.CellStatus>());
-			for(int h = 0; h < hoursInADay; h++) {
-				table.table.get(d).add(Timetable.CellStatus.FREE);
-			}
-		}
+		// for(int d = 0; d < days; d++) {
+		// 	table.table.add(new ArrayList<Timetable.CellStatus>());
+		// 	for(int h = 0; h < hoursInADay; h++) {
+		// 		table.table.get(d).add(Timetable.CellStatus.FREE);
+		// 	}
+		// }
 
 		// fill tables
 		System.out.println("Filling tables...");
+		System.out.println("hoursCalendar size: " + hoursCalendar.size());
 		for(int i = 0; i < hoursCalendar.size(); i++) {
+
 			System.out.println("i="+i);
+			System.out.println("row index:");
 			System.out.println("hoursCalendar.get(i).get(Calendar.DAY_OF_YEAR) - min.get(Calendar.DAY_OF_YEAR) = "
 				+hoursCalendar.get(i).get(Calendar.DAY_OF_YEAR) +"-"
 				+min.get(Calendar.DAY_OF_YEAR)+"="
 				+(hoursCalendar.get(i).get(Calendar.DAY_OF_YEAR)-min.get(Calendar.DAY_OF_YEAR))
 			);
+			int getting = (hoursCalendar.get(i).get(Calendar.DAY_OF_YEAR) - min.get(Calendar.DAY_OF_YEAR));
+
+			System.out.println("Size: " + table.table.size());
+			System.out.println("getting: "+table.table.get(getting));
+
+			System.out.println("getting int: "+getting);
+			// ArrayList<Timetable.CellStatus> row =
+			// table.table.get(getting);
 			
-			ArrayList<Timetable.CellStatus> row =
-			table.table.get(
-				hoursCalendar.get(i).get(Calendar.DAY_OF_YEAR) - min.get(Calendar.DAY_OF_YEAR)
-			);
+			// System.out.println("hoursCalendar.get(i).get(Calendar.HOUR_OF_DAY)="+hoursCalendar.get(i).get(Calendar.HOUR_OF_DAY));
+			// System.out.println("startingHour="+startingHour);
 			
-			System.out.println("hoursCalendar.get(i).get(Calendar.HOUR_OF_DAY)="+hoursCalendar.get(i).get(Calendar.HOUR_OF_DAY));
-			System.out.println("startingHour="+startingHour);
-			
-			System.out.println(
-			"hoursCalendar.get(i).get(Calendar.HOUR_OF_DAY)-startingHour="
-				+(hoursCalendar.get(i).get(Calendar.HOUR_OF_DAY)-startingHour)
-			);
+			// System.out.println(
+			// "hoursCalendar.get(i).get(Calendar.HOUR_OF_DAY)-startingHour="
+			// 	+(hoursCalendar.get(i).get(Calendar.HOUR_OF_DAY)-startingHour)
+			// );
 			
 			
 			int cellIdx = hoursCalendar.get(i).get(Calendar.HOUR_OF_DAY)-startingHour;
+			System.out.println("hour of day: "+hoursCalendar.get(i).get(Calendar.HOUR_OF_DAY));
+			System.out.println("cellIdx: " + cellIdx);
+
+			System.out.println("timetable at 0: " + table.table.get(getting).get(0));
 			
-			if (cellIdx < 0) {
+			if (cellIdx < 0 || cellIdx > hoursInADay) {
 				System.out.println(
 					"Discarding out of hours entry for employee hours:"
 					+hoursCalendar.get(i).toString()
 				);
-				continue;
+				// continue;
+			} else {
+				System.out.println("setting cell: " + cellIdx);
+				table.table.get(getting).set(cellIdx, Timetable.CellStatus.BOOKED_BY_YOU);
 			}
-			
-			row.set(cellIdx, Timetable.CellStatus.BOOKED_BY_YOU);
+			System.out.println("next entry in hoursCalendar");
 		}
+		System.out.println("end of createTableFromDates");
+		// TODO: clean up all these println statements
 		return table;
 	}
 
