@@ -15,12 +15,13 @@ import javafx.geometry.Insets;//insets = padding
 public class AddEmployeeGUI {
 
 	private static String redBorder = "-fx-border-color: red ; -fx-border-width: 2px ;";
+	private static EmployeeManager employeeManager;
+	private static Employee currEmployee = null;
 
 	public static AddEmployeeInfo display(SessionManager session) {
 		// setup object to return
 		AddEmployeeInfo info = new AddEmployeeInfo();
-		EmployeeManager employeeManager = session.getEmployeeManager();
-		Employee currEmployee = null;
+		employeeManager = session.getEmployeeManager();
 
 		// create the window
 		Stage window = new Stage();
@@ -61,7 +62,7 @@ public class AddEmployeeGUI {
 					return;
 				}
 				handleEmployeeSelect(cbEmployeeSelect, tfName, employeeManager,
-				currEmployee, table);
+					table);
 			}
 		});
 		
@@ -74,6 +75,17 @@ public class AddEmployeeGUI {
 			@Override
 			public void handle(ActionEvent event) {
 				info.button = AddEmployeeInfo.Buttons.SAVE;
+				if (currEmployee != null) {
+					currEmployee.name = tfName.getText();
+					System.out.println(
+						employeeManager.updateEmployee(currEmployee) ?
+						"Succesfully saved employee." :
+						"Could not save employee."
+					);
+				}
+				else {
+					System.out.println("Not saving null employee");
+				}
 			}
 		});
 
@@ -132,7 +144,6 @@ public class AddEmployeeGUI {
 	public static void handleEmployeeSelect(ComboBox cbEmployeeSelect,
 		TextField tfName,
 		EmployeeManager employeeManager,
-		Employee currEmployee,
 		TimetableGUI table)
 	{
 		String [] employeeFields = cbEmployeeSelect.getValue().toString().split(" #");

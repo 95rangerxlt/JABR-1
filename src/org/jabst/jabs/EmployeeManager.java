@@ -17,6 +17,18 @@ public class EmployeeManager {
 	
 	//Methods
 	
+	/** Updates the employee in the database to match the given object
+	  * @param employee An employee object representing the employee to update
+	  * @return whether the record sucessfully updated
+	  */
+	public boolean updateEmployee(Employee employee) {
+		try {
+			return dbm.updateEmployee(employee);
+		} catch (SQLException sqle) {
+			return false;
+		}
+	}
+	
 	/** Creates a new employee object
 	 * 
 	 * @param employeeName : the name of the new employee

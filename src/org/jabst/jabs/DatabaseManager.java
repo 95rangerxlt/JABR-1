@@ -489,6 +489,8 @@ public class DatabaseManager {
         Statement stmt = businessConnection.createStatement();
         ResultSet rs = stmt.executeQuery (
             "SELECT DISTINCT AVAILABLE_TIME FROM AVAILABILITY"
+          +" WHERE AVAILABLE_TIME >= CURDATE"
+          +" AND AVAILABLE_TIME <= CURDATE + INTERVAL '7' DAY"
         );
         
         while (rs.next()) {
@@ -676,7 +678,7 @@ public class DatabaseManager {
         try {
             updateCount = stmt.executeUpdate(
                 "UPDATE EMPLOYEE"
-                +" SET EMPL_NAME = "+employee.name
+                +" SET EMPL_NAME = '"+employee.name+"'"
                 +" WHERE EMPL_ID = "+employee.id
             );
 
