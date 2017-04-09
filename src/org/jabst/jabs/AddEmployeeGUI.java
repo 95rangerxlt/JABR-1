@@ -15,10 +15,13 @@ import javafx.geometry.Insets;//insets = padding
 public class AddEmployeeGUI {
 
 	private static String redBorder = "-fx-border-color: red ; -fx-border-width: 2px ;";
+	private static EmployeeManager employeeManager;
+	private static Employee currEmployee = null;
 
 	public static AddEmployeeInfo display(SessionManager session) {
 		// setup object to return
 		AddEmployeeInfo info = new AddEmployeeInfo();
+		employeeManager = session.getEmployeeManager();
 
 		// create the window
 		Stage window = new Stage();
@@ -34,18 +37,36 @@ public class AddEmployeeGUI {
 		tfName.setPrefWidth(500);
 
 		ComboBox cbEmployeeSelect = new ComboBox();
+		cbEmployeeSelect.getItems().add("Select Employee");
 		cbEmployeeSelect.getItems().addAll(
-			"Select Employee",
-			"Joe",
-			"Ann",
-			"Jasonface"
+			employeeManager.getEmployeeNameIDs()
 		);
 		cbEmployeeSelect.setValue("Select Employee");
 
-		TimetableGUI table = new TimetableGUI(/*TODO: put timetable to use here*/);
+		TimetableGUI table = new TimetableGUI(/*Set timetable on combobox update*/);
 
 		//block events to other window
 		window.initModality(Modality.APPLICATION_MODAL);
+		
+		// Close on request
+		window.setOnCloseRequest(new EventHandler<WindowEvent>() {
+			public void handle(WindowEvent we) {
+				window.close();
+			}
+		});
+		
+		cbEmployeeSelect.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				if (cbEmployeeSelect.getValue().equals("Select Employee")) {
+					return;
+				}
+				handleEmployeeSelect(cbEmployeeSelect, tfName, employeeManager,
+					table);
+			}
+		});
+		
+
 
 		// event handlers
 		bSave.setOnAction(new EventHandler<ActionEvent>() {
@@ -54,7 +75,17 @@ public class AddEmployeeGUI {
 			@Override
 			public void handle(ActionEvent event) {
 				info.button = AddEmployeeInfo.Buttons.SAVE;
-				window.close();
+				if (currEmployee != null) {
+					currEmployee.name = tfName.getText();
+					System.out.println(
+						employeeManager.updateEmployee(currEmployee) ?
+						"Succesfully saved employee." :
+						"Could not save employee."
+					);
+				}
+				else {
+					System.out.println("Not saving null employee");
+				}
 			}
 		});
 
@@ -63,7 +94,6 @@ public class AddEmployeeGUI {
 			@Override
 			public void handle(ActionEvent event) {
 				info.button = AddEmployeeInfo.Buttons.NEW;
-				window.close();
 			}
 		});
 
@@ -72,7 +102,6 @@ public class AddEmployeeGUI {
 			@Override
 			public void handle(ActionEvent event) {
 				info.button = AddEmployeeInfo.Buttons.DELETE;
-				window.close();
 			}
 		});
 
@@ -110,6 +139,35 @@ public class AddEmployeeGUI {
 		window.showAndWait();//put the window on the desktop
 
 		return info;
+	}
+	
+	public static void handleEmployeeSelect(ComboBox cbEmployeeSelect,
+		TextField tfName,
+		EmployeeManager employeeManager,
+		TimetableGUI table)
+	{
+		String [] employeeFields = cbEmployeeSelect.getValue().toString().split(" #");
+		String employeeName = employeeFields[0];
+		long employeeID = Long.parseLong(employeeFields[1]);
+		if (employeeName.equals("Select Employee")) {
+			tfName.setText("");
+		}
+		else {
+			tfName.setText(employeeName);
+		}
+		
+		currEmployee = employeeManager.getEmployee(employeeID);
+		System.out.println("currEmployee.workingHours.size(): " + currEmployee.workingHours.size());
+		if (currEmployee == null) {
+			System.err.println("Cannot find employee "+cbEmployeeSelect.getValue());
+		}
+
+		System.out.println("creating table from dates...");
+		currEmployee.table = currEmployee.createTableFromDates();
+		System.out.println("...Success!");
+
+		table.table = currEmployee.table.table;
+		table.update();
 	}
 
 }

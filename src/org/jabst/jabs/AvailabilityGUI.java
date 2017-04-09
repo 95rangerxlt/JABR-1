@@ -1,6 +1,5 @@
 package org.jabst.jabs;
 
-
 import javafx.event.ActionEvent;//type of event
 import javafx.event.EventHandler;//this activates when a button is pressed
 import javafx.scene.Scene;//area inside stage
@@ -13,37 +12,39 @@ import javafx.stage.WindowEvent;//when window closes
 import javafx.geometry.Insets;//insets = padding
 
 
-public class CustomerMenuGUI {
+public class AvailabilityGUI {
 
 	private static String redBorder = "-fx-border-color: red ; -fx-border-width: 2px ;";
 
-	public static CustomerInfo display(SessionManager session) {
+	public static AvailabilityInfo display(SessionManager session) {
 		// setup object to return
-		CustomerInfo info = new CustomerInfo();
+		AvailabilityInfo info = new AvailabilityInfo();
+		EmployeeManager employeeManager = session.getEmployeeManager();
+		Employee currEmployee = null;
 
 		// create the window
 		Stage window = new Stage();
 
 		// create all elements
-		Button bOk = new Button("Ok");
-		bOk.setDefaultButton(true);
+		Button bClose = new Button("Close");
+		bClose.setDefaultButton(true);
 
-		Timetable table = new Timetable(true);
-		TimetableGUI tableGUI = new TimetableGUI(table);
-		tableGUI.setupSpacing();
-		// tableGUI.update();
+		TextField tfName = new TextField();
+		tfName.setPromptText("Name");
+		tfName.setPrefWidth(500);
+
+		Employee allEmployees = null;
+		TimetableGUI table = new TimetableGUI(/*Set timetable on combobox update*/);
+		getData(employeeManager, allEmployees, table);
 
 		//block events to other window
 		window.initModality(Modality.APPLICATION_MODAL);
 
 		// event handlers
-		bOk.setOnAction(new EventHandler<ActionEvent>() {
-			
-			// handle method is called when the button is pressed
+		bClose.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				info.button = CustomerInfo.Buttons.OK;
-				window.close();
+				System.out.println("Customer Menu window Closed");
 			}
 		});
 
@@ -61,17 +62,31 @@ public class CustomerMenuGUI {
 		root.setPadding(new Insets(3.0, 3.0, 3.0, 3.0));
 
 		//add elements to the layout
-		root.getChildren().addAll(bOk, tableGUI);
+		root.getChildren().addAll(table, bClose);
 
-		Scene scene = new Scene(root, 600, 200);//create area inside window
+		Scene scene = new Scene(root, 700, 500);//create area inside window
 
-		tableGUI.update();
-
-		window.setTitle("Customer GUI -placeholder-");//text at the top of the window
+		window.setTitle("Overview Employee GUI -placeholder-");//text at the top of the window
 		window.setScene(scene);//add scene to window
 		window.showAndWait();//put the window on the desktop
 
 		return info;
+	}
+	
+	public static void getData(EmployeeManager employeeManager, Employee allEmployees,
+		TimetableGUI table)
+	{
+		allEmployees = employeeManager.getEmployee(-1);
+		if (allEmployees == null) {
+			System.err.println("Cannot find all employees");
+		}
+
+		System.out.println("creating table from dates...");
+		allEmployees.table = allEmployees.createTableFromDates();
+		System.out.println("...Success!");
+
+		table.table = allEmployees.table.table;
+		table.update();
 	}
 
 }

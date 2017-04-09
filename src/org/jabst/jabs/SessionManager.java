@@ -10,6 +10,7 @@ import org.hsqldb.HsqlException;
 public class SessionManager extends Application {
 	// Fields
 	private DatabaseManager dbm;
+	private EmployeeManager employeeManager;
 
 	public enum Window {
 		LOGIN, REGISTER, BUSINESSMENU, CUSTOMERMENU, ADDEMPLOYEE
@@ -65,6 +66,14 @@ public class SessionManager extends Application {
 					}
 				break;
 				case BUSINESSMENU:
+					try {
+					dbm.connectToBusiness(username);
+					} catch (SQLException sqle) {
+						// TODO: Visual cue
+						System.err.println("Cannot connect to business:"+username);
+						currentWindow = Window.LOGIN;
+						break;
+					}
 					username = "";
 					password = "";
 					BusinessInfo bInfo = BusinessMenuGUI.display(this);
@@ -109,9 +118,19 @@ public class SessionManager extends Application {
 	
 	public SessionManager() {
 		load_database();
+		this.employeeManager = new EmployeeManager(this);
 	}
 	
 	// Methods
+	
+	public EmployeeManager getEmployeeManager() {
+		return this.employeeManager;
+	}
+	
+	public DatabaseManager getDatabaseManager() {
+		return this.dbm;
+	}
+	
 	public boolean loginUser(String username, String password){
 		try {
 			return dbm.checkUser(username, password);

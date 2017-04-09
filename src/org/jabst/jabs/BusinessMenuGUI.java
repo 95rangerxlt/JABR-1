@@ -25,13 +25,14 @@ public class BusinessMenuGUI {
 		// create all elements
 		MenuBar mb = new MenuBar();
 		Menu mFileMenu = new Menu("File");
-			MenuItem miFileSave = new MenuItem("Save");
-			MenuItem miFileLogout = new MenuItem("Logout");
-			MenuItem miFileQuit = new MenuItem("Quit");
+		MenuItem miFileSave = new MenuItem("Save");
+		MenuItem miFileLogout = new MenuItem("Logout");
+		MenuItem miFileQuit = new MenuItem("Quit");
 		Menu mEmployeesMenu = new Menu("Employees");
-			MenuItem miEditEmployee = new MenuItem("Edit Employee");
+		MenuItem miEditEmployee = new MenuItem("Edit Employee");
+		MenuItem miAvailabilitySummary = new MenuItem("Availability Summary");
 		Menu mBusinessMenu = new Menu("Business");
-			MenuItem miEditBusInfo = new MenuItem("Edit Info"); 
+		MenuItem miEditBusInfo = new MenuItem("Edit Info"); 
 
 		//block events to other window
 		window.initModality(Modality.APPLICATION_MODAL);
@@ -61,13 +62,20 @@ public class BusinessMenuGUI {
 				session.shutdown();
 			}
 		});
-        
-        miEditEmployee.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                AddEmployeeGUI.display(session);
-            }
-        });
+
+		miEditEmployee.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				AddEmployeeGUI.display(session);
+			}
+		});
+
+		miAvailabilitySummary.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				AvailabilityGUI.display(session);
+			}
+		});
 
 		// when the window is closed
 		window.setOnCloseRequest(new EventHandler<WindowEvent>() {
@@ -79,15 +87,15 @@ public class BusinessMenuGUI {
 		// Setup Window and layout
  		VBox root = new VBox();//layout manager
 
-		root.setSpacing(2);
-		root.setPadding(new Insets(3.0, 3.0, 3.0, 3.0));
+ 		root.setSpacing(2);
+ 		root.setPadding(new Insets(3.0, 3.0, 3.0, 3.0));
 
 		//add elements to the layout
-		root.getChildren().addAll(mb);
-		mb.getMenus().addAll(mFileMenu, mEmployeesMenu, mBusinessMenu);
-		mFileMenu.getItems().addAll(miFileSave, miFileLogout, miFileQuit);
-		mEmployeesMenu.getItems().add(miEditEmployee);
-		mBusinessMenu.getItems().add(miEditBusInfo);
+ 		root.getChildren().addAll(mb);
+ 		mb.getMenus().addAll(mFileMenu, mEmployeesMenu, mBusinessMenu);
+ 		mFileMenu.getItems().addAll(miFileSave, miFileLogout, miFileQuit);
+ 		mEmployeesMenu.getItems().addAll(miEditEmployee, miAvailabilitySummary);
+ 		mBusinessMenu.getItems().add(miEditBusInfo);
 
 		Scene scene = new Scene(root, 300, 200);//create area inside window
 
