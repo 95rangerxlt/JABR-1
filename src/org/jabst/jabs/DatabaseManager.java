@@ -480,6 +480,24 @@ public class DatabaseManager {
         return appointments;
     }
     
+    public ArrayList<Date> getSevenDayEmployeeAvailability() throws SQLException{
+        if (businessConnection == null || businessConnection.isClosed()) {
+            throw new SQLException("Not connected to a business");
+        }
+        
+        ArrayList<Date> availableDates = new ArrayList<Date>();
+        Statement stmt = businessConnection.createStatement();
+        ResultSet rs = stmt.executeQuery (
+            "SELECT DISTINCT AVAILABLE_TIME FROM AVAILABILITY"
+        );
+        
+        while (rs.next()) {
+            availableDates.add(new Date(rs.getTimestamp(1).getTime()));
+        }
+        
+        return availableDates;
+    }
+    
     /** Gets an ArrayList containg all the names and IDs of all employees
       * as preformatted Strings.
       * @return All employees listed in the form name+" #"+employee_Id
