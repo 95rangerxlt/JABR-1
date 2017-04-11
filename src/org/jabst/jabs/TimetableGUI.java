@@ -9,6 +9,8 @@ import java.util.ArrayList;
 
 class TimetableGUI extends GridPane {
 
+	public boolean allEmployees = false;
+
 	public ArrayList<ArrayList<Timetable.CellStatus>> table;
 	public TimetableCellGUI cells[][];
 	public TimetableCellGUI.Type type;
@@ -43,18 +45,38 @@ class TimetableGUI extends GridPane {
 			return;
 		for(int j = 0; j < this.table.get(0).size(); j++) {
 			for(int i = 0; i < this.table.size(); i++) {
+				if(allEmployees) {
+					cells[i][j] = new TimetableCellGUI(TimetableCellGUI.Type.NONE, new String[] {"", "", ""}, false, 120, 40);
+					switch(this.table.get(i).get(j)) {
+						case FREE:
+							// System.out.println("setting border fill to WHITE");
+							cells[i][j].border.setFill(Color.WHITE);
+						break;
+						case BOOKED:
+							// System.out.println("setting border fill to RED");
+							cells[i][j].border.setFill(Color.RED);
+						break;
+						case BOOKED_BY_YOU:
+							// System.out.println("setting border fill to LIGHTGRAY");
+							cells[i][j].border.setFill(Color.LIGHTGRAY);
+						break;
+					}
+					cells[i][j].border.setStroke(Color.GRAY);
+					this.add(cells[i][j], i, j);
+					continue;
+				}
 				switch(this.table.get(i).get(j)) {
 					case FREE:
-						cells[i][j] = new TimetableCellGUI(type, "FREE", 120, 40);
-						cells[i][j].border.setFill(Color.WHITE);
+						cells[i][j] = new TimetableCellGUI(type, new String[] {"FREE", "BOOKED_BY_YOU", "BOOKED"}, false, 120, 40);
+						// cells[i][j].border.setFill(Color.WHITE);
 					break;
 					case BOOKED:
-						cells[i][j] = new TimetableCellGUI(TimetableCellGUI.Type.NONE, "BOOKED", 120, 40);
-						cells[i][j].border.setFill(Color.RED);
+						cells[i][j] = new TimetableCellGUI(TimetableCellGUI.Type.NONE, new String[] {"FREE", "BOOKED_BY_YOU", "BOOKED"}, false, 120, 40);
+						cells[i][j].border.setFill(Color.RED);//special case, color is not decided by selectable
 					break;
 					case BOOKED_BY_YOU:
-						cells[i][j] = new TimetableCellGUI(type, "BOOKED_BY_YOU", 120, 40);
-						cells[i][j].border.setFill(Color.LIGHTGRAY);
+						cells[i][j] = new TimetableCellGUI(type, new String[] {"FREE", "BOOKED_BY_YOU", "BOOKED"}, true, 120, 40);
+						// cells[i][j].border.setFill(Color.LIGHTGRAY);
 					break;
 				}
 				cells[i][j].border.setStroke(Color.GRAY);

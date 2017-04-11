@@ -132,7 +132,7 @@ public class AddEmployeeGUI {
 		saveAndDelete.getChildren().addAll(bSave, bDelete);
 		root.getChildren().addAll(selEmpAndName, tfName, table, saveAndDelete);
 
-		Scene scene = new Scene(root, 700, 500);//create area inside window
+		Scene scene = new Scene(root, 900, 450);//create area inside window
 
 		window.setTitle("Add Employee GUI -placeholder-");//text at the top of the window
 		window.setScene(scene);//add scene to window

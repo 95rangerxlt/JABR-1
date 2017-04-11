@@ -5,6 +5,9 @@ import javafx.scene.control.*;//buttons, labels  etc.
 import javafx.geometry.Insets;//insets = padding
 import javafx.scene.shape.Rectangle;
 import javafx.scene.layout.HBox;
+import javafx.event.EventHandler;//this activates when a button is pressed
+import javafx.event.ActionEvent;//type of event
+import javafx.scene.paint.Color;
 
 public class TimetableCellGUI extends StackPane {
 	
@@ -15,35 +18,142 @@ public class TimetableCellGUI extends StackPane {
 	public Type type;
 
 	public Rectangle border;
-	// private RadioButton radioButton;
-	// private CheckBox checkBox;
-	public ButtonBase selectable;
-	private HBox hbox;
+	public Selectable selectable;//your checkbox or radiobutton
+	public String[] states = new String[3];//deselected, selected, default
 
 	public TimetableCellGUI() {
-		this(Type.CHECKBOX, "default name", 120, 40);
+		this(Type.CHECKBOX, new String[] {"default_desel", "default_sel", "default_default"}, false, 120, 40);
 	}
 
-	public TimetableCellGUI(Type type, String name, int width, int height) {
+	public TimetableCellGUI(Type type, String[] states, boolean selected, int width, int height) {
+		this.states = states;
 		this.type = type;
 		border = new Rectangle(width, height);
-		hbox = new HBox();
 
-		switch(type) {
-			case CHECKBOX:
-				selectable = new CheckBox(name);
-				this.getChildren().addAll(border, hbox, selectable);
-			break;
-			case RADIOBUTTON:
-				selectable = new RadioButton(name);
-				this.getChildren().addAll(border, hbox, selectable);
-			break;
-			case NONE:
-				this.getChildren().addAll(hbox, border);
-			break;
-		}
-		 //border.widthProperty().bind(hbox.widthProperty());
-		 //border.heightProperty().bind(hbox.heightProperty());
+		selectable = new Selectable(type);
+		if(type == Type.NONE)//the selectable shouldnt be added, so it shouldnt show... yet it does
+			this.getChildren().addAll(border);
+		else
+			this.getChildren().addAll(border, selectable);
+
+		selectable.setSelected(selected);
+		update();
+
+		// when the checkbox/radiobutton is pressed
+		selectable.get().setOnAction(new EventHandler<ActionEvent>() {
+			
+			@Override
+			public void handle(ActionEvent event) {
+				switch(type) {
+					case CHECKBOX:
+						// TODO
+						System.out.println("Checkbox checked!");
+					break;
+					case RADIOBUTTON:
+						// TODO
+						System.out.println("Radiobutton Selected!");
+					break;
+					default:
+						System.out.println("ERROR: TimetableCellGUI type not set!");
+					break;
+				}
+				update();
+			}
+		});
 	}
 
+	public void update() {
+		if(type == Type.NONE) {
+			return;
+		}
+		selectable.setText(selectable.isSelected() ? states[1] : states[0]);
+		if(selectable.isSelected()) {
+			border.setFill(Color.LIGHTGRAY);
+		} else {
+			border.setFill(Color.WHITE);
+		}
+	}
+
+}
+
+class Selectable extends StackPane {
+	public TimetableCellGUI.Type type;
+	private CheckBox checkbox;
+	private RadioButton button;
+
+	public Selectable() {
+		this(TimetableCellGUI.Type.NONE);
+	}
+
+	public Selectable(TimetableCellGUI.Type type) {
+		this.type = type;
+		switch(type) {
+			case CHECKBOX:
+				checkbox = new CheckBox();
+				this.getChildren().addAll(checkbox);
+			break;
+			case RADIOBUTTON:
+				button = new RadioButton();
+				this.getChildren().addAll(button);
+			break;
+			default:
+				// empty selectable
+			break;
+		}
+	}
+
+	public Selectable(TimetableCellGUI.Type type, String name) {
+		this(type);
+		get().setText(name);
+	}
+
+	public ButtonBase get() {
+		switch(type) {
+			case CHECKBOX:
+				return checkbox;
+			case RADIOBUTTON:
+				return button;
+			default:
+				// System.out.println("ERROR: Selectable get\n\tSelectable doesn't have a type");
+				return new CheckBox();
+		}
+	}
+
+	public void setText(String a) {
+		switch(type) {
+			case CHECKBOX:
+				checkbox.setText(a);
+			break;
+			case RADIOBUTTON:
+				button.setText(a);
+			default:
+				// System.out.println("ERROR: Selectable setText\n\tSelectable doesn't have a type");
+			break;
+		}
+	}
+
+	public void setSelected(boolean a) {
+		switch(type) {
+			case CHECKBOX:
+				checkbox.setSelected(a);
+			break;
+			case RADIOBUTTON:
+				button.setSelected(a);
+			default:
+				// System.out.println("ERROR: Selectable setSelected\n\tSelectable doesn't have a type");
+			break;
+		}
+	}
+
+	public boolean isSelected() {
+		switch(type) {
+			case CHECKBOX:
+				return checkbox.isSelected();
+			case RADIOBUTTON:
+				return button.isSelected();
+			default:
+				// System.out.println("ERROR: Selectable isSelected\n\tSelectable doesn't have a type");
+				return false;
+		}
+	}
 }

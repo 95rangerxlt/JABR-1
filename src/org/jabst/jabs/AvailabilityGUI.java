@@ -14,8 +14,6 @@ import javafx.geometry.Insets;//insets = padding
 
 public class AvailabilityGUI {
 
-	private static String redBorder = "-fx-border-color: red ; -fx-border-width: 2px ;";
-
 	public static AvailabilityInfo display(SessionManager session) {
 		// setup object to return
 		AvailabilityInfo info = new AvailabilityInfo();
@@ -64,9 +62,9 @@ public class AvailabilityGUI {
 		//add elements to the layout
 		root.getChildren().addAll(table, bClose);
 
-		Scene scene = new Scene(root, 700, 500);//create area inside window
+		Scene scene = new Scene(root, 900, 400);//create area inside window
 
-		window.setTitle("Overview Employee GUI -placeholder-");//text at the top of the window
+		window.setTitle("Availability GUI -placeholder-");//text at the top of the window
 		window.setScene(scene);//add scene to window
 		window.showAndWait();//put the window on the desktop
 
@@ -85,6 +83,7 @@ public class AvailabilityGUI {
 		allEmployees.table = allEmployees.createTableFromDates();
 		System.out.println("...Success!");
 
+		table.allEmployees = true;
 		table.table = allEmployees.table.table;
 		table.update();
 	}
