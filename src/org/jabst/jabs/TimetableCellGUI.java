@@ -15,8 +15,9 @@ public class TimetableCellGUI extends StackPane {
 	public Type type;
 
 	public Rectangle border;
-	private RadioButton radioButton;
-	private CheckBox checkBox;
+	// private RadioButton radioButton;
+	// private CheckBox checkBox;
+	public ButtonBase selectable;
 	private HBox hbox;
 
 	public TimetableCellGUI() {
@@ -26,16 +27,16 @@ public class TimetableCellGUI extends StackPane {
 	public TimetableCellGUI(Type type, String name, int width, int height) {
 		this.type = type;
 		border = new Rectangle(width, height);
-		 hbox = new HBox();
+		hbox = new HBox();
 
 		switch(type) {
 			case CHECKBOX:
-				checkBox = new CheckBox(name);
-				this.getChildren().addAll(border, hbox, checkBox);
+				selectable = new CheckBox(name);
+				this.getChildren().addAll(border, hbox, selectable);
 			break;
 			case RADIOBUTTON:
-				radioButton = new RadioButton(name);
-				this.getChildren().addAll(border, hbox, radioButton);
+				selectable = new RadioButton(name);
+				this.getChildren().addAll(border, hbox, selectable);
 			break;
 			case NONE:
 				this.getChildren().addAll(hbox, border);
