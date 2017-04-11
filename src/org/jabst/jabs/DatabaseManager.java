@@ -55,7 +55,7 @@ public class DatabaseManager {
     };
     private static final String[] SQL_TABLES_BUSINESS = {
         "CREATE TABLE EMPLOYEE ("
-            +    "EMPL_ID INTEGER,"
+            +    "EMPL_ID INTEGER GENERATED ALWAYS AS IDENTITY,"
             +    "EMPL_NAME VARCHAR(40) NOT NULL,"
             +    "ADDRESS VARCHAR(255),"
             +    "PHONE VARCHAR(10),"
@@ -70,14 +70,14 @@ public class DatabaseManager {
         +")",
         
         "CREATE TABLE APPOINTMENTTYPE ("
-            +   "TYPE_ID INTEGER,"
+            +   "TYPE_ID INTEGER GENERATED ALWAYS AS IDENTITY,"
             +   "NAME VARCHAR(40) NOT NULL,"
             +   "COST_CENTS INTEGER NOT NULL,"
             +   "PRIMARY KEY (TYPE_ID)"
         +")",
         
         "CREATE TABLE APPOINTMENT ("
-            +   "APT_ID INTEGER,"
+            +   "APT_ID INTEGER GENERATED ALWAYS AS IDENTITY,"
             +   "DATE_AND_TIME DATETIME NOT NULL,"
             +   "APPOINTMENT_TYPE INTEGER NOT NULL,"
             +   "EMPLOYEE INTEGER NOT NULL,"
@@ -89,17 +89,13 @@ public class DatabaseManager {
             +   "    REFERENCES AVAILABILITY(EMPLOYEE, AVAILABLE_TIME),"
         +")",
         // Default data
-        "INSERT INTO EMPLOYEE VALUES (1, 'default_employee', 'default', '0420123456')",
-        "INSERT INTO AVAILABILITY VALUES(1, CURDATE);",
-        "INSERT INTO APPOINTMENTTYPE VALUES (0, 'DEFAULT_APPOINTMENT_TYPE', 99);",
-        "INSERT INTO"
-            +" APPOINTMENT (APT_ID, DATE_AND_TIME, APPOINTMENT_TYPE,"
-            +" EMPLOYEE, CUSTOMER)"
-            +" VALUES(1, CURDATE, 0, 1, 'default_customer')",
-        "INSERT INTO AVAILABILITY VALUES (1, CURDATE+INTERVAL '10' HOUR)",
-        "INSERT INTO AVAILABILITY VALUES (1, CURDATE+INTERVAL '9' HOUR)",
-        "INSERT INTO APPOINTMENT VALUES (2,CURDATE+INTERVAL '9' HOUR, 0, 1, 'default_customer')",
-        "INSERT INTO APPOINTMENT VALUES (3,CURDATE+INTERVAL '10' HOUR, 0, 1, 'default_customer')"
+        "INSERT INTO EMPLOYEE VALUES (DEFAULT, 'default_employee', 'default', '0420123456')",
+        "INSERT INTO AVAILABILITY VALUES(0, CURDATE);",
+        "INSERT INTO APPOINTMENTTYPE VALUES (DEFAULT, 'DEFAULT_APPOINTMENT_TYPE', 99);",
+        "INSERT INTO AVAILABILITY VALUES (0, CURDATE+INTERVAL '10' HOUR)",
+        "INSERT INTO AVAILABILITY VALUES (0, CURDATE+INTERVAL '9' HOUR)",
+        "INSERT INTO APPOINTMENT VALUES (DEFAULT, CURDATE+INTERVAL '9' HOUR, 0, 0, 'default_customer')",
+        "INSERT INTO APPOINTMENT VALUES (DEFAULT, CURDATE+INTERVAL '10' HOUR, 0, 0, 'default_customer')"
     };
     
     public static final String dbDefaultFileName = "db/credentials_db";
