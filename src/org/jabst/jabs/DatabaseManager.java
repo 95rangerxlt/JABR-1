@@ -19,8 +19,13 @@ import java.io.InputStream;
 import java.util.Scanner;
 import java.util.Date;
 
-// Util imports from this project
+// Logging
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+// For SHA-256 hashing
 import org.jabst.jabs.util.Digest;
+
 import org.jabst.jabs.util.DayOfWeekConversion;
 
 // For returning result sets as native objects
@@ -115,6 +120,8 @@ public class DatabaseManager {
     public static final String dbDefaultFileName = "db/credentials_db";
     /** The name of the default business' database file */
     public static final String defaultBusinessName = "default_business";
+    /** Logger. All output should go through logger instead of System.out
+    private Logger logger;
     /** The JDBC connection to the general (user info) database */
     private Connection generalConnection;
     /** The JDBC connection to the business-specific database*/
@@ -131,6 +138,7 @@ public class DatabaseManager {
          if (generalConnection == null) {
              throw new SQLException();
          }
+         this.logger = getLogger("org.jabst.jabs.DatabaseManager");
          generalConnection.setAutoCommit(false);
     }
 
@@ -169,7 +177,7 @@ public class DatabaseManager {
             try {
                 statement = connection.createStatement();
             } catch (SQLException se) {
-                System.err.println("Error creating statement for table");
+                logger.severe("Failed to create new statement in createTables");
                 return false;
             }
 
@@ -177,10 +185,10 @@ public class DatabaseManager {
                 // Statement.execute returns false if no results were returned,
                 // including for CREATE statements
                 statement.execute(currTable);
-                System.out.println("Successfully created table");
+                logger.info("Successfully created table");
                 success = true;
             } catch (SQLException se) {
-                System.out.println("Failed to create"
+                logger.severe("Failed to create"
                         +"table:"+SQL_TABLES_BUSINESS[i]);
                 return false;
             }
@@ -199,7 +207,7 @@ public class DatabaseManager {
                 businessConnection.commit();
             }
         } catch (SQLException e) {
-            System.err.println("DatabaseManager: Error commiting");
+            logger.severe("DatabaseManager: Error commiting");
             e.printStackTrace();
         }
     }
@@ -217,7 +225,7 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             // Nah don't bother handling it
-            System.err.println(
+            logger.warning(
                 "DatabaseManager: Error closing database properly. Continuing."
             );
         }
@@ -234,20 +242,22 @@ public class DatabaseManager {
          try {
              c = DriverManager.getConnection(dbfilePrefix+dbFileName+";ifexists=true", "sa", "");
          } catch (HsqlException hse) {
-             System.err.println("HqlException conecting to database'"+dbFileName+"': Doesn't exist");
+             logger.severe("HqlException conecting to database'"+dbFileName+"': Doesn't exist");
          }
 
          catch (SQLException se) {
             try {
                 c = DriverManager.getConnection(dbfilePrefix+dbFileName, "sa", "");
             } catch (SQLException sqle) {
-                System.err.println(
-                    "DriverManager: Error: Cannot connect to general database file (SQL error) (when trying to open new)"
+                logger.severe(
+                    "DriverManager: Error: Cannot connect to general database"
+                   +"file (SQL error) (when trying to open new)"
                 );
             }
             if (!createTables(c, tables)) {
-                System.err.println(
-                    "DriverManager: Error: Cannot create tables in database'"+dbFileName+"'"
+                logger.severe(
+                    "DriverManager: Error: Cannot create tables in database'"
+                    + dbFileName+ "'"
                  );
             }
          }
@@ -344,10 +354,10 @@ public class DatabaseManager {
         while (rs.next()) {
             String result_username = rs.getString("username");
             byte[] result_password = rs.getBytes("password");
-            System.out.format("Input: username,password = %s,%s\n",
+            logger.info("Input: username,password = %s,%s\n",
                 username, Digest.digestToHexString(password_hash)
             );
-            System.out.format("Result:username,password = %s,%s\n",
+            logger.info("Result:username,password = %s,%s\n",
                 result_username, Digest.digestToHexString(result_password)
             );
 
@@ -388,7 +398,7 @@ public class DatabaseManager {
         statement.setString(1, username);
         statement.setBytes(2, password_hash);
 
-        System.out.println("About to execute adding user...");
+        logger.info("About to execute adding user...");
         statement.execute();
 
         statement.close();
@@ -549,7 +559,9 @@ public class DatabaseManager {
      *  appointments within the date range.
      *  @throws SQLException If a general database error occurs
      */
-    public ArrayList<Appointment> getThisWeeksAppointments() throws SQLException {
+    public ArrayList<Appointment> getThisWeeksAppointments()
+        throws SQLException
+    {
         ArrayList<Appointment> appointments = new ArrayList<Appointment>();
         Statement stmt = businessConnection.createStatement();
 
@@ -569,7 +581,6 @@ public class DatabaseManager {
             +"    AND"
             +"    date_and_time <= "+dateStr+" + INTERVAL '7' DAY"
             +") "
-            +"ORDER BY DATE_AND_TIME"
         );
         while (rs.next()) {
             try {
@@ -583,8 +594,9 @@ public class DatabaseManager {
                 );
             }
             catch (SQLException sqle) {
-                System.err.println(
-                    "Error getting appointment. Error code: "+sqle.getErrorCode()
+                logger.warning(
+                    "Error getting appointment. Error code: "
+                        +sqle.getErrorCode()
                 ); 
             }
         }
@@ -699,7 +711,7 @@ public class DatabaseManager {
                 "SELECT EMPL_NAME, EMPL_ID FROM EMPLOYEE"
             );
         } catch (SQLException sqle) {
-            System.err.println("SQL Error getting employee names and IDs:");
+            logger.warning("SQL Error getting employee names and IDs:");
             sqle.printStackTrace();
             throw sqle;
         }
@@ -760,7 +772,7 @@ public class DatabaseManager {
                );
 
             while (rs.next()) {
-                System.out.println("Found appointment date: "+rs.getDate(1));
+                logger.fine("Found appointment date: "+rs.getDate(1));
                 Date currAptDate = new Date(rs.getTimestamp(1).getTime());
                 appointments.add(
                     new Appointment (
@@ -812,6 +824,7 @@ public class DatabaseManager {
                 availWeekDates.add(wd);
             }
         } catch (SQLException sqle) {
+            logger.warning("SQL Error in getEmployeeAvailability:");
             sqle.printStackTrace();
             throw new SQLException("Cannot get available WeekDates (empl_id = )"
                     +employeeID);
@@ -840,8 +853,8 @@ public class DatabaseManager {
                 +"VALUES (default, '"+name+"')"
             );
         } catch (SQLException sqle) {
-            System.err.println(
-                "Error creating employee(name=)"+name+"):"
+            logger.severe(
+                "Error creating employee(name="+name+"):"
             );
             sqle.printStackTrace();
             return -1;
@@ -857,7 +870,7 @@ public class DatabaseManager {
             rs.next();
             maxID = rs.getLong(1);
         } catch (SQLException sqle) {
-            System.err.println(
+            logger.severe(
                 "Error getting max employee_id (EMPL_ID) from database:"
             );
             sqle.printStackTrace();
@@ -890,7 +903,7 @@ public class DatabaseManager {
             );
 
         } catch (SQLException sqle) {
-            System.err.println("Error updating employee name for:"+employee
+            logger.severe("Error updating employee name for:"+employee
             +". Rolling back.");
             sqle.printStackTrace();
             businessConnection.rollback();
