@@ -19,7 +19,9 @@ import java.io.InputStream;
 import java.util.Scanner;
 import java.util.Date;
 
+// Util imports from this project
 import org.jabst.jabs.util.Digest;
+import org.jabst.jabs.util.DayOfWeekConversion;
 
 // For returning result sets as native objects
 import java.util.ArrayList;
@@ -129,17 +131,22 @@ public class DatabaseManager {
       * @return whether the tables were successfully created
       */
     private boolean createTables(Connection connection, String[] tables) {
-        boolean success = false;
-        
-        // Problem: SQL uses dates Sun-Sat, Calendar uses them Mon-Sun,
-        // AND that modular arithmetic fails to convert between them nicely
-        // The Hack Solution: Use format string to calculate the real value
-        // and a ternary operator to wrap around at 0
+        // Problem: SQL uses dates Sun-Sat, DayOfWeek uses them Mon-Sun,
+        // Hackish Solution: Make methods to convert between the two
+
+        // Get the day of Week in Sun-Sat form
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         int dow = cal.get(Calendar.DAY_OF_WEEK);
-        --dow;
-        dow = (dow == 0 ? 7 : dow);
+
+        // Convert to Mon-Sun form because that is the form used in WeekDate
+        dow = DayOfWeekConversion.cal2dow(dow);
+
+        // Format the day of week into the SQL
+        SQL_TABLES_BUSINESS[9] = String.format(SQL_TABLES_BUSINESS[9], dow);
+        SQL_TABLES_BUSINESS[10] = String.format(SQL_TABLES_BUSINESS[10], dow);
+
+        boolean success = false;
         for (String currTable : tables) {
             Statement statement = null;
             try {
