@@ -11,6 +11,7 @@ import javafx.stage.Stage;//window
 import javafx.stage.Modality;
 import javafx.stage.WindowEvent;//when window closes
 import javafx.geometry.Insets;//insets = padding
+// import javafx.beans.value;//changelistener
 
 
 public class AddEmployeeGUI {
@@ -114,6 +115,18 @@ public class AddEmployeeGUI {
 				System.out.println("Customer Menu window Closed");
 			}
 		});
+
+		// cbEmployeeSelect.valueProperty().addListener(new ChangeListener<String>() {
+
+		// 	@Override
+		// 	public void changed(ObservableValue ov, String t, String t1) {
+		// 		System.out.println(ov);
+		// 		System.out.println(t);
+		// 		System.out.println(t1);
+
+		// 		// TODO: change the table
+		// 	}
+		// });
 		
 		// Setup Window and layout
  		VBox root = new VBox();//layout manager

@@ -28,7 +28,6 @@ public class Employee {
 		}
 	}
 
-
 	public void createDatesFromTable() {
 		workingHours = new ArrayList<Date>();//reset data
 
@@ -146,6 +145,5 @@ public class Employee {
 	public void setWorkingHours(ArrayList<Date> workingHours) {
 		this.workingHours = workingHours;
 	}
-
 
 }

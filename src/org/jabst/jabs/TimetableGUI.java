@@ -10,7 +10,6 @@ import java.util.ArrayList;
 class TimetableGUI extends GridPane {
 
 	public boolean allEmployees = false;
-
 	public ArrayList<ArrayList<Timetable.CellStatus>> table;
 	public TimetableCellGUI cells[][];
 	public TimetableCellGUI.Type type;
