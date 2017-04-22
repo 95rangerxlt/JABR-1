@@ -4,6 +4,7 @@ package org.jabst.jabs;
 import javafx.event.ActionEvent;//type of event
 import javafx.event.EventHandler;//this activates when a button is pressed
 import javafx.scene.Scene;//area inside stage
+import javafx.scene.input.KeyEvent;//key listener
 import javafx.scene.control.*;//buttons, labels  etc.
 import javafx.scene.layout.VBox;//layout manager
 import javafx.scene.layout.HBox;
@@ -119,6 +120,14 @@ public class RegisterGUI {
 		root.getChildren().addAll(lName, tfName, lAddress, tfAddress, lPhone, tfPhone, lUName, tfUName, lPWord, tfPWord, lPWord2, tfPWord2, buttons);
 
 		Scene scene = new Scene(root/*, 300, 200*/);//create area inside window
+
+		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				// TODO: input validation
+				System.out.println("key pressed");
+			}
+		});
 
 		window.setTitle("JABRS System: JABRS Automatic Booking Registration System");//text at the top of the window
 		window.setScene(scene);//add scene to window

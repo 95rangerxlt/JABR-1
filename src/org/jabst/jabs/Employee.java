@@ -47,6 +47,8 @@ public class Employee {
 				}
 			}
 		}
+
+		System.out.println("dates: \n" + workingHours.toString());
 	}
 
 	public Timetable createTableFromDates() {
@@ -89,6 +91,9 @@ public class Employee {
 	}
 
 	private ArrayList<Calendar> getCalendars(ArrayList<Date> list) {
+		if(list.size() == 0) {
+			System.out.println("cannot get calendars: \tlist size is 0");
+		}
 		ArrayList<Calendar> newList = new ArrayList<Calendar>();
 		for(int i = 0; i < list.size(); i++) {
 			Calendar cal = Calendar.getInstance();
@@ -110,6 +115,7 @@ public class Employee {
 			}
 			return min;
 		} else {
+			System.out.println("calendar is null");
 			return null;
 		}
 	}

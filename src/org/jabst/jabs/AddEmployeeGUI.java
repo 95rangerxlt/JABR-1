@@ -3,6 +3,7 @@ package org.jabst.jabs;
 import javafx.event.ActionEvent;//type of event
 import javafx.event.EventHandler;//this activates when a button is pressed
 import javafx.scene.Scene;//area inside stage
+import javafx.scene.input.KeyEvent;//key listener
 import javafx.scene.control.*;//buttons, labels  etc.
 import javafx.scene.layout.VBox;//layout manager
 import javafx.scene.layout.HBox;
@@ -82,6 +83,8 @@ public class AddEmployeeGUI {
 						"Succesfully saved employee." :
 						"Could not save employee."
 					);
+
+					currEmployee.createDatesFromTable();
 				}
 				else {
 					System.out.println("Not saving null employee");
@@ -133,6 +136,14 @@ public class AddEmployeeGUI {
 		root.getChildren().addAll(selEmpAndName, tfName, table, saveAndDelete);
 
 		Scene scene = new Scene(root, 900, 450);//create area inside window
+
+		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				// TODO: input validation
+				System.out.println("key pressed");
+			}
+		});
 
 		window.setTitle("Add Employee GUI -placeholder-");//text at the top of the window
 		window.setScene(scene);//add scene to window

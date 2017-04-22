@@ -4,6 +4,7 @@ package org.jabst.jabs;
 import javafx.event.ActionEvent;//type of event
 import javafx.event.EventHandler;//this activates when a button is pressed
 import javafx.scene.Scene;//area inside stage
+import javafx.scene.input.KeyEvent;//key listener
 import javafx.scene.control.*;//buttons, labels  etc.
 import javafx.scene.layout.VBox;//layout manager
 import javafx.scene.layout.HBox;
@@ -74,6 +75,22 @@ public class LoginGUI {
 			}
 		});
 
+		tfUName.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				// TODO: input validation
+				System.out.println("key pressed in username text field");
+			}
+		});
+
+		tfPWord.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				// TODO: input validation
+				System.out.println("key pressed in password text field");
+			}
+		});
+
 		// when the window is closed
 		window.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			public void handle(WindowEvent we) {
@@ -93,6 +110,14 @@ public class LoginGUI {
 		root.getChildren().addAll(lUName, tfUName, lPWord, tfPWord, buttons);
 
 		Scene scene = new Scene(root/*, 300, 200*/);//create area inside window
+
+		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				// TODO: input validation
+				System.out.println("key pressed");
+			}
+		});
 
 		window.setTitle("JABLS System: JABLS Automatic Booking Login System");//text at the top of the window
 		window.setScene(scene);//add scene to window
