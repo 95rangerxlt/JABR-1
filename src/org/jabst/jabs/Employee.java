@@ -9,7 +9,7 @@ public class Employee {
 
 	public long id;
 	String name;
-	ArrayList<Date> workingHours;
+	ArrayList<WeekDate> workingHours;
 	ArrayList<Date> appointmentHours;
 	Calendar startDate;
 	Timetable table;
@@ -17,7 +17,7 @@ public class Employee {
 	public int startingHour = 9;
 
 	public Employee(long id, String name,
-		ArrayList<Date> workingHours, ArrayList<Date> appointmentHours) {
+		ArrayList<WeekDate> workingHours, ArrayList<Date> appointmentHours) {
 		this.name = name;
 		this.id = id;
 		this.workingHours = workingHours;
@@ -30,7 +30,7 @@ public class Employee {
 
 
 	public void createDatesFromTable() {
-		workingHours = new ArrayList<Date>();//reset data
+		workingHours = new ArrayList<WeekDate>();//reset data
 
 		if(table.table.size() > 0) {//make sure there is data
 			// nested loops for nested arrays
@@ -39,7 +39,8 @@ public class Employee {
 
 					if(table.table.get(i).get(j) == Timetable.CellStatus.BOOKED_BY_YOU) {
 						// create date
-						Calendar timeSlot = (Calendar)startDate.clone();
+						//TODO: Change from Calendar conversion to WeekDay conversion
+						WeekDate timeSlot = (Calendar)startDate.clone();
 						timeSlot.add(Calendar.DAY_OF_YEAR, i);
 						timeSlot.add(Calendar.HOUR_OF_DAY, j);
 						workingHours.add(timeSlot.getTime());
@@ -88,7 +89,7 @@ public class Employee {
 		return table;
 	}
 
-	private ArrayList<Calendar> getCalendars(ArrayList<Date> list) {
+	private ArrayList<Calendar> getCalendars(ArrayList<WeekDate> list) {
 		ArrayList<Calendar> newList = new ArrayList<Calendar>();
 		for(int i = 0; i < list.size(); i++) {
 			Calendar cal = Calendar.getInstance();
@@ -133,11 +134,11 @@ public class Employee {
 	}
 
 
-	public ArrayList<Date> getWorkingHours() {
+	public ArrayList<WeekDate> getWorkingHours() {
 		return workingHours;
 	}
 
-	public void setWorkingHours(ArrayList<Date> workingHours) {
+	public void setWorkingHours(ArrayList<WeekDate> workingHours) {
 		this.workingHours = workingHours;
 	}
 

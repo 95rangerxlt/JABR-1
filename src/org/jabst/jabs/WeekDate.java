@@ -41,4 +41,7 @@ public class WeekDate {
             return true;
         } else return false;
     }
+    
+    public int getTime() { return timeOfDay; }
+    public DayOfWeek getDayOfWeek() { return dayOfWeek; }
 }

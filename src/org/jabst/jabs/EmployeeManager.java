@@ -52,7 +52,7 @@ public class EmployeeManager {
 		if(employeeID == -1) {
 			// get all employees
 			try {
-				ArrayList<Date> availability = dbm.getSevenDayEmployeeAvailability();
+				ArrayList<WeekDate> availability = dbm.getSevenDayEmployeeAvailability();
 				Employee emp = new Employee(-1, "allEmployees", availability, new ArrayList<Date>());
 				return emp;
 			} catch (SQLException sqle) {
@@ -99,7 +99,7 @@ public class EmployeeManager {
 	 * @param employeeID : use getEmployeeID(String employeeName) to ensure valid ID
 	 * @param workingHours : takes an ArrayList with new workingHours
 	 */
-	public void setWorkingHours(long employeeID, ArrayList<Date> workingHours){
+	public void setWorkingHours(long employeeID, ArrayList<WeekDate> workingHours){
 		for(int i = 0; i < employees.size(); i++){
 			if(employeeID == employees.get(i).id){
 				employees.get(i).setWorkingHours(workingHours);
