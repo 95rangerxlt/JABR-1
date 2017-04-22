@@ -120,7 +120,7 @@ public class DatabaseManager {
          if (generalConnection == null) {
              throw new SQLException();
          }
-         this.logger = getLogger("org.jabst.jabs.DatabaseManager");
+         this.logger = Logger.getLogger("org.jabst.jabs.DatabaseManager");
     }
     
     /** Creates the database tables in case the database is being
@@ -304,11 +304,11 @@ public class DatabaseManager {
         while (rs.next()) {
             String result_username = rs.getString("username");
             byte[] result_password = rs.getBytes("password");
-            logger.info("Input: username,password = %s,%s\n",
-                username, Digest.digestToHexString(password_hash)
+            logger.info("Input: username,password = "+username+","
+                + Digest.digestToHexString(password_hash)+"\n"
             );
-            logger.info("Result:username,password = %s,%s\n",
-                result_username, Digest.digestToHexString(result_password)
+            logger.info("Result:username,password = "+result_username+","
+                + Digest.digestToHexString(result_password)+"\n"
             );
             
             for (int i = 0; i < result_password.length; ++i) {
