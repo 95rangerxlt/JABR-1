@@ -42,8 +42,8 @@ public class RegisterGUI {
 		PasswordField tfPWord = new PasswordField();
 		PasswordField tfPWord2 = new PasswordField();
 
-		tfUName.setText(user);
-		tfPWord.setText(pass);
+		// tfUName.setText(user);//homy didnt want this
+		// tfPWord.setText(pass);//homy didnt want this
 
 		//block events to other window
 		window.initModality(Modality.APPLICATION_MODAL);
@@ -95,8 +95,8 @@ public class RegisterGUI {
 			@Override
 			public void handle(ActionEvent event) {
 				info.button = RegisterInfo.Buttons.LOGIN;
-				info.username = tfUName.getText();
-				info.password = tfPWord.getText();
+				info.username = ""/*tfUName.getText()*/;//homy didnt want this
+				info.password = ""/*tfPWord.getText()*/;//homy didnt want this
 				window.close();
 			}
 		});
@@ -107,6 +107,47 @@ public class RegisterGUI {
 				System.out.println("Register window Closed");
 			}
 		});
+
+		tfUName.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				// TODO: input validation
+				System.out.println("key pressed in username text field");
+			}
+		});
+
+		tfPWord.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				// TODO: input validation
+				System.out.println("key pressed in password text field");
+			}
+		});
+
+		tfName.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				// TODO: input validation
+				System.out.println("Key pressed in Name text field");
+			}
+		});
+
+		tfAddress.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				// TODO: input validation
+				System.out.println("Key pressed in Address text field");
+			}
+		});
+
+		tfPhone.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				// TODO: input validation
+				System.out.println("Key pressed in Phone text field");
+			}
+		});
+
 
 		VBox root = new VBox();//layout manager
 		HBox buttons = new HBox();
@@ -120,14 +161,14 @@ public class RegisterGUI {
 		root.getChildren().addAll(lName, tfName, lAddress, tfAddress, lPhone, tfPhone, lUName, tfUName, lPWord, tfPWord, lPWord2, tfPWord2, buttons);
 
 		Scene scene = new Scene(root/*, 300, 200*/);//create area inside window
-
+/*
 		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
 				// TODO: input validation
 				System.out.println("key pressed");
 			}
-		});
+		});*/
 
 		window.setTitle("JABRS System: JABRS Automatic Booking Registration System");//text at the top of the window
 		window.setScene(scene);//add scene to window

@@ -29,8 +29,8 @@ public class LoginGUI {
 		TextField tfUName = new TextField();
 		PasswordField tfPWord = new PasswordField();
 
-		tfUName.setText(user);
-		tfPWord.setText(pass);
+		// tfUName.setText(user);//homy didnt want this
+		// tfPWord.setText(pass);//homy didnt want this
 
 		//block events to other window
 		window.initModality(Modality.APPLICATION_MODAL);
@@ -69,8 +69,8 @@ public class LoginGUI {
 			@Override
 			public void handle(ActionEvent event) {
 				info.button = LoginInfo.Buttons.REGISTER;
-				info.username = tfUName.getText();
-				info.password = tfPWord.getText();
+				info.username = ""/*tfUName.getText()*/;//homy didnt want this
+				info.password = ""/*tfPWord.getText()*/;//homy didnt want this
 				window.close();
 			}
 		});
@@ -111,13 +111,13 @@ public class LoginGUI {
 
 		Scene scene = new Scene(root/*, 300, 200*/);//create area inside window
 
-		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		/*scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
 				// TODO: input validation
 				System.out.println("key pressed");
 			}
-		});
+		});*/
 
 		window.setTitle("JABLS System: JABLS Automatic Booking Login System");//text at the top of the window
 		window.setScene(scene);//add scene to window

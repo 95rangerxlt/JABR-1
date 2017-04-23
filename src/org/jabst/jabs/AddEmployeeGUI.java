@@ -116,6 +116,14 @@ public class AddEmployeeGUI {
 			}
 		});
 
+		tfName.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				// TODO: input validation
+				System.out.println("key pressed in name text field");
+			}
+		});
+
 		// cbEmployeeSelect.valueProperty().addListener(new ChangeListener<String>() {
 
 		// 	@Override
@@ -149,14 +157,14 @@ public class AddEmployeeGUI {
 		root.getChildren().addAll(selEmpAndName, tfName, table, saveAndDelete);
 
 		Scene scene = new Scene(root, 900, 450);//create area inside window
-
+/*
 		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
 				// TODO: input validation
 				System.out.println("key pressed");
 			}
-		});
+		});*/
 
 		window.setTitle("Add Employee GUI -placeholder-");//text at the top of the window
 		window.setScene(scene);//add scene to window
