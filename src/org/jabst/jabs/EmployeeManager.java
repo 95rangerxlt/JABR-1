@@ -112,7 +112,7 @@ public class EmployeeManager {
 	 * @param employeeID : use getEmployeeID(String employeeName) to ensure valid ID
 	 * @return an ArrayList<Date> of current workingHours
 	 */
-	public ArrayList<Date> getWorkingHours(long employeeID){
+	public ArrayList<WeekDate> getWorkingHours(long employeeID){
 		for(int i = 0; i < employees.size(); i++){
 			if(employeeID == employees.get(i).id){
 				return (employees.get(i).workingHours);
