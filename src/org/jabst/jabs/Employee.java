@@ -4,32 +4,51 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
+import java.time.DayOfWeek;
 
 public class Employee {
 
 	public long id;
 	String name;
-	ArrayList<Date> workingHours;
+	ArrayList<WeekDate> workingHours;
 	ArrayList<Date> appointmentHours;
-	Calendar startDate;
+	WeekDate startDate;
 	Timetable table;
 	public int hoursInADay = 8;
 	public int startingHour = 9;
 
 	public Employee(long id, String name,
-		ArrayList<Date> workingHours, ArrayList<Date> appointmentHours) {
+		ArrayList<WeekDate> workingHours, ArrayList<Date> appointmentHours) {
 		this.name = name;
 		this.id = id;
 		this.workingHours = workingHours;
 		this.appointmentHours = appointmentHours;
 
 		if(workingHours.size() > 0) {
-			table = createTableFromDates();
+			table = createTableFromWeekDates(workingHours);
 		}
 	}
 
+	public void createWeekDatesFromTable() {
+		workingHours = new ArrayList<WeekDate>();//reset data
+
+		if(table.table.size() > 0) {//make sure there is data
+			// nested loops for nested arrays
+			for(int i = 0; i < table.table.size(); i++) {//days
+				for(int j = 0; j < table.table.get(0).size(); j++) {//hours
+
+					if(table.table.get(i).get(j) == Timetable.CellStatus.BOOKED_BY_YOU) {
+						// create weekdate
+						WeekDate timeSlot = new WeekDate(DayOfWeek.of(i), 0);
+						timeSlot.setTimeOfDayHour(j);
+					}
+				}
+			}
+		}
+	}
+/*
 	public void createDatesFromTable() {
-		workingHours = new ArrayList<Date>();//reset data
+		workingHours = new ArrayList<WeekDate>();//reset data
 
 		if(table.table.size() > 0) {//make sure there is data
 			// nested loops for nested arrays
@@ -38,7 +57,8 @@ public class Employee {
 
 					if(table.table.get(i).get(j) == Timetable.CellStatus.BOOKED_BY_YOU) {
 						// create date
-						Calendar timeSlot = (Calendar)startDate.clone();
+						//TODO: Change from Calendar conversion to WeekDay conversion
+						WeekDate timeSlot = (Calendar)startDate.clone();
 						timeSlot.add(Calendar.DAY_OF_YEAR, i);
 						timeSlot.add(Calendar.HOUR_OF_DAY, j);
 						workingHours.add(timeSlot.getTime());
@@ -49,7 +69,24 @@ public class Employee {
 
 		System.out.println("dates: \n" + workingHours.toString());
 	}
+*/
+	public Timetable createTableFromWeekDates(ArrayList<WeekDate> dates) {
+		table = new Timetable(true);
+		System.out.println("creating table from " + dates.size() + " shifts");
+		WeekDate min = minWeekDate(dates);
+		startDate = min;
+		table.createBlankTables();
 
+		// fill tables
+		for(int i = 0; i < dates.size(); i++) {
+			int dayIdx = dates.get(i).getDayOfWeek().getValue();
+			int hourIdx = dates.get(i).getStartingHour() - startingHour;
+
+			table.table.get(dayIdx).set(hourIdx, Timetable.CellStatus.BOOKED_BY_YOU);
+		}
+		return table;
+	}
+/*
 	public Timetable createTableFromDates() {
 		table = new Timetable(true);
 		System.out.println("creating table from " + workingHours.size() + " shifts");
@@ -87,9 +124,9 @@ public class Employee {
 		System.out.println("end of createTableFromDates");
 		// TODO: clean up all these println statements
 		return table;
-	}
-
-	private ArrayList<Calendar> getCalendars(ArrayList<Date> list) {
+	}*/
+/*
+	private ArrayList<Calendar> getCalendars(ArrayList<WeekDate> list) {
 		if(list.size() == 0) {
 			System.out.println("cannot get calendars: \tlist size is 0");
 		}
@@ -101,12 +138,28 @@ public class Employee {
 		}
 		return newList;
 	}
-	
+	*/
 
 	private Calendar minDate(ArrayList<Calendar> list) {
 		System.out.println("minDate:\n\tlist size: " + list.size());
 		if(list.size() > 0) {
 			Calendar min = list.get(0);
+			for(int i = 0; i < list.size(); i++) {
+				if(list.get(i).compareTo(min) < 0) {
+					min = list.get(i);
+				}
+			}
+			return min;
+		} else {
+			System.out.println("calendar is null");
+			return null;
+		}
+	}
+
+	private WeekDate minWeekDate(ArrayList<WeekDate> list) {
+		System.out.println("minDate:\n\tlist size: " + list.size());
+		if(list.size() > 0) {
+			WeekDate min = list.get(0);
 			for(int i = 0; i < list.size(); i++) {
 				if(list.get(i).compareTo(min) < 0) {
 					min = list.get(i);
@@ -129,6 +182,16 @@ public class Employee {
 		return max;
 	}
 
+	private WeekDate maxWeekDate(ArrayList<WeekDate> list) {
+		WeekDate max = list.get(0);
+		for(int i = 0; i < list.size(); i++) {
+			if(list.get(i).compareTo(max) > 0) {
+				max = list.get(i);
+			}
+		}
+		return max;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -138,11 +201,11 @@ public class Employee {
 	}
 
 
-	public ArrayList<Date> getWorkingHours() {
+	public ArrayList<WeekDate> getWorkingHours() {
 		return workingHours;
 	}
 
-	public void setWorkingHours(ArrayList<Date> workingHours) {
+	public void setWorkingHours(ArrayList<WeekDate> workingHours) {
 		this.workingHours = workingHours;
 	}
 

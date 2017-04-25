@@ -85,7 +85,7 @@ public class AddEmployeeGUI {
 						"Could not save employee."
 					);
 
-					currEmployee.createDatesFromTable();
+					currEmployee.createWeekDatesFromTable();
 				}
 				else {
 					System.out.println("Not saving null employee");
@@ -195,7 +195,7 @@ public class AddEmployeeGUI {
 		}
 
 		System.out.println("creating table from dates...");
-		currEmployee.table = currEmployee.createTableFromDates();
+		currEmployee.table = currEmployee.createTableFromWeekDates(currEmployee.workingHours);
 		System.out.println("...Success!");
 
 		table.table = currEmployee.table.table;

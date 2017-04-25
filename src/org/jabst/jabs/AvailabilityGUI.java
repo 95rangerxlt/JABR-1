@@ -80,7 +80,7 @@ public class AvailabilityGUI {
 		}
 
 		System.out.println("creating table from dates...");
-		allEmployees.table = allEmployees.createTableFromDates();
+		allEmployees.table = allEmployees.createTableFromWeekDates(allEmployees.workingHours);
 		System.out.println("...Success!");
 
 		table.allEmployees = true;
