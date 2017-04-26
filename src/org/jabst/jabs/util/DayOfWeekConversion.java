@@ -19,7 +19,7 @@ public class DayOfWeekConversion {
     }
     
     /** Converts in integer from DayOfWeek.getValue() to the equivalent
-      * getValue used by Calendar.SUNDAY, MONDAY etc.
+      * integer value  used by Calendar.SUNDAY, MONDAY etc.
       * Use Calendar.set(DAY_OF_WEEK, int) to set a calendar to this
       * day of week.
       */

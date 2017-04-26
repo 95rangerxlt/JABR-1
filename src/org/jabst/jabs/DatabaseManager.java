@@ -716,7 +716,6 @@ public class DatabaseManager {
                 pstmt.setLong(1, employee.id);
                 pstmt.setInt(2, currDate.getTime());
                 pstmt.setInt(3, currDate.getDayOfWeek().getValue());
-                
                 updateCount += pstmt.executeUpdate();
             } catch (SQLIntegrityConstraintViolationException sqle) {
                 // Already exists, ignore it
