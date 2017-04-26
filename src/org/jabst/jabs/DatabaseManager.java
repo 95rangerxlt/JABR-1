@@ -71,8 +71,8 @@ public class DatabaseManager {
             
         "CREATE TABLE AVAILABILITY ("
             +   "EMPLOYEE INTEGER,"
-            +   "AVAILABLE_TIME INTEGER"
-            +   "AVAILABLE_DAY INTEGER" // Day of week
+            +   "AVAILABLE_TIME INTEGER,"
+            +   "AVAILABLE_DAY INTEGER," // Day of week
             +   "FOREIGN KEY (EMPLOYEE) REFERENCES EMPLOYEE(EMPL_ID),"
             +   "PRIMARY KEY(EMPLOYEE, AVAILABLE_TIME, AVAILABLE_DAY)"
         +")",
@@ -97,7 +97,6 @@ public class DatabaseManager {
         +")",
         // Default data
         "INSERT INTO EMPLOYEE VALUES (DEFAULT, 'default_employee', 'default', '0420123456')",
-        "INSERT INTO AVAILABILITY VALUES(0, CURDATE);",
         "INSERT INTO APPOINTMENTTYPE VALUES (DEFAULT, 'DEFAULT_APPOINTMENT_TYPE', 99);",
         "INSERT INTO AVAILABILITY VALUES (0, 36000, 1)",
         "INSERT INTO AVAILABILITY VALUES (0, 32400, 1)",
@@ -143,8 +142,8 @@ public class DatabaseManager {
         dow = DayOfWeekConversion.cal2dow(dow);
 
         // Format the day of week into the SQL
+        SQL_TABLES_BUSINESS[8] = String.format(SQL_TABLES_BUSINESS[8], dow);
         SQL_TABLES_BUSINESS[9] = String.format(SQL_TABLES_BUSINESS[9], dow);
-        SQL_TABLES_BUSINESS[10] = String.format(SQL_TABLES_BUSINESS[10], dow);
 
         boolean success = false;
         for (String currTable : tables) {
