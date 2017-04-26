@@ -1,5 +1,6 @@
 package org.jabst.jabs;
 
+import org.jabst.jabs.util.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ public class Employee {
 	String name;
 	ArrayList<WeekDate> workingHours;
 	ArrayList<Date> appointmentHours;
-	WeekDate startDate;
+	Calendar startDate;
 	Timetable table;
 	public int hoursInADay = 8;
 	public int startingHour = 9;
@@ -46,9 +47,9 @@ public class Employee {
 			}
 		}
 	}
-/*
+
 	public void createDatesFromTable() {
-		workingHours = new ArrayList<WeekDate>();//reset data
+		appointmentHours = new ArrayList<Date>();//reset data
 
 		if(table.table.size() > 0) {//make sure there is data
 			// nested loops for nested arrays
@@ -58,10 +59,10 @@ public class Employee {
 					if(table.table.get(i).get(j) == Timetable.CellStatus.BOOKED_BY_YOU) {
 						// create date
 						//TODO: Change from Calendar conversion to WeekDay conversion
-						WeekDate timeSlot = (Calendar)startDate.clone();
+						Calendar timeSlot = startDate;
 						timeSlot.add(Calendar.DAY_OF_YEAR, i);
 						timeSlot.add(Calendar.HOUR_OF_DAY, j);
-						workingHours.add(timeSlot.getTime());
+						appointmentHours.add(timeSlot.getTime());
 					}
 				}
 			}
@@ -69,12 +70,10 @@ public class Employee {
 
 		System.out.println("dates: \n" + workingHours.toString());
 	}
-*/
+
 	public Timetable createTableFromWeekDates(ArrayList<WeekDate> dates) {
 		table = new Timetable(true);
 		System.out.println("creating table from " + dates.size() + " shifts");
-		WeekDate min = minWeekDate(dates);
-		startDate = min;
 		table.createBlankTables();
 
 		// fill tables
@@ -86,15 +85,16 @@ public class Employee {
 		}
 		return table;
 	}
-/*
+
 	public Timetable createTableFromDates() {
 		table = new Timetable(true);
-		System.out.println("creating table from " + workingHours.size() + " shifts");
-		ArrayList<Calendar> hoursCalendar = getCalendars(workingHours);
-		Calendar min = minDate(hoursCalendar);
-		startDate = (Calendar)min.clone();
+		System.out.println("creating table from " + appointmentHours.size() + " shifts");
+		ArrayList<Calendar> hoursCalendar = getCalendars(appointmentHours);
+		Calendar firstDay = hoursCalendar.get(0);
+		firstDay.set(Calendar.DAY_OF_WEEK, DayOfWeekConversion.dow2cal(0));
+		startDate = firstDay;
 		Calendar max = maxDate(hoursCalendar);
-		int days = max.get(Calendar.DAY_OF_YEAR) - min.get(Calendar.DAY_OF_YEAR);
+		int days = max.get(Calendar.DAY_OF_YEAR) - firstDay.get(Calendar.DAY_OF_YEAR);
 		table.createBlankTables();
 
 		// fill tables
@@ -102,12 +102,12 @@ public class Employee {
 
 			System.out.println("i="+i);
 			System.out.println("row index:");
-			System.out.println("hoursCalendar.get(i).get(Calendar.DAY_OF_YEAR) - min.get(Calendar.DAY_OF_YEAR) = "
+			System.out.println("hoursCalendar.get(i).get(Calendar.DAY_OF_YEAR) - firstDay.get(Calendar.DAY_OF_YEAR) = "
 				+hoursCalendar.get(i).get(Calendar.DAY_OF_YEAR) +"-"
-				+min.get(Calendar.DAY_OF_YEAR)+"="
-				+(hoursCalendar.get(i).get(Calendar.DAY_OF_YEAR)-min.get(Calendar.DAY_OF_YEAR))
+				+firstDay.get(Calendar.DAY_OF_YEAR)+"="
+				+(hoursCalendar.get(i).get(Calendar.DAY_OF_YEAR)-firstDay.get(Calendar.DAY_OF_YEAR))
 			);
-			int getting = (hoursCalendar.get(i).get(Calendar.DAY_OF_YEAR) - min.get(Calendar.DAY_OF_YEAR));
+			int getting = (hoursCalendar.get(i).get(Calendar.DAY_OF_YEAR) - firstDay.get(Calendar.DAY_OF_YEAR));
 			
 			int cellIdx = hoursCalendar.get(i).get(Calendar.HOUR_OF_DAY)-startingHour;
 			
@@ -124,9 +124,9 @@ public class Employee {
 		System.out.println("end of createTableFromDates");
 		// TODO: clean up all these println statements
 		return table;
-	}*/
-/*
-	private ArrayList<Calendar> getCalendars(ArrayList<WeekDate> list) {
+	}
+
+	private ArrayList<Calendar> getCalendars(ArrayList<Date> list) {
 		if(list.size() == 0) {
 			System.out.println("cannot get calendars: \tlist size is 0");
 		}
@@ -138,7 +138,7 @@ public class Employee {
 		}
 		return newList;
 	}
-	*/
+	
 
 	private Calendar minDate(ArrayList<Calendar> list) {
 		System.out.println("minDate:\n\tlist size: " + list.size());
