@@ -184,6 +184,27 @@ public class SessionManager extends Application {
 		//Application.launch(BusinessMenu.class);
 	}
 	
+	public boolean validateNameInput(String input){
+		boolean valid = input.chars().allMatch(Character::isLetter);
+		return valid;
+	}
+	
+	public boolean validatePhoneInput(String input){
+		boolean valid = input.chars().allMatch(Character::isDigit);
+		if (input.length() > 10 || input.length() < 8){
+			valid = false;
+		}
+		return valid;		
+	}
+	
+	public boolean validatePasswordStrength(String input){
+		// Strength Conditions
+	}
+	
+	public boolean validateAddressInput(String Input){
+		// TODO: determine conditions
+	}
+	
 	public static void main(String[] args) {
 		launch(args);
 	}
