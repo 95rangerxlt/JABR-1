@@ -588,25 +588,15 @@ public class DatabaseManager {
             throw sqle;
         }
             
-        // Get times
+        // Get working hours
         try {
-            rs = stmt.executeQuery (
-                "SELECT AVAILABLE_DAY, AVAILABLE_TIME "+
-                "FROM EMPLOYEE EMP JOIN AVAILABILITY AVA "+
-                "ON EMP.EMPL_ID = AVA.EMPLOYEE "+
-                "WHERE EMPL_ID = "+empl_id
-            );
-            
-            while (rs.next()) {
-                WeekDate wd = new WeekDate(DayOfWeek.of(rs.getInt(1)), rs.getInt(2));
-                System.out.println("Found available date: "+wd);
-                available_hours.add(wd);
-            }
+            available_hours = getEmployeeAvailability((int)empl_id);
         } catch (SQLException sqle) {
             sqle.printStackTrace();
             throw sqle;
         }
         
+        // Get appointment hours
         try {
             rs = stmt.executeQuery (
                 "SELECT APT.DATE_AND_TIME"
@@ -626,34 +616,45 @@ public class DatabaseManager {
         return new Employee(empl_id, empl_name, available_hours, appointment_hours);
     }
     
-    /** Gets the given employee's available dates for the next 7 days
-      * @return ArrayList<Date> representing the availability
+    /** Gets the given employee's available days and times on the roster
+      * You may want to just fetch the whole Employee with getEmployee
+      * @return ArrayList<WeekDate> representing the availability
       * @throws SQLException if the employee doesn't exist, or a database
       * error occurs
      */
-    public ArrayList<Date> getEmployeeAvailability(int employeeID) throws SQLException{
-        ArrayList<Date> availDates = new ArrayList<Date>();
+    public ArrayList<WeekDate> getEmployeeAvailability(long employeeID)
+        throws SQLException
+    {
         if (businessConnection == null || businessConnection.isClosed()) {
             throw new SQLException("Not connected to a business");
         }
+
         Statement stmt = businessConnection.createStatement();
         ResultSet rs = null;
+        ArrayList<WeekDate> availWeekDates = new ArrayList<WeekDate>();
+
         try {
-            rs = stmt.executeQuery(
-                "SELECT AVAILABLE_TIME FROM AVAILABILITY "
-                    +"WHERE EMPLOYEE="+employeeID
-                    +" AND (AVAILABLE_TIME >= CURDATE) "
-                    +" AND (AVAILABLE_TIME <= CURDATE() + INTERVAL '7' DAY)"
+            rs = stmt.executeQuery (
+                "SELECT AVAILABLE_DAY, AVAILABLE_TIME "+
+                "FROM EMPLOYEE EMP JOIN AVAILABILITY AVA "+
+                "ON EMP.EMPL_ID = AVA.EMPLOYEE "+
+                "WHERE EMPL_ID = "+employeeID
             );
+            
+            while (rs.next()) {
+                WeekDate wd = new WeekDate(
+                        DayOfWeek.of(rs.getInt(1)), rs.getInt(2)
+                );
+                System.out.println("Found available WeekDate: "+wd);
+                availWeekDates.add(wd);
+            }
         } catch (SQLException sqle) {
-            System.err.println("SQL Error in getEmployeeAvailability:");
             sqle.printStackTrace();
-            throw sqle;
+            throw new SQLException("Cannot get available WeekDates (empl_id = )"
+                    +employeeID);
         }
-        while (rs.next()) {
-            availDates.add(rs.getDate(1));
-        }
-        return availDates;
+        
+        return availWeekDates;
     }
 
     /** Adds an employee with the given name. The ID is generated automatically
@@ -723,13 +724,19 @@ public class DatabaseManager {
             Date availDate = DayOfWeekConversion.wd2cal(currAvailability).getTime();
             if (employee.appointmentHours.contains(availDate)) {
                 System.err.println("Can't remove availability for employee:"
+                    +employee.name+"#"+employee.id+" at "+availDate+". "
                     +"They have an appointment at that time"
                 );
+            }
+            else {
+                // TODO
+            }
+                /*
                 throw new SQLIntegrityConstraintViolationException(
                     "Cannot remove employee when they have an appointment"
-                );
-            }
+                );*/
         }
+
         try {
             stmt.execute("DELETE FROM AVAILABILITY"
             +" WHERE EMPLOYEE="+employee.id);
@@ -741,8 +748,7 @@ public class DatabaseManager {
             businessConnection.rollback();
         }
 
-        
-        /* Update availability */
+        /* Update availability - insert all availability */
         PreparedStatement pstmt;
         for (WeekDate currDate : employee.workingHours) {
             try {
@@ -766,7 +772,10 @@ public class DatabaseManager {
             }
         }
         
-        /* Update appointments? */
+        /* Update appointments? - no, do that seperately  
+            Remember: appointments belong in a separate table and are returned 
+            to the Employee object at runtime, but only for convenience
+            of access */
         
         // Return true even if no updates occurred - it still means we
         // guarantee the record is correct
@@ -783,7 +792,7 @@ public class DatabaseManager {
      *  THIS METHOD IS DEPRECATED, please use updateEmployee
      */
     public boolean setEmployeeAvailability(int employeeID,
-        ArrayList<Date> dates,
+        ArrayList<WeekDate> dates,
         ArrayList<Boolean> availability)
         throws SQLException, DateTimeException
     {
@@ -792,21 +801,23 @@ public class DatabaseManager {
         }
         
         int resultUpdates = 0;
-        Date givenDate;
+        WeekDate givenWeekDate;
         for (int dateIdx = 0; dateIdx < dates.size(); ++dateIdx) {
-            givenDate = dates.get(dateIdx);
+            givenWeekDate = dates.get(dateIdx);
             // Available
             if (availability.get(dateIdx) == true) {
                 PreparedStatement pstmt = businessConnection.prepareStatement(
-                    "INSERT INTO AVAILABILITY VALUES(?, ?)"
+                    "INSERT INTO AVAILABILITY VALUES(?, ?, ?)"
                 );
                 pstmt.setInt(1, employeeID);
-                pstmt.setTimestamp(2, new java.sql.Timestamp(givenDate.getTime()));
+                pstmt.setInt(2, givenWeekDate.getTime());
+                pstmt.setInt(3, givenWeekDate.getDayOfWeek().getValue());
                 try {
                     resultUpdates += pstmt.executeUpdate();
                 } catch (SQLException sqle) {
                     System.err.println("DatabaseManager: Error inserting appointment");
-                    System.err.println("date="+givenDate.toString() + ";empl_id=" + employeeID);
+                    System.err.println("date="+givenWeekDate.toString()
+                            + ";empl_id=" + employeeID);
                     sqle.printStackTrace();
                     throw sqle;
                 }
@@ -818,14 +829,16 @@ public class DatabaseManager {
                     "WHERE EMPLOYEE = ? AND AVAILABLE_TIME = ?"
                 );
                 pstmt.setInt(1, employeeID);
-                pstmt.setTimestamp(2, new java.sql.Timestamp(givenDate.getTime()));
-                System.out.format("Deleting values(%d,%s)\n", employeeID, givenDate.toString());
+                pstmt.setTimestamp(2, new java.sql.Timestamp(givenWeekDate.getTime()));
+                System.out.format("Deleting values(%d,%s)\n", employeeID,
+                        givenWeekDate.toString());
                 try {
                     resultUpdates += pstmt.executeUpdate();
                     System.out.println("resultUpdates:"+resultUpdates);
                 } catch (SQLException sqle) {
                     System.err.println("DatabaseManager: Error deleting appointment");
-                    System.err.println("date="+givenDate.toString() + ";empl_id=" + employeeID);
+                    System.err.println("date="+givenWeekDate.toString() 
+                            + ";empl_id=" + employeeID);
                     sqle.printStackTrace();
                     throw sqle;
                 }
@@ -904,7 +917,7 @@ public class DatabaseManager {
                     break;
                 case "get_availability":
                     employee = sc.nextInt();
-                    ArrayList<Date> availability = null;
+                    ArrayList<WeekDate> availability = null;
                     try {
                         availability = dbm.getEmployeeAvailability(1);
                     } catch (SQLException sqle) {
@@ -912,18 +925,18 @@ public class DatabaseManager {
                         sqle.printStackTrace();
                         break;
                     }
-                    for (Date d : availability) {
+                    for (WeekDate d : availability) {
                         System.out.println(d);
                     }
                     break;
-                case "set_availability":
+                /*case "set_availability":
                     employee = sc.nextInt();
                     ArrayList<Date> availableDates = new ArrayList<Date>();
                     Date today00 = new Date();
                     /*today00.setHours(0);
                     today00.setHours(today00.getHours()+10);
                     today00.setMinutes(0);
-                    today00.setSeconds(0);*/
+                    today00.setSeconds(0);*//*
                     availableDates.add(today00);
                     ArrayList<Boolean> availabilities = new ArrayList<Boolean>();
                     availabilities.add(sc.nextBoolean());
@@ -943,8 +956,8 @@ public class DatabaseManager {
                         sqle.printStackTrace();
                         break;
                     }
-                    /*ArrayList<Boolean>*/ availabilities = new ArrayList<Boolean>();
-                    for (Date d : availability) {
+                    /*ArrayList<Boolean>*//* availabilities = new ArrayList<Boolean>();
+                    for (WeekDate d : availability) {
                         System.out.println(d);
                         availabilities.add(false);
                     }
@@ -956,6 +969,7 @@ public class DatabaseManager {
                         e.printStackTrace();
                     }
                     break;
+                */
                 case "default_business":
                     System.out.println(dbm.getBusiness(defaultBusinessName));
                     break;
