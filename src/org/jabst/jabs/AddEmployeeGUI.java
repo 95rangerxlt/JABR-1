@@ -79,13 +79,13 @@ public class AddEmployeeGUI {
 				info.button = AddEmployeeInfo.Buttons.SAVE;
 				if (currEmployee != null) {
 					currEmployee.name = tfName.getText();
+					currEmployee.createWeekDatesFromTable();
 					System.out.println(
 						employeeManager.updateEmployee(currEmployee) ?
 						"Succesfully saved employee." :
 						"Could not save employee."
 					);
 
-					currEmployee.createWeekDatesFromTable();
 				}
 				else {
 					System.out.println("Not saving null employee");

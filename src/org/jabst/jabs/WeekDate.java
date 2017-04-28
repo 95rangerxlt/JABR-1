@@ -69,6 +69,7 @@ public class WeekDate implements Comparable<WeekDate> {
     	} else {
     		return day;
     	}
+    }
     
     public String toString() {
         StringBuilder sb = new StringBuilder();
