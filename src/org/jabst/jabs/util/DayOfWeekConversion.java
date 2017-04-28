@@ -2,44 +2,78 @@ package org.jabst.jabs.util;
 
 import java.time.DayOfWeek;
 import java.util.Calendar;
+import org.jabst.jabs.WeekDate;
 
 /** Static methods for converting between DayOfWeek and Calendar representations
-  * of the day of week
+  * of the day of week, and between Calendar objects and day of week objects
   */
 public class DayOfWeekConversion {
 
     /** Converts an integer from Calendar.SUNDAY, MONDAY etc into the
-      * equivalent ordinal used by DayOfWeek.
+      * equivalent getValue used by DayOfWeek.
       * Use DayOfWeek.of(int) to convert to a DayOfWeek.
       */
     public static int cal2dow(int cal) {
-        cal -= 2;
-        cal = (cal == -1 ? 6 : cal );
+        cal -= 1;
+        cal = (cal == 0 ? 7 : cal );
         return cal;
     }
     
-    /** Converts in integer from DayOfWeek.ordinal() to the equivalent
-      * ordinal used by Calendar.SUNDAY, MONDAY etc.
+    /** Converts in integer from DayOfWeek.getValue() to the equivalent
+      * integer value  used by Calendar.SUNDAY, MONDAY etc.
       * Use Calendar.set(DAY_OF_WEEK, int) to set a calendar to this
       * day of week.
       */
     public static int dow2cal(int dow) {
-        dow += 2;
+        dow += 1;
         dow = (dow == 8 ? 1 : dow);
         return dow;
+    }
+    
+    /** Converts a WeekDate into a Calendar for this week
+      * @param wd The WeekDate to convert to a calendar
+      * @return A Calendar which is set to the day of week and time of day
+      * in the WeekDate, and to this week in absolute value.
+      */
+    public static Calendar wd2cal (WeekDate wd) {
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.HOUR_OF_DAY, wd.getStartingHour());
+        c.set(Calendar.MINUTE, (wd.getTime()/60)%60);
+        c.set(Calendar.SECOND, wd.getTime()%60);
+        c.set(Calendar.MILLISECOND, 0);
+        c.set(Calendar.DAY_OF_WEEK,
+            DayOfWeekConversion.dow2cal(wd.getDayOfWeek().getValue()));
+        return c;
+    }
+    
+    /** Converts a Calendar into the corresponding WeekDate
+      * @param c The Calendar to be converted
+      * @return A WeekDate with the time of day and day of week
+      * found in the Calendar.
+      */
+    public static WeekDate cal2wd (Calendar c) {
+        /* WeekDate(DayOfWeek, timeOfDay */
+        return new WeekDate (
+            DayOfWeek.of(
+                DayOfWeekConversion.cal2dow(c.get(Calendar.DAY_OF_WEEK))
+            ),
+              c.get(Calendar.HOUR_OF_DAY)*3600
+            + c.get(Calendar.MINUTE)*60
+            + c.get(Calendar.SECOND)
+        );
     }
 
     /** Main is used to test this class */
     public static void main(String[] args) {
         System.out.println("Test: WeekDay Conversion Calendar -> DayOfWeek MON-FRI");
         
-        System.out.println("DayOfWeek:"+(DayOfWeek.MONDAY.ordinal()));
-        System.out.println("DayOfWeek:"+(DayOfWeek.TUESDAY.ordinal()));
-        System.out.println("DayOfWeek:"+(DayOfWeek.WEDNESDAY.ordinal()));
-        System.out.println("DayOfWeek:"+(DayOfWeek.THURSDAY.ordinal()));
-        System.out.println("DayOfWeek:"+(DayOfWeek.FRIDAY.ordinal()));
-        System.out.println("DayOfWeek:"+(DayOfWeek.SATURDAY.ordinal()));
-        System.out.println("DayOfWeek:"+(DayOfWeek.SUNDAY.ordinal()));
+        System.out.println("DayOfWeek:"+(DayOfWeek.MONDAY.getValue()));
+        System.out.println("DayOfWeek:"+(DayOfWeek.TUESDAY.getValue()));
+        System.out.println("DayOfWeek:"+(DayOfWeek.WEDNESDAY.getValue()));
+        System.out.println("DayOfWeek:"+(DayOfWeek.THURSDAY.getValue()));
+        System.out.println("DayOfWeek:"+(DayOfWeek.FRIDAY.getValue()));
+        System.out.println("DayOfWeek:"+(DayOfWeek.SATURDAY.getValue()));
+        System.out.println("DayOfWeek:"+(DayOfWeek.SUNDAY.getValue()));
         
         System.out.println("Calendar-2:"+cal2dow(Calendar.MONDAY));
         System.out.println("Calendar-2:"+cal2dow(Calendar.TUESDAY));
@@ -59,13 +93,13 @@ public class DayOfWeekConversion {
         System.out.println("Calendar"+Calendar.FRIDAY);
         System.out.println("Calendar"+Calendar.SATURDAY);
         
-        System.out.println("DayOfWeek:"+dow2cal(DayOfWeek.SUNDAY.ordinal()));
-        System.out.println("DayOfWeek:"+dow2cal(DayOfWeek.MONDAY.ordinal()));
-        System.out.println("DayOfWeek:"+dow2cal(DayOfWeek.TUESDAY.ordinal()));
-        System.out.println("DayOfWeek:"+dow2cal(DayOfWeek.WEDNESDAY.ordinal()));
-        System.out.println("DayOfWeek:"+dow2cal(DayOfWeek.THURSDAY.ordinal()));
-        System.out.println("DayOfWeek:"+dow2cal(DayOfWeek.FRIDAY.ordinal()));
-        System.out.println("DayOfWeek:"+dow2cal(DayOfWeek.SATURDAY.ordinal()));
+        System.out.println("DayOfWeek:"+dow2cal(DayOfWeek.SUNDAY.getValue()));
+        System.out.println("DayOfWeek:"+dow2cal(DayOfWeek.MONDAY.getValue()));
+        System.out.println("DayOfWeek:"+dow2cal(DayOfWeek.TUESDAY.getValue()));
+        System.out.println("DayOfWeek:"+dow2cal(DayOfWeek.WEDNESDAY.getValue()));
+        System.out.println("DayOfWeek:"+dow2cal(DayOfWeek.THURSDAY.getValue()));
+        System.out.println("DayOfWeek:"+dow2cal(DayOfWeek.FRIDAY.getValue()));
+        System.out.println("DayOfWeek:"+dow2cal(DayOfWeek.SATURDAY.getValue()));
 
     }
 }
