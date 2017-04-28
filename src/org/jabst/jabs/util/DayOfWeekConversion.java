@@ -37,7 +37,7 @@ public class DayOfWeekConversion {
       */
     public static Calendar wd2cal (WeekDate wd) {
         Calendar c = Calendar.getInstance();
-        c.set(Calendar.HOUR, wd.getStartingHour());
+        c.set(Calendar.HOUR_OF_DAY, wd.getStartingHour());
         c.set(Calendar.MINUTE, (wd.getTime()/60)%60);
         c.set(Calendar.SECOND, wd.getTime()%60);
         c.set(Calendar.MILLISECOND, 0);
@@ -57,7 +57,7 @@ public class DayOfWeekConversion {
             DayOfWeek.of(
                 DayOfWeekConversion.cal2dow(c.get(Calendar.DAY_OF_WEEK))
             ),
-              c.get(Calendar.HOUR)*3600
+              c.get(Calendar.HOUR_OF_DAY)*3600
             + c.get(Calendar.MINUTE)*60
             + c.get(Calendar.SECOND)
         );

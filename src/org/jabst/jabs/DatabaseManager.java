@@ -100,8 +100,8 @@ public class DatabaseManager {
         "INSERT INTO APPOINTMENTTYPE VALUES (DEFAULT, 'DEFAULT_APPOINTMENT_TYPE', 99);",
         "INSERT INTO AVAILABILITY VALUES (0, 36000, 1)",
         "INSERT INTO AVAILABILITY VALUES (0, 32400, 1)",
-        "INSERT INTO APPOINTMENT VALUES (DEFAULT, DATEADD('dd', %d, CURDATE)+INTERVAL '9' HOUR, 0, 0, 'default_customer')",
-        "INSERT INTO APPOINTMENT VALUES (DEFAULT, DATEADD('dd', %d, CURDATE)+INTERVAL '10' HOUR, 0, 0, 'default_customer')"
+        "INSERT INTO APPOINTMENT VALUES (DEFAULT, %s+INTERVAL '9' HOUR, 0, 0, 'default_customer')",
+        "INSERT INTO APPOINTMENT VALUES (DEFAULT, %s+INTERVAL '10' HOUR, 0, 0, 'default_customer')"
     };
     
     public static final String dbDefaultFileName = "db/credentials_db";
@@ -120,6 +120,7 @@ public class DatabaseManager {
          if (generalConnection == null) {
              throw new SQLException();
          }
+         generalConnection.setAutoCommit(false);
     }
     
     /** Creates the database tables in case the database is being
@@ -135,17 +136,19 @@ public class DatabaseManager {
 
         // Get the day of Week in Sun-Sat form
         Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        int dow = cal.get(Calendar.DAY_OF_WEEK);
-
-        // Convert to Mon-Sun form because that is the form used in WeekDate
-        dow = DayOfWeekConversion.cal2dow(dow);
-
-        // Format the day of week into the SQL
-        SQL_TABLES_BUSINESS[8] = String.format(SQL_TABLES_BUSINESS[8], dow);
-        SQL_TABLES_BUSINESS[9] = String.format(SQL_TABLES_BUSINESS[9], dow);
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        
+        String dateStr = String.format("DATE '%04d-%02d-%02d'",
+                 cal.get(Calendar.YEAR),
+                 cal.get(Calendar.MONTH)+1,
+                 cal.get(Calendar.DAY_OF_MONTH)
+                );
+        //"INSERT INTO APPOINTMENT VALUES (DEFAULT, DATEADD('dd', %d, CURDATE)+INTERVAL '9' HOUR, 0, 0, 'default_customer')",
+        SQL_TABLES_BUSINESS[8] = String.format(SQL_TABLES_BUSINESS[8], dateStr);
+        SQL_TABLES_BUSINESS[9] = String.format(SQL_TABLES_BUSINESS[9], dateStr);
 
         boolean success = false;
+        int i = 0;
         for (String currTable : tables) {
             Statement statement = null;
             try {
@@ -162,9 +165,11 @@ public class DatabaseManager {
                 System.out.println("Successfully created table");
                 success = true;
             } catch (SQLException se) {
-                System.out.println("Failed to create table");
+                System.out.println("Failed to create"
+                        +"table:"+SQL_TABLES_BUSINESS[i]);
                 return false;
             }
+            ++i;
         }
         return success;
     }
@@ -271,6 +276,7 @@ public class DatabaseManager {
         if (this.businessConnection == null) {
             return false;
         }
+        this.businessConnection.setAutoCommit(false);
         return true;
     }
     
@@ -393,6 +399,7 @@ public class DatabaseManager {
         
         statement.execute();
         statement.close();
+        generalConnection.commit();
     }
     
     private void scannerAddUser(Scanner sc) {
@@ -690,6 +697,8 @@ public class DatabaseManager {
         if (businessConnection == null || businessConnection.isClosed()) {
             throw new SQLException("Not connected to a business");
         }
+        
+        businessConnection.commit();
         int updateCount = 0;
         Statement stmt = businessConnection.createStatement();
         
@@ -702,11 +711,38 @@ public class DatabaseManager {
             );
 
         } catch (SQLException sqle) {
-            System.err.println("Error updating employee:"+employee);
+            System.err.println("Error updating employee name for:"+employee
+            +". Rolling back.");
             sqle.printStackTrace();
+            businessConnection.rollback();
         }
         
-        /* Update availability / working hours */
+        /* Remove all availability for this employee - so we can add all given 
+           availability. Rollback will save us if we fail */
+        for (WeekDate currAvailability : employee.workingHours) {
+            Date availDate = DayOfWeekConversion.wd2cal(currAvailability).getTime();
+            if (employee.appointmentHours.contains(availDate)) {
+                System.err.println("Can't remove availability for employee:"
+                    +"They have an appointment at that time"
+                );
+                throw new SQLIntegrityConstraintViolationException(
+                    "Cannot remove employee when they have an appointment"
+                );
+            }
+        }
+        try {
+            stmt.execute("DELETE FROM AVAILABILITY"
+            +" WHERE EMPLOYEE="+employee.id);
+        } catch (SQLException sqle) {
+            System.err.println(
+                "DatabaseManager: Failed to delete from availability, empl_id="
+                    +employee.id+". Rolling back."
+            );
+            businessConnection.rollback();
+        }
+
+        
+        /* Update availability */
         PreparedStatement pstmt;
         for (WeekDate currDate : employee.workingHours) {
             try {
@@ -717,25 +753,34 @@ public class DatabaseManager {
                 pstmt.setInt(2, currDate.getTime());
                 pstmt.setInt(3, currDate.getDayOfWeek().getValue());
                 updateCount += pstmt.executeUpdate();
-            } catch (SQLIntegrityConstraintViolationException sqle) {
+            } catch (SQLIntegrityConstraintViolationException sqlie) {
                 // Already exists, ignore it
+            } catch (SQLException sqle) {
+                // Something bad actually happened
+                System.err.println(
+                    "DatabaseManager: Failed to insert availability "
+                    +"for empl_id:"+employee.id+". Rolling back."
+                );
+                sqle.printStackTrace();
+                businessConnection.rollback();
             }
         }
         
-        if (updateCount > 0) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        /* Update appointments? */
+        
+        // Return true even if no updates occurred - it still means we
+        // guarantee the record is correct
+        businessConnection.commit();
+        return true;
     }
     
-    /** Marks the employee available or unavailable at the given dates and times
+    /** @deprecated Marks the employee available or unavailable at the given dates and times
      *  @param employeeID The ID of the employee to mark availabilty for
      *  @param dates An ArrayList of dates representing times the employee is
      *  available for
      *  @param available An ArrayList of same size as dates, representing the
      *  whether the employee is available at the given date
+     *  THIS METHOD IS DEPRECATED, please use updateEmployee
      */
     public boolean setEmployeeAvailability(int employeeID,
         ArrayList<Date> dates,
