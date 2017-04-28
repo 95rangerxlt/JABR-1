@@ -584,15 +584,16 @@ public class DatabaseManager {
         // Get times
         try {
             rs = stmt.executeQuery (
-                "SELECT AVAILABLE DAY, AVAILABLE_TIME "+
+                "SELECT AVAILABLE_DAY, AVAILABLE_TIME "+
                 "FROM EMPLOYEE EMP JOIN AVAILABILITY AVA "+
                 "ON EMP.EMPL_ID = AVA.EMPLOYEE "+
                 "WHERE EMPL_ID = "+empl_id
             );
             
             while (rs.next()) {
-                System.out.println("Found available date: "+rs.getDate(1));
-                available_hours.add(new WeekDate(DayOfWeek.of(rs.getInt(1)), rs.getInt(2)));
+                WeekDate wd = new WeekDate(DayOfWeek.of(rs.getInt(1)), rs.getInt(2));
+                System.out.println("Found available date: "+wd);
+                available_hours.add(wd);
             }
         } catch (SQLException sqle) {
             sqle.printStackTrace();
@@ -714,8 +715,7 @@ public class DatabaseManager {
                 );
                 pstmt.setLong(1, employee.id);
                 pstmt.setInt(2, currDate.getTime());
-                pstmt.setInt(3, currDate.getDayOfWeek().ordinal());
-                
+                pstmt.setInt(3, currDate.getDayOfWeek().getValue());
                 updateCount += pstmt.executeUpdate();
             } catch (SQLIntegrityConstraintViolationException sqle) {
                 // Already exists, ignore it
