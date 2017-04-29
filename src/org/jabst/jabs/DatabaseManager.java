@@ -800,6 +800,69 @@ public class DatabaseManager {
         return true;
     }
     
+    /** Deletes the employee and their appointments and availability from the
+      * database, forcing if necessary.
+      * The employee will not be permanently deleted until save.
+      * @param employeeID The ID of the employee to delete
+      * @param force If true, delete the employee even if they have appointments
+      * they have not yet completed
+      * @return Whether the employee could be deleted. False indicates that they
+      * still have appointments in the future
+      * @throws SQLException If a database error occurs
+      */
+    public boolean deleteEmployee(Employee employee, boolean force)
+        throws SQLException
+    {
+        System.out.println("Deleting employee #"+employee.id+". force="+force);
+        if (businessConnection == null || businessConnection.isClosed()) {
+            throw new SQLException("Not connected to a business");
+        }
+        Statement stmt = businessConnection.createStatement();
+        try {
+            stmt.execute("DELETE FROM EMPLOYEE WHERE EMPL_ID="+employee.id);
+        }
+        // Employee still has appointments, availability in the system
+        catch (SQLIntegrityConstraintViolationException sqlie) {
+            if (force) {
+                // Delete regardless
+                stmt.execute(
+                    "DELETE FROM APPOINTMENT WHERE EMPLOYEE=0; "+
+                    "DELETE FROM AVAILABILITY WHERE EMPLOYEE=0; "+
+                    "DELETE FROM EMPLOYEE WHERE EMPL_ID=0"
+                );
+                return true;
+            }
+
+            // Not forcing, only delete if we don't have any future appointments
+            Date currDate = new Date();
+            boolean dateInFuture = false;
+            for (Date aptDate : employee.appointmentHours) {
+                // Convert WeekDate to absolute date
+                System.out.println("Comparing dates "+aptDate
+                    +" and "+currDate);
+                System.out.println("aptDate.compareTo(currDate)="
+                    +aptDate.compareTo(currDate));
+                if (aptDate.compareTo(currDate) > 0) {
+                    dateInFuture = true;
+                    break;
+                }
+            }
+            if (!dateInFuture) {
+                // Delete regardless
+                stmt.execute(
+                    "DELETE FROM APPOINTMENT WHERE EMPLOYEE=0; "+
+                    "DELETE FROM AVAILABILITY WHERE EMPLOYEE=0; "+
+                    "DELETE FROM EMPLOYEE WHERE EMPL_ID=0"
+                );
+                return true;
+            }
+            else {
+                // Inform caller we cannot delete
+                return false;
+            }
+        }
+        return true;
+    }
     /** @deprecated Marks the employee available or unavailable at the given dates and times
      *  @param employeeID The ID of the employee to mark availabilty for
      *  @param dates An ArrayList of dates representing times the employee is
@@ -921,6 +984,24 @@ public class DatabaseManager {
                         "Adding employee failed"
                         : "Adding employee succeeded! New ID: "+result
                     );
+                    break;
+                case "delete_employee":
+                    System.out.print("Employee ID: ");
+                    Employee emp =
+                        dbm.getEmployee(Long.parseLong(sc.next()));
+                    if (!dbm.deleteEmployee(emp, false)) {
+                        System.out.println("Force deletion? ");
+                        if (sc.nextBoolean()) {
+                            System.out.println(
+                                "Success="+dbm.deleteEmployee(emp, true)
+                            );
+                        }
+                    }
+                    else {
+                        System.out.println(
+                            "Sucessfully deleted useless employee."
+                        );
+                    }
                     break;
                 case "check":
                     dbm.scannerCheckUser(sc);
