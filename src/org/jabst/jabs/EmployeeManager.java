@@ -16,6 +16,24 @@ public class EmployeeManager {
 	}
 	
 	//Methods
+
+	/** adds an employee to the database with correct id
+	  * @return the employee object created by the database
+	  */
+	public Employee addEmployee() {
+		try {
+			long id = dbm.addEmployee("new Employee");
+			if(id == -1) {
+				System.out.println("EMPLOYEE MANAGER:\n\tEmployee not created");
+				return null;//can't create employee
+			}
+			return dbm.getEmployee(id);
+		} catch (SQLException sqle) {
+			System.out.println("EMPLOYEE MANAGER:\n\tError adding employee:\n");
+			sqle.printStackTrace();
+			return null;
+		}
+	}
 	
 	/** Updates the employee in the database to match the given object
 	  * @param employee An employee object representing the employee to update
@@ -89,11 +107,13 @@ public class EmployeeManager {
 	 * 
 	 * @param employeeName : use getEmployeeID(String employeeName) to ensure valid ID
 	 */
-	public void removeEmployee(String employeeID){
-		for(int i = 0; i < employees.size(); i++){
-			if (employees.get(i).name.equals(employees.get(i).name)){
-				employees.remove(i);
-			}		
+	public boolean deleteEmployee(Employee emp, boolean force){
+		try {
+			return dbm.deleteEmployee(emp, force);
+		} catch(SQLException sqle) {
+			System.out.println("EMPLOYEE MANAGER: \t\ncannot remove employee:");
+			sqle.printStackTrace();
+			return false;
 		}
 	}
 	

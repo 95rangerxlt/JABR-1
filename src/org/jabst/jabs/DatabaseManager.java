@@ -476,7 +476,8 @@ public class DatabaseManager {
     public ArrayList<Appointment> getThisWeeksAppointments() throws SQLException {
         ArrayList<Appointment> appointments = new ArrayList<Appointment>();
         Statement stmt = businessConnection.createStatement();
-        ResultSet rs = stmt.executeQuery(            "SELECT * FROM Appointment"
+        ResultSet rs = stmt.executeQuery(
+            "SELECT * FROM Appointment"
             +"WHERE ("
             +"    date_and_time >= DATE_SUB(CURDATE(),  DAYOFWEEK(CURDATE())-1)"
             +"    AND"
@@ -861,6 +862,7 @@ public class DatabaseManager {
                 return false;
             }
         }
+        commit();
         return true;
     }
     /** @deprecated Marks the employee available or unavailable at the given dates and times

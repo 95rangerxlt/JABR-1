@@ -20,6 +20,8 @@ public class AddEmployeeGUI {
 	private static EmployeeManager employeeManager;
 	private static Employee currEmployee = null;
 
+	private static ComboBox cbEmployeeSelect;
+
 	public static AddEmployeeInfo display(SessionManager session) {
 		// setup object to return
 		AddEmployeeInfo info = new AddEmployeeInfo();
@@ -38,11 +40,8 @@ public class AddEmployeeGUI {
 		tfName.setPromptText("Name");
 		tfName.setPrefWidth(500);
 
-		ComboBox cbEmployeeSelect = new ComboBox();
-		cbEmployeeSelect.getItems().add("Select Employee");
-		cbEmployeeSelect.getItems().addAll(
-			employeeManager.getEmployeeNameIDs()
-		);
+		cbEmployeeSelect = new ComboBox();
+		updateCombobox(cbEmployeeSelect);
 		cbEmployeeSelect.setValue("Select Employee");
 
 		TimetableGUI table = new TimetableGUI(/*Set timetable on combobox update*/);
@@ -67,8 +66,6 @@ public class AddEmployeeGUI {
 					table);
 			}
 		});
-		
-
 
 		// event handlers
 		bSave.setOnAction(new EventHandler<ActionEvent>() {
@@ -77,6 +74,7 @@ public class AddEmployeeGUI {
 			@Override
 			public void handle(ActionEvent event) {
 				info.button = AddEmployeeInfo.Buttons.SAVE;
+				//sets data = GUI
 				table.updateTableFromCells();
 				if (currEmployee != null) {
 					currEmployee.name = tfName.getText();
@@ -87,6 +85,8 @@ public class AddEmployeeGUI {
 						"Could not save employee."
 					);
 
+					updateCombobox(cbEmployeeSelect);
+					cbEmployeeSelect.setValue(currEmployee.getName() + " #" + currEmployee.id);
 				}
 				else {
 					System.out.println("Not saving null employee");
@@ -99,6 +99,21 @@ public class AddEmployeeGUI {
 			@Override
 			public void handle(ActionEvent event) {
 				info.button = AddEmployeeInfo.Buttons.NEW;
+				currEmployee = employeeManager.addEmployee();
+
+				tfName.setText(currEmployee.getName());
+
+				//creating table from dates
+				currEmployee.table = currEmployee.createTableFromWeekDates(currEmployee.workingHours);
+
+				//updating table on Employees side
+				table.table = currEmployee.table.table;
+
+				//set the GUI = data
+				table.update();
+
+				updateCombobox(cbEmployeeSelect);
+				cbEmployeeSelect.setValue(currEmployee.getName() + " #" + currEmployee.id);
 			}
 		});
 
@@ -106,7 +121,20 @@ public class AddEmployeeGUI {
 
 			@Override
 			public void handle(ActionEvent event) {
+				if(!employeeManager.deleteEmployee(currEmployee, true)) {
+					System.out.println("Cant delete: Employee has appointments");
+					if(ConfirmGUI.display("This employee has appointments. are you sure?")) {
+						employeeManager.deleteEmployee(currEmployee, true);
+					} else {
+						return;
+					}
+				} else {
+					System.out.println("Employee Deleted");
+				}
 				info.button = AddEmployeeInfo.Buttons.DELETE;
+				currEmployee = null;
+				updateCombobox(cbEmployeeSelect);
+				cbEmployeeSelect.setValue("Select Employee");
 			}
 		});
 
@@ -201,6 +229,17 @@ public class AddEmployeeGUI {
 
 		table.table = currEmployee.table.table;
 		table.update();
+	}
+
+	static void updateCombobox(ComboBox cb) {
+		System.out.println("not sure why but 'cb.getItems().clear();' makes this error every time");
+		cb.getItems().clear();
+		System.out.println("not sure why but 'cb.getItems().clear();' makes this error every time");
+
+		cb.getItems().add("Select Employee");
+		cb.getItems().addAll(
+			employeeManager.getEmployeeNameIDs()
+		);
 	}
 
 }

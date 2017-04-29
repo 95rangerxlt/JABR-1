@@ -10,8 +10,8 @@ import java.util.ArrayList;
 class TimetableGUI extends GridPane {
 
 	public boolean allEmployees = false;
-	public ArrayList<ArrayList<Timetable.CellStatus>> table;
-	public TimetableCellGUI cells[][];
+	public ArrayList<ArrayList<Timetable.CellStatus>> table;//data
+	public TimetableCellGUI cells[][];//GUI
 	public TimetableCellGUI.Type type;
 	public Timetable timetable;
 
@@ -41,6 +41,7 @@ class TimetableGUI extends GridPane {
 		return this.table;
 	}
 
+	//sets data from GUI
 	public void updateTableFromCells() {
 		if(this.cells.length == 0)
 			return;//something went wrong
@@ -58,6 +59,7 @@ class TimetableGUI extends GridPane {
 		this.timetable.table = this.table;
 	}
 
+	//sets GUI from data
 	public void update() {
 		if(this.table.size() == 0)
 			return;//something went wrong
