@@ -678,13 +678,10 @@ public class DatabaseManager {
         // Insert an employee with the given name
         Statement stmt = businessConnection.createStatement();
         try {
-            // If false, return -1 immediately
-            if (!stmt.execute (
+            stmt.execute (
                 "INSERT INTO EMPLOYEE (EMPL_ID, EMPL_NAME) "
-                +"VALUES (default, '"+name+"')"))
-                {
-                    return -1;
-                }
+                +"VALUES (default, '"+name+"')"
+            );
         } catch (SQLException sqle) {
             System.err.println(
                 "Error creating employee(name=)"+name+"):"
@@ -700,6 +697,7 @@ public class DatabaseManager {
             rs = stmt.executeQuery (
                 "SELECT MAX(EMPL_ID) FROM EMPLOYEE"
             );
+            rs.next();
             maxID = rs.getLong(1);
         } catch (SQLException sqle) {
             System.err.println(
@@ -906,13 +904,23 @@ public class DatabaseManager {
         //sc.useDelimiter("\n");
         String input;
         while(true) {
-            System.out.print("> ");
+            System.out.print("DBM > ");
             input = sc.next();
             sc.nextLine();
             int employee;
             switch (input) {
                 case "add":
                     dbm.scannerAddUser(sc);
+                    break;
+                case "add_employee":
+                    System.out.print("New employee name: ");
+                    long result = dbm.addEmployee(sc.next());
+                    System.out.println();
+                    System.out.println(
+                        result == -1 ?
+                        "Adding employee failed"
+                        : "Adding employee succeeded! New ID: "+result
+                    );
                     break;
                 case "check":
                     dbm.scannerCheckUser(sc);
