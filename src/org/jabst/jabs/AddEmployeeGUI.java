@@ -121,7 +121,7 @@ public class AddEmployeeGUI {
 
 			@Override
 			public void handle(ActionEvent event) {
-				if(!employeeManager.deleteEmployee(currEmployee, true)) {
+				if(!employeeManager.deleteEmployee(currEmployee, false)) {
 					System.out.println("Cant delete: Employee has appointments");
 					if(ConfirmGUI.display("This employee has appointments. are you sure?")) {
 						employeeManager.deleteEmployee(currEmployee, true);
