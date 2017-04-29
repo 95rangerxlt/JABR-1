@@ -667,39 +667,50 @@ public class DatabaseManager {
 
     /** Adds an employee with the given name. The ID is generated automatically
         @param name The name of a new employee to add
-        @return whether the database sucessfully added the employee
+        @return The new ID of the employee if successful, or -1 for failure
+        @throw SQLException If a database error occurs
     */
-    public boolean addEmployee(String name) throws SQLException {
+    public long addEmployee(String name) throws SQLException {
         if (businessConnection == null || businessConnection.isClosed()) {
             throw new SQLException("Not connected to a business");
         }
+        
+        // Insert an employee with the given name
         Statement stmt = businessConnection.createStatement();
-        ResultSet rs = null;
-        int maxId;
         try {
-            rs = stmt.executeQuery (
-                "SELECT MAX(EMPL_ID) FROM EMPLOYEE"
-            );
-            maxId = rs.getInt(1);
-        } catch (SQLException sqle) {
-            System.err.println(
-                "Error getting max employee_id (EMPL_ID) from database:"
-            );
-            sqle.printStackTrace();
-            throw sqle;
-        }
-        try {
-            return stmt.execute (
+            // If false, return -1 immediately
+            if (!stmt.execute (
                 "INSERT INTO EMPLOYEE (EMPL_ID, EMPL_NAME) "
-               +"VALUES ("+maxId+", '"+name+"')"
-            );
+                +"VALUES (default, '"+name+"')"))
+                {
+                    return -1;
+                }
         } catch (SQLException sqle) {
             System.err.println(
                 "Error creating employee(name=)"+name+"):"
             );
             sqle.printStackTrace();
+            return -1;
+        }
+        
+        // Return max ID
+        long maxID;
+        ResultSet rs = null;
+        try {
+            rs = stmt.executeQuery (
+                "SELECT MAX(EMPL_ID) FROM EMPLOYEE"
+            );
+            maxID = rs.getLong(1);
+        } catch (SQLException sqle) {
+            System.err.println(
+                "Error getting max employee_id (EMPL_ID) from database:"
+            );
+            sqle.printStackTrace();
+            // It was added, but we can't know the ID, so throw an exception
             throw sqle;
         }
+        
+        return maxID;
     }
     
     public boolean updateEmployee(Employee employee) throws SQLException {
