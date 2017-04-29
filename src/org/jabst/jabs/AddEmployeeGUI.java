@@ -77,6 +77,7 @@ public class AddEmployeeGUI {
 			@Override
 			public void handle(ActionEvent event) {
 				info.button = AddEmployeeInfo.Buttons.SAVE;
+				table.updateTableFromCells();
 				if (currEmployee != null) {
 					currEmployee.name = tfName.getText();
 					currEmployee.createWeekDatesFromTable();

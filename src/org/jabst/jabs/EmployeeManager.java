@@ -54,8 +54,11 @@ public class EmployeeManager {
 			try {
 				ArrayList<WeekDate> availability = dbm.getSevenDayEmployeeAvailability();
 				Employee emp = new Employee(-1, "allEmployees", availability, new ArrayList<Date>());
+				System.out.println("All Employees: \n" + availability.toString());
 				return emp;
 			} catch (SQLException sqle) {
+				System.out.println("error getting employees:\n");
+				sqle.printStackTrace();
 				return null;
 			}
 		} else {

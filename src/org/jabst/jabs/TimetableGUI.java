@@ -13,6 +13,7 @@ class TimetableGUI extends GridPane {
 	public ArrayList<ArrayList<Timetable.CellStatus>> table;
 	public TimetableCellGUI cells[][];
 	public TimetableCellGUI.Type type;
+	public Timetable timetable;
 
 	public TimetableGUI() {
 		this(new Timetable(true));
@@ -20,6 +21,7 @@ class TimetableGUI extends GridPane {
 	
 	public TimetableGUI(Timetable table) {
 		this.table = table.table;
+		this.timetable = table;
 		System.out.println("TimetableGUI:table.table.size="+table.table.size());
 		if(table.table.size() > 0)
 			cells = new TimetableCellGUI[this.table.size()][this.table.get(0).size()];
@@ -39,9 +41,26 @@ class TimetableGUI extends GridPane {
 		return this.table;
 	}
 
+	public void updateTableFromCells() {
+		if(this.cells.length == 0)
+			return;//something went wrong
+		if(this.cells[0].length == 0)
+			return;//something went wrong
+		for(int j = 0; j < cells[0].length; j++) {
+			for(int i = 0; i < cells.length; i++) {
+				if(cells[i][j].selectable.isSelected()) {
+					this.table.get(i).set(j, Timetable.CellStatus.BOOKED_BY_YOU);
+				} else {
+					this.table.get(i).set(j, Timetable.CellStatus.FREE);
+				}
+			}
+		}
+		this.timetable.table = this.table;
+	}
+
 	public void update() {
 		if(this.table.size() == 0)
-			return;
+			return;//something went wrong
 		for(int j = 0; j < this.table.get(0).size(); j++) {
 			for(int i = 0; i < this.table.size(); i++) {
 				if(allEmployees) {
