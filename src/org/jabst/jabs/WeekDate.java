@@ -1,6 +1,8 @@
 package org.jabst.jabs;
 
 import java.time.DayOfWeek;
+import java.time.format.TextStyle;
+import java.util.Locale;
 
 /** WeekDate represents a time and a day of week together.
  *  WeekDate is used to represent employee availability. It stores the time
@@ -67,5 +69,15 @@ public class WeekDate implements Comparable<WeekDate> {
     	} else {
     		return day;
     	}
+    }
+    
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(dayOfWeek.getDisplayName(TextStyle.FULL, Locale.UK));
+        sb.append(" ");
+        sb.append(String.format("%02d", getStartingHour()));
+        sb.append(":");
+        sb.append(String.format("%02d", (timeOfDay/60)%60));
+        return sb.toString();
     }
 }

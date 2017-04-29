@@ -33,7 +33,7 @@ public class Employee {
 	}
 
 	public void createWeekDatesFromTable() {
-		workingHours = new ArrayList<WeekDate>();//reset data
+		this.workingHours = new ArrayList<WeekDate>();//reset data
 
 		if(table.table.size() > 0) {//make sure there is data
 			// nested loops for nested arrays
@@ -43,11 +43,14 @@ public class Employee {
 					if(table.table.get(i).get(j) == Timetable.CellStatus.BOOKED_BY_YOU) {
 						// create weekdate
 						WeekDate timeSlot = new WeekDate(DayOfWeek.of(i), 0);
-						timeSlot.setTimeOfDayHour(j);
+                        // Hour = cellIdx + startingHour
+						timeSlot.setTimeOfDayHour(j+startingHour);
+                        this.workingHours.add(timeSlot);
 					}
 				}
 			}
 		}
+        System.out.println(this.workingHours);
 	}
 
 	public static ArrayList<Date> createDatesFromTable(Timetable table, Calendar startDate) {
@@ -80,6 +83,12 @@ public class Employee {
 		for(int i = 0; i < dates.size(); i++) {
 			int dayIdx = dates.get(i).getDayOfWeek().getValue();
 			int hourIdx = dates.get(i).getStartingHour() - startingHour;
+
+            if (hourIdx < 0) {
+                System.err.println("Discarding out of range "
+                        +"WeekDate:"+dates.get(i));
+                continue;
+            }
 
 			table.table.get(dayIdx).set(hourIdx, Timetable.CellStatus.BOOKED_BY_YOU);
 		}
