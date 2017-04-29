@@ -592,7 +592,7 @@ public class DatabaseManager {
             rs.next();
             empl_name = (rs.getString(1));
         } catch (SQLException sqle) {
-            sqle.printStackTrace();
+            // Employee does not exist, ignore error
             throw sqle;
         }
             
