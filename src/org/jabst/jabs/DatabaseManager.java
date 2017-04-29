@@ -511,17 +511,25 @@ public class DatabaseManager {
         
         ArrayList<WeekDate> availableDates = new ArrayList<WeekDate>();
         Statement stmt = businessConnection.createStatement();
-        ResultSet rs = stmt.executeQuery (
-            "SELECT DISTINCT AVAILABLE_DAY, AVAILABLE_TIME, FROM AVAILABILITY"
-          +" WHERE AVAILABLE_TIME >= CURDATE"
-          +" AND AVAILABLE_TIME <= CURDATE + INTERVAL '7' DAY"
-        );
+        ResultSet rs;
+        try {
+            rs = stmt.executeQuery (
+                "SELECT DISTINCT AVAILABLE_DAY, AVAILABLE_TIME FROM AVAILABILITY"
+            );
+        }
+        catch (SQLException sqle) {
+            sqle.printStackTrace();
+            throw sqle;
+        }
         
         while (rs.next()) {
             availableDates.add(
                 new WeekDate(DayOfWeek.of(rs.getInt(1)), rs.getInt(2))
             );
         }
+        
+        System.out.println("Available dates:"+availableDates);
+        System.out.flush();
         
         return availableDates;
     }
