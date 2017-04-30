@@ -192,10 +192,19 @@ public class SessionManager extends Application {
 	
 	public boolean validatePhoneInput(String input){
 		boolean valid = input.chars().allMatch(Character::isDigit);
-		if (input.length() > 10 || input.length() < 8){
+		if ((input.length() < 8) || (input.length() > 10)){
 			valid = false;
 		}
 		return valid;		
+	}
+	
+	public boolean validateUsernameInput(String input){
+		boolean valid = input.chars().allMatch(Character::isLetter);
+		valid &= !(input.equals(""));
+		if (input.length() > 20){
+			valid = false;
+		}
+		return valid;
 	}
 	
 	public boolean validatePasswordStrength(String input){
@@ -212,3 +221,4 @@ public class SessionManager extends Application {
 		launch(args);
 	}
 }
+
