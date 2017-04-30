@@ -9,10 +9,13 @@ public class EmployeeManager {
 	//Fields
 	ArrayList<Employee> employees = new ArrayList<Employee>();
 	private DatabaseManager dbm;
+	SessionManager session;
+
 	
 	// Constructor
 	public EmployeeManager(SessionManager sm) {
 		this.dbm = sm.getDatabaseManager();
+		this.session = sm;
 	}
 	
 	//Methods
@@ -75,7 +78,7 @@ public class EmployeeManager {
 				ArrayList<Appointment> appointments = dbm.getThisWeeksAppointments();
 				Employee emp = new Employee(
 					-1, "allEmployees", availability,
-					dbm.getThisWeeksAppointments()
+					appointments
 				);
 				System.out.println("All Employees: \n" + availability.toString());
 				return emp;

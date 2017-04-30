@@ -1,10 +1,11 @@
+package org.jabst.jabs;
 
 public class Customer {
 	
 	// Variables
-	private String name;
-	private String address;
-	private String phone;
+	public String name;
+	public String address;
+	public String phone;
 	
 
 	// Methods

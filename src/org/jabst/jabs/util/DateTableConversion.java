@@ -17,7 +17,7 @@ public final class DateTableConversion {
       * entries. It also updateds the vlaue of startDate by finding the first
       * date entry in dates
       * @param dates The dates to convert
-      * @param startDate The object which will have its value set to the first
+      * @param startDate indicates the first day of the week
       * found date
       * @param hoursInADay The number of hours in a day, beyond which no more
       * cells will be added to the table after startingHour
