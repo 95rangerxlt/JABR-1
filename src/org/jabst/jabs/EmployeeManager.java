@@ -93,6 +93,38 @@ public class EmployeeManager {
 			}
 		}
 	}
+
+	
+	/** Asks the database for just this employee, and passes
+	 *  it back to the caller
+	*/
+	public Employee getEmployee(long employeeID, boolean duplicates) {
+		if(employeeID == -1) {
+			// get all employees
+			try {
+				ArrayList<WeekDate> availability
+                    = dbm.getSevenDayEmployeeAvailability(!duplicates);
+				ArrayList<Appointment> appointments = dbm.getThisWeeksAppointments();
+				Employee emp = new Employee(
+					-1, "allEmployees", availability,
+					dbm.getThisWeeksAppointments()
+				);
+				System.out.println("All Employees: \n" + availability.toString());
+				return emp;
+			} catch (SQLException sqle) {
+				System.out.println("error getting employees:\n");
+				sqle.printStackTrace();
+				return null;
+			}
+		} else {
+			try {
+				System.out.println("getting Employee: " + employeeID);
+				return dbm.getEmployee(employeeID);
+			} catch (SQLException sqle) {
+				return null;
+			}
+		}
+	}
 	
 	/** Returns the unique ID of an employee
 	 * 

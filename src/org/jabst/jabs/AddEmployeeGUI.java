@@ -156,18 +156,6 @@ public class AddEmployeeGUI {
 				System.out.println("key pressed in name text field");
 			}
 		});
-
-		// cbEmployeeSelect.valueProperty().addListener(new ChangeListener<String>() {
-
-		// 	@Override
-		// 	public void changed(ObservableValue ov, String t, String t1) {
-		// 		System.out.println(ov);
-		// 		System.out.println(t);
-		// 		System.out.println(t1);
-
-		// 		// TODO: change the table
-		// 	}
-		// });
 		
 		// Setup Window and layout
  		VBox root = new VBox();//layout manager
@@ -190,14 +178,6 @@ public class AddEmployeeGUI {
 		root.getChildren().addAll(selEmpAndName, tfName, table, saveAndDelete);
 
 		Scene scene = new Scene(root, 900, 450);//create area inside window
-/*
-		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-			@Override
-			public void handle(KeyEvent event) {
-				// TODO: input validation
-				System.out.println("key pressed");
-			}
-		});*/
 
 		window.setTitle("Add Employee GUI -placeholder-");//text at the top of the window
 		window.setScene(scene);//add scene to window

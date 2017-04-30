@@ -9,14 +9,16 @@ public class Timetable {
 	};
 	
 	public ArrayList<ArrayList<CellStatus>> table;
+	public int days = 7;
+	public int hours = 8;
 
 	public Timetable(boolean blank) {
 		if (blank) {
 			table = new ArrayList<ArrayList<CellStatus>>();
 			ArrayList<CellStatus> row;
-			for (int rowIdx = 0; rowIdx < 7; ++rowIdx) {
+			for (int rowIdx = 0; rowIdx < days; ++rowIdx) {
 				row = new ArrayList<CellStatus>();
-				for (int cell = 0; cell < 8; ++cell) {
+				for (int cell = 0; cell < hours; ++cell) {
 					row.add(CellStatus.FREE);
 				}
 				table.add(row);
@@ -57,10 +59,22 @@ public class Timetable {
 	void createBlankTables() {
 		table = new ArrayList<ArrayList<CellStatus>>();
 		ArrayList<CellStatus> row;
-		for (int rowIdx = 0; rowIdx < 7; ++rowIdx) {
+		for (int rowIdx = 0; rowIdx < days; ++rowIdx) {
 			row = new ArrayList<CellStatus>();
-			for (int cell = 0; cell < 8; ++cell) {
+			for (int cell = 0; cell < hours; ++cell) {
 				row.add(CellStatus.FREE);
+			}
+			table.add(row);
+		}
+	}
+
+	void createTablesOfType(CellStatus status) {
+		table = new ArrayList<ArrayList<CellStatus>>();
+		ArrayList<CellStatus> row;
+		for (int rowIdx = 0; rowIdx < days; ++rowIdx) {
+			row = new ArrayList<CellStatus>();
+			for (int cell = 0; cell < hours; ++cell) {
+				row.add(status);
 			}
 			table.add(row);
 		}

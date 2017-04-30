@@ -21,7 +21,7 @@ public class CustomerMenuGUI {
 		// setup object to return
 		CustomerInfo info = new CustomerInfo();
 		EmployeeManager employeeManager = session.getEmployeeManager();
-		Employee allEmployees = employeeManager.getEmployee(-1);
+		Employee allEmployees = employeeManager.getEmployee(-1, true);//get all employees and allow duplicate WeekDates
 
 		// create the window
 		Stage window = new Stage();
@@ -31,8 +31,9 @@ public class CustomerMenuGUI {
 		bOk.setDefaultButton(true);
 
 		Timetable table = new Timetable(true);
+		table.createTablesOfType(Timetable.CellStatus.UNAVAILABLE);
 		TimetableGUI tableGUI = new TimetableGUI(table);
-		tableGUI.setupSpacing();
+		//the constructor already calls setupSpacing
 		// tableGUI.update();
 
 		//block events to other window
@@ -65,7 +66,7 @@ public class CustomerMenuGUI {
 		//add elements to the layout
 		root.getChildren().addAll(bOk, tableGUI);
 
-		Scene scene = new Scene(root, 600, 200);//create area inside window
+		Scene scene = new Scene(root, 900, 400);//create area inside window
 
 		tableGUI.update();
 
