@@ -20,6 +20,8 @@ public class CustomerMenuGUI {
 	public static CustomerInfo display(SessionManager session) {
 		// setup object to return
 		CustomerInfo info = new CustomerInfo();
+		EmployeeManager employeeManager = session.getEmployeeManager();
+		Employee allEmployees = employeeManager.getEmployee(-1);
 
 		// create the window
 		Stage window = new Stage();

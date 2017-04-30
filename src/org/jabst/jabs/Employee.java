@@ -15,17 +15,18 @@ public class Employee {
 	String name;
 	ArrayList<WeekDate> workingHours;
 	ArrayList<Date> appointmentHours;
+	ArrayList<Appointment> appointments;
 	Calendar startDate;
 	Timetable table;
 	public int hoursInADay = 8;
 	public int startingHour = 9;
 
 	public Employee(long id, String name,
-		ArrayList<WeekDate> workingHours, ArrayList<Date> appointmentHours) {
+		ArrayList<WeekDate> workingHours, ArrayList<Appointment> appointments) {
 		this.name = name;
 		this.id = id;
 		this.workingHours = workingHours;
-		this.appointmentHours = appointmentHours;
+		this.appointments = appointments;
 
 		if(workingHours.size() > 0) {
 			table = createTableFromWeekDates(workingHours);

@@ -477,12 +477,12 @@ public class DatabaseManager {
         ArrayList<Appointment> appointments = new ArrayList<Appointment>();
         Statement stmt = businessConnection.createStatement();
         ResultSet rs = stmt.executeQuery(
-            "SELECT * FROM Appointment"
+            "SELECT * FROM Appointment "
             +"WHERE ("
             +"    date_and_time >= DATE_SUB(CURDATE(),  DAYOFWEEK(CURDATE())-1)"
             +"    AND"
             +"    date_and_time <= DATE_SUB(CURDATE(),  DAYOFWEEK(CURDATE())-1) + INTERVAL '7' DAY"
-            +")"
+            +") "
             +"ORDER BY DATE_AND_TIME"
         );
         while (rs.next()) {
@@ -579,7 +579,7 @@ public class DatabaseManager {
         Employee employee;
         String empl_name;
         ArrayList<WeekDate> available_hours = new ArrayList<WeekDate>();
-        ArrayList<Date> appointment_hours = new ArrayList<Date>();
+        ArrayList<Appointment> appointments = new ArrayList<Appointment>();
         
         Statement stmt = businessConnection.createStatement();
         ResultSet rs = null;
@@ -608,21 +608,28 @@ public class DatabaseManager {
         // Get appointment hours
         try {
             rs = stmt.executeQuery (
-                "SELECT APT.DATE_AND_TIME"
-                +" FROM EMPLOYEE EMP INNER JOIN APPOINTMENT APT"
-                +" ON EMP.EMPL_ID = APT.EMPLOYEE"
-                +" WHERE EMP.EMPL_ID = "+empl_id);
+                "SELECT DATE_AND_TIME,APPOINTMENT_TYPE,EMPLOYEE, CUSTOMER "
+               +"FROM APPOINTMENT "
+               +"WHERE EMPLOYEE="+empl_id
+               );
 
             while (rs.next()) {
             System.out.println("Found appointment date: "+rs.getDate(1));
-                appointment_hours.add(new Date(rs.getTimestamp(1).getTime()));
+                appointments.add(
+                    new Appointment (
+                        new Date(rs.getTimestamp(1).getTime()), //DATE_AND_TIME
+                        rs.getInt(2), // APPOINTMENT_TYPE
+                        rs.getInt(3), // EMPLOYEE
+                        rs.getString(4) // CUSTOMER
+                    )
+                );
             }
         } catch (SQLException sqle) {
             sqle.printStackTrace();
             throw sqle;
         }
         
-        return new Employee(empl_id, empl_name, available_hours, appointment_hours);
+        return new Employee(empl_id, empl_name, available_hours, appointments);
     }
     
     /** Gets the given employee's available days and times on the roster

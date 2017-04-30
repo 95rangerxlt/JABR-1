@@ -82,6 +82,15 @@ public class SessionManager extends Application {
 					}
 				break;
 				case CUSTOMERMENU:
+					try {
+						dbm.connectToBusiness();
+					} catch (SQLException sqle) {
+						// TODO: Visual cue
+						System.err.println("Error connecting to default"
+							+" business for customer menu");
+						currentWindow = Window.LOGIN;
+						break;
+					}
 					CustomerInfo cInfo = CustomerMenuGUI.display(this);
 					if(cInfo.button == CustomerInfo.Buttons.OK) {
 						shutdown();
