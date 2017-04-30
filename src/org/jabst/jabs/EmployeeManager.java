@@ -70,7 +70,8 @@ public class EmployeeManager {
 		if(employeeID == -1) {
 			// get all employees
 			try {
-				ArrayList<WeekDate> availability = dbm.getSevenDayEmployeeAvailability();
+				ArrayList<WeekDate> availability
+                    = dbm.getSevenDayEmployeeAvailability(false);
 				ArrayList<Appointment> appointments = dbm.getThisWeeksAppointments();
 				Employee emp = new Employee(
 					-1, "allEmployees", availability,

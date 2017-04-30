@@ -505,7 +505,17 @@ public class DatabaseManager {
         return appointments;
     }
     
-    public ArrayList<WeekDate> getSevenDayEmployeeAvailability() throws SQLException{
+    /** Returns the availability of employees for these 7 days.
+      * @param distinct If set to true, do not return duplicate
+      * WeekDates if there is more than one employee available at a given time
+      * @return ArrayList<WeekDate> representing the availability of all
+      * employees, optionally containing duplicates if
+      * called with distinct = false
+      */ 
+    public ArrayList<WeekDate> 
+    getSevenDayEmployeeAvailability(boolean distinct)
+        throws SQLException
+    {
         if (businessConnection == null || businessConnection.isClosed()) {
             throw new SQLException("Not connected to a business");
         }
@@ -515,7 +525,9 @@ public class DatabaseManager {
         ResultSet rs;
         try {
             rs = stmt.executeQuery (
-                "SELECT DISTINCT AVAILABLE_DAY, AVAILABLE_TIME FROM AVAILABILITY"
+                "SELECT "+(distinct ? "DISTINCT " : "")
+                +"AVAILABLE_DAY, AVAILABLE_TIME"
+                +"FROM AVAILABILITY"
             );
         }
         catch (SQLException sqle) {
