@@ -111,4 +111,14 @@ class TimetableGUI extends GridPane {
 		this.setVgap(2);
 		this.setHgap(2);
 	}
+
+	public void removeData() {
+		if(this.table.size() == 0)
+			return;//something went wrong
+		for(int j = 0; j < this.table.get(0).size(); j++) {
+			for(int i = 0; i < this.table.size(); i++) {
+				this.table.get(i).set(j, Timetable.CellStatus.FREE);
+			}
+		}
+	}
 }
