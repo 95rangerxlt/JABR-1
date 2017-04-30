@@ -70,6 +70,29 @@ public class RegisterGUI {
 				System.out.println("Name: "+tfName.getText());
 				System.out.println("Address: "+tfAddress.getText());
 				System.out.println("Phone: "+tfPhone.getText());
+				
+				// Validate user input
+				if (!validateNameInput(tfName)){
+					// Error message
+					return;
+				}
+				if (!validateAddressInputInput(tfAddress)){
+					// Error message
+					return;
+				}
+				if (!validatePhoneInput(tfPhone)){
+					// Error message
+					return;
+				}
+				if (!validateUsernameInput(tfUName)){
+					// Error message
+					return;
+				}
+				if (!validatePasswordStrength(tfPWord)){
+					// Error message
+					return;
+				}
+				
 
 				// register user or clear fields
 				if(session.registerUser(tfUName.getText(), tfPWord.getText(), tfName.getText(), tfAddress.getText(), tfPhone.getText())) {
@@ -114,7 +137,7 @@ public class RegisterGUI {
 				// Character restrictions
 				System.out.println("key pressed in username text field");
 				tfUName.setStyle (
-						session.validateNameInput(tfUName.getText())
+						session.validateUsernameInput(tfUName.getText())
 						? "" : redBorder
 				);
 			}
@@ -137,6 +160,10 @@ public class RegisterGUI {
 			public void handle(KeyEvent event) {
 				// TODO: input validation
 				System.out.println("Key pressed in Name text field");
+				tfName.setStyle (
+						session.validateNameInput(tfName.getText())
+						? "" : redBorder
+				);
 			}
 		});
 
@@ -159,7 +186,7 @@ public class RegisterGUI {
 				// TODO: input validation
 				System.out.println("Key pressed in Phone text field");
 				tfPhone.setStyle (
-						session.validatePhoneInput(tfUName.getText())
+						session.validatePhoneInput(tfPhone.getText())
 						? "" : redBorder
 				);
 			}
