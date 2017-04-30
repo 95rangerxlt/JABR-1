@@ -136,6 +136,9 @@ public class AddEmployeeGUI {
 				cbEmployeeSelect.setValue(cbEmployeeSelect.getItems().get(0));
 				cbEmployeeSelect.getItems().remove(oldValue);
 				currEmployee = null;
+				tfName.setText("Select Employee");
+				table.removeData();
+				table.update();
 			}
 		});
 

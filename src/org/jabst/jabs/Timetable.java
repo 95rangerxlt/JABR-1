@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Timetable {
 
 	public static enum CellStatus {
-		FREE, BOOKED, BOOKED_BY_YOU
+		FREE, BOOKED, BOOKED_BY_YOU, UNAVAILABLE
 	};
 	
 	public ArrayList<ArrayList<CellStatus>> table;
