@@ -20,7 +20,7 @@ public class AddEmployeeGUI {
 	private static EmployeeManager employeeManager;
 	private static Employee currEmployee = null;
 
-	private static ComboBox cbEmployeeSelect;
+	private static ComboBox<String> cbEmployeeSelect;
 
 	public static AddEmployeeInfo display(SessionManager session) {
 		// setup object to return
@@ -132,9 +132,10 @@ public class AddEmployeeGUI {
 					System.out.println("Employee Deleted");
 				}
 				info.button = AddEmployeeInfo.Buttons.DELETE;
+				String oldValue = cbEmployeeSelect.getValue();
+				cbEmployeeSelect.setValue(cbEmployeeSelect.getItems().get(0));
+				cbEmployeeSelect.getItems().remove(oldValue);
 				currEmployee = null;
-				updateCombobox(cbEmployeeSelect);
-				cbEmployeeSelect.setValue("Select Employee");
 			}
 		});
 
@@ -232,9 +233,7 @@ public class AddEmployeeGUI {
 	}
 
 	static void updateCombobox(ComboBox cb) {
-		System.out.println("not sure why but 'cb.getItems().clear();' makes this error every time");
 		cb.getItems().clear();
-		System.out.println("not sure why but 'cb.getItems().clear();' makes this error every time");
 
 		cb.getItems().add("Select Employee");
 		cb.getItems().addAll(
