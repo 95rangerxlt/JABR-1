@@ -108,29 +108,31 @@ public class RegisterGUI {
 			}
 		});
 
-		tfUName.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		tfUName.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
-				// TODO: input validation
+				// Character restrictions
 				System.out.println("key pressed in username text field");
-				if (!session.validateNameInput(tfUName.getText())) {
-					tfUName.setStyle(redBorder);
-				}
-				else {
-					tfUName.setStyle("");
-				}
+				tfUName.setStyle (
+						session.validateNameInput(tfUName.getText())
+						? "" : redBorder
+				);
 			}
 		});
 
-		tfPWord.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		tfPWord.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
-				// TODO: input validation
+				// Password strength
 				System.out.println("key pressed in password text field");
+				tfPWord.setStyle (
+						session.validatePasswordStrength(tfUName.getText())
+						? "" : redBorder
+				);
 			}
 		});
 
-		tfName.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		tfName.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
 				// TODO: input validation
@@ -138,19 +140,28 @@ public class RegisterGUI {
 			}
 		});
 
-		tfAddress.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		tfAddress.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
 				// TODO: input validation
 				System.out.println("Key pressed in Address text field");
+				tfAddress.setStyle (
+						session.validateAddressInput(tfUName.getText())
+						? "" : redBorder
+				);
+
 			}
 		});
 
-		tfPhone.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		tfPhone.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
 				// TODO: input validation
 				System.out.println("Key pressed in Phone text field");
+				tfPhone.setStyle (
+						session.validatePhoneInput(tfUName.getText())
+						? "" : redBorder
+				);
 			}
 		});
 
@@ -168,7 +179,7 @@ public class RegisterGUI {
 
 		Scene scene = new Scene(root/*, 300, 200*/);//create area inside window
 /*
-		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
 				// TODO: input validation
