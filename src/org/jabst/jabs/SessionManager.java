@@ -186,6 +186,7 @@ public class SessionManager extends Application {
 	
 	public boolean validateNameInput(String input){
 		boolean valid = input.chars().allMatch(Character::isLetter);
+		valid &= !(input.equals(""));
 		return valid;
 	}
 	
@@ -199,10 +200,12 @@ public class SessionManager extends Application {
 	
 	public boolean validatePasswordStrength(String input){
 		// Strength Conditions
+		return true;
 	}
 	
 	public boolean validateAddressInput(String Input){
 		// TODO: determine conditions
+		return true;
 	}
 	
 	public static void main(String[] args) {

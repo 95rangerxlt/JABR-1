@@ -113,6 +113,12 @@ public class RegisterGUI {
 			public void handle(KeyEvent event) {
 				// TODO: input validation
 				System.out.println("key pressed in username text field");
+				if (!session.validateNameInput(tfUName.getText())) {
+					tfUName.setStyle(redBorder);
+				}
+				else {
+					tfUName.setStyle("");
+				}
 			}
 		});
 
