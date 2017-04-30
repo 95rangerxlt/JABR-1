@@ -526,8 +526,9 @@ public class DatabaseManager {
         try {
             rs = stmt.executeQuery (
                 "SELECT "+(distinct ? "DISTINCT " : "")
-                +"AVAILABLE_DAY, AVAILABLE_TIME"
-                +"FROM AVAILABILITY"
+                +"AVAILABLE_DAY, AVAILABLE_TIME "
+                +"FROM AVAILABILITY "
+                +"ORDER BY AVAILABLE_DAY, AVAILABLE_TIME "
             );
         }
         catch (SQLException sqle) {
@@ -1057,6 +1058,10 @@ public class DatabaseManager {
                     for (WeekDate d : availability) {
                         System.out.println(d);
                     }
+                    break;
+                case "7days":
+                    ArrayList<WeekDate> avail =
+                        dbm.getSevenDayEmployeeAvailability(false);
                     break;
                 /*case "set_availability":
                     employee = sc.nextInt();
