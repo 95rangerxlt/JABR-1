@@ -72,24 +72,34 @@ public class RegisterGUI {
 				System.out.println("Phone: "+tfPhone.getText());
 				
 				// Validate user input
-				if (!validateNameInput(tfName)){
+				if (!session.validateNameInput(tfName.getText())){
 					// Error message
+					System.out.println("Invalid Name");
+					NotificationGUI.display("Invalid Name Input:\nPlease enter your name containing only letters (A-Z,a-z).", "Registration Error");
 					return;
 				}
-				if (!validateAddressInputInput(tfAddress)){
+				if (!session.validateAddressInput(tfAddress.getText())){
 					// Error message
+					System.out.println("Invalid Address");
+					NotificationGUI.display("Invalid Address Input:\nPlease enter your address in the correct format.", "Registration Error");
 					return;
 				}
-				if (!validatePhoneInput(tfPhone)){
+				if (!session.validatePhoneInput(tfPhone.getText())){
 					// Error message
+					System.out.println("Invalid Phone Number");
+					NotificationGUI.display("Invalid Phone Number Input:\nPlease enter a valid Australian phone number including area code", "Registration Error");
 					return;
 				}
-				if (!validateUsernameInput(tfUName)){
+				if (!session.validateUsernameInput(tfUName.getText())){
 					// Error message
+					System.out.println("Invalid Username");
+					NotificationGUI.display("Invalid Username Input:\nPlease enter a Username containing only letters (A-Z,a-z)", "Registration Error");
 					return;
 				}
-				if (!validatePasswordStrength(tfPWord)){
+				if (!session.validatePasswordStrength(tfPWord.getText())){
 					// Error message
+					System.out.println("Invalid Password");
+					NotificationGUI.display("Invalid Password Input:\nPlease enter a stronger Password", "Registration Error");
 					return;
 				}
 				
@@ -226,3 +236,4 @@ public class RegisterGUI {
 	}
 
 }
+
