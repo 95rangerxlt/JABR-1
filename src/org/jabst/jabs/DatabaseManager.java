@@ -402,6 +402,54 @@ public class DatabaseManager {
         generalConnection.commit();
     }
     
+    /** Gets the customer with the given username. Customers are uniquely
+      * identified in the database by their username.
+      * @param username The customer's username
+      * @return A Customer object with the customer's username, name,
+      * address, and phone number.
+      * @throws SQLException If a database error occurs
+      */
+    public Customer getCustomer(String username) throws SQLException {
+        // Get the customer by username
+        Statement stmt = generalConnection.createStatement();
+        ResultSet rs = stmt.executeQuery(
+            "SELECT USERNAME, NAME, ADDRESS, PHONE FROM CUSTOMERS "
+           +"WHERE USERNAME='"+username+"'"
+        );
+        // Construct the customer as object and return
+        rs.next();
+        return new Customer (
+            rs.getString(1),
+            rs.getString(2),
+            rs.getString(3),
+            rs.getString(4)
+        );
+    }
+    
+    /** Returns all the customers in the database as ArrayList<Customer>
+      * @throws SQLException If a database error occurs
+      */
+    public ArrayList<Customer> getAllCustomers() throws SQLException {
+        ArrayList<Customer> customers = new ArrayList<Customer>();
+        // Ask database for all customers
+        PreparedStatement pstmt = generalConnection.prepareStatement(
+            "SELECT USERNAME, NAME, ADDRESS, PHONE FROM CUSTOMERS "
+        );
+        ResultSet rs = pstmt.executeQuery();
+        // Construct the customer as object and return
+        while (rs.next()) {
+            customers.add (
+                new Customer (
+                    rs.getString(1),
+                    rs.getString(2),
+                    rs.getString(3),
+                    rs.getString(4)
+                )
+            );
+        }
+        return customers;
+    }
+    
     private void scannerAddUser(Scanner sc) {
         String username, password, name, address, phone;
         byte[] digest;
@@ -1062,6 +1110,12 @@ public class DatabaseManager {
                 case "7days":
                     ArrayList<WeekDate> avail =
                         dbm.getSevenDayEmployeeAvailability(false);
+                    break;
+                case "customer":
+                    System.out.println(dbm.getCustomer(sc.next()));
+                    break;
+                case "customers":
+                    System.out.println(dbm.getAllCustomers());
                     break;
                 /*case "set_availability":
                     employee = sc.nextInt();
