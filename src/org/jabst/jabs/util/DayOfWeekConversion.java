@@ -3,6 +3,7 @@ package org.jabst.jabs.util;
 import java.time.DayOfWeek;
 import java.util.Calendar;
 import org.jabst.jabs.WeekDate;
+import java.util.Date;
 
 /** Static methods for converting between DayOfWeek and Calendar representations
   * of the day of week, and between Calendar objects and day of week objects
@@ -61,6 +62,17 @@ public class DayOfWeekConversion {
             + c.get(Calendar.MINUTE)*60
             + c.get(Calendar.SECOND)
         );
+    }
+
+    /** converts a date to the corresponding WeekDate
+      * @param d The Date to be converted
+      * @return A WeekDate with the time of day and day of week
+      * found in the Date.
+      */
+    public static WeekDate dat2wd(Date date) {
+    	Calendar cal = Calendar.getInstance();
+    	cal.setTime(date);
+    	return cal2wd(cal);//yes, i know. if you want you can make it better
     }
 
     /** Main is used to test this class */
