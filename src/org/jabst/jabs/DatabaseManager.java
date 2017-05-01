@@ -552,6 +552,41 @@ public class DatabaseManager {
         }
         return appointments;
     }
+
+    /** Attempts to save the appointment
+      * @param cust The customer to ask for a booking
+      * @param time The time to ask for a booking
+      * @return Whether the booking could be made. This depends on whether
+      * there is a free employee at the given time.
+      * @throws SQLException If a database error occurred
+      */
+    public boolean saveAppointment(Appointment apt)
+        throws SQLEXception
+    {
+        if (businessConnection == null || businessConnection.isClosed()) {
+            throw new SQLException("Not connected to a business");
+        }
+        
+        // Get the assigned employee
+        Employee emp = getEmployee(apt.getEmployeeID());
+        // If they are not free at appointment time, reject
+        if (emp.apppointmentHours.contains(apt.getDate())) {
+            return false;
+        }
+        
+        // Add the appointment to the database
+        PreparedStatement pstmt = businessConnection.prepareStatement(
+            "INSERT INTO APPOINTMENT "
+           +"VALUES (default, ?, ?, ?, ?)"
+        );
+        pstmt.setTimestamp(1, new java.sql.Timestamp(apt.getDate().getTime()));
+        pstmt.setInt(2, apt.getAppointmentType());
+        pstmt.setLong(3, apt.getEmployeeID());
+        pstmt.setString(4, apt.getCustomer().username);
+        pstmt.execute();
+        
+        return true;
+    }
     
     /** Returns the availability of employees for these 7 days.
       * @param distinct If set to true, do not return duplicate
