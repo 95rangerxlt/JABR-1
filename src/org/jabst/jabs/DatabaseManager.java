@@ -524,12 +524,22 @@ public class DatabaseManager {
     public ArrayList<Appointment> getThisWeeksAppointments() throws SQLException {
         ArrayList<Appointment> appointments = new ArrayList<Appointment>();
         Statement stmt = businessConnection.createStatement();
+        
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        
+        String dateStr = String.format("DATE '%04d-%02d-%02d'",
+                 cal.get(Calendar.YEAR),
+                 cal.get(Calendar.MONTH)+1,
+                 cal.get(Calendar.DAY_OF_MONTH)
+                );
+        
         ResultSet rs = stmt.executeQuery(
             "SELECT * FROM Appointment "
             +"WHERE ("
-            +"    date_and_time >= DATE_SUB(CURDATE(),  DAYOFWEEK(CURDATE())-1)"
+            +"    date_and_time >= "+dateStr
             +"    AND"
-            +"    date_and_time <= DATE_SUB(CURDATE(),  DAYOFWEEK(CURDATE())-1) + INTERVAL '7' DAY"
+            +"    date_and_time <= "+dateStr+" + INTERVAL '7' DAY"
             +") "
             +"ORDER BY DATE_AND_TIME"
         );
