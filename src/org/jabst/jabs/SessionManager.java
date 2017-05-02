@@ -208,14 +208,17 @@ public class SessionManager extends Application {
 	}
 	
 	public boolean validatePasswordStrength(String input){
-		// Strength Conditions
+		// TODO: Strength Conditions
+		boolean valid = true;
 		valid &= !(input.equals(""));
-		return true;
+		return valid;
 	}
 	
-	public boolean validateAddressInput(String Input){
+	public boolean validateAddressInput(String input){
 		// TODO: determine conditions
-		return true;
+		boolean valid = true;
+		valid &= !(input.equals(""));
+		return valid;
 	}
 	
 	public static void main(String[] args) {
