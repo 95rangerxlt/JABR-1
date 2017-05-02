@@ -32,7 +32,11 @@ import java.time.DateTimeException;
 import java.time.DayOfWeek;
 
 public class DatabaseManager {
+    /** The string that all database file connections start with */
     private static final String dbfilePrefix = "jdbc:hsqldb:file:";
+    /** The SQL tables and data that are in the general database by default.
+      * Used for testing without manual insertion.
+      */
     private static final String[] SQL_TABLES_GENERAL = {
         "CREATE TABLE CREDENTIALS ("
             +"USERNAME VARCHAR(20),"
@@ -60,6 +64,7 @@ public class DatabaseManager {
         "INSERT INTO BUSINESS VALUES('default_business', 'default business', 'default_owner', 'default_addr', '0420123456')",
         "INSERT INTO CUSTOMERS VALUES('default_customer','default customer','default','0420123546')"
     };
+    /** The SQL tables and data that are in a business database by default */
     private static final String[] SQL_TABLES_BUSINESS = {
         "CREATE TABLE EMPLOYEE ("
             +    "EMPL_ID INTEGER GENERATED ALWAYS AS IDENTITY,"
@@ -104,9 +109,13 @@ public class DatabaseManager {
         "INSERT INTO APPOINTMENT VALUES (DEFAULT, %s+INTERVAL '10' HOUR, 0, 0, 'default_customer')"
     };
     
+    /** The name of the general database */
     public static final String dbDefaultFileName = "db/credentials_db";
+    /** The name of the default business' database file */
     public static final String defaultBusinessName = "default_business";
+    /** The JDBC connection to the general (user info) database */
     private Connection generalConnection;
+    /** The JDBC connection to the business-specific database*/
     private Connection businessConnection;
     
     /** Creates a new DatabaseManager
@@ -138,15 +147,19 @@ public class DatabaseManager {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
         
+        // Format cal as a string for HyperSQL
         String dateStr = String.format("DATE '%04d-%02d-%02d'",
                  cal.get(Calendar.YEAR),
                  cal.get(Calendar.MONTH)+1,
                  cal.get(Calendar.DAY_OF_MONTH)
                 );
-        //"INSERT INTO APPOINTMENT VALUES (DEFAULT, DATEADD('dd', %d, CURDATE)+INTERVAL '9' HOUR, 0, 0, 'default_customer')",
+        
+        // Insert the date into these INSERT statements by String.format
+        // Doing it from Java is easier.
         SQL_TABLES_BUSINESS[8] = String.format(SQL_TABLES_BUSINESS[8], dateStr);
         SQL_TABLES_BUSINESS[9] = String.format(SQL_TABLES_BUSINESS[9], dateStr);
 
+        // Try to execute each SQL statement in tables
         boolean success = false;
         int i = 0;
         for (String currTable : tables) {
@@ -174,7 +187,9 @@ public class DatabaseManager {
         return success;
     }
     
-    /** Asks the database to save the data it has now */
+    /** Asks the database to save the data it has now. It should generally do
+      * this by itself, but you can use this to be safe.
+      */
     public void commit() {
         try {
             generalConnection.commit();
@@ -187,9 +202,9 @@ public class DatabaseManager {
         }
     }
 
-    /** Closes the database connection associated with the manager
-        You MUST do this, or data will not be saved on program exit
-     */
+    /** Closes the database connections associated with the manager
+      * You MUST do this, or data will not be saved on program exit
+      */
     public void close() {
         try {
             generalConnection.commit();
@@ -207,11 +222,11 @@ public class DatabaseManager {
     }
     
     /** Tries to connect to the given database, and create it if it doesn't exist already
-        @param dbFileName The name of the database file to connect to
-        @param tables A string array of SQL statements to execute to make the tables in the
-        new database
-        @return A connection to the database if successful, otherwise null.
-     */
+      * @param dbFileName The name of the database file to connect to
+      * @param tables A string array of SQL statements to execute to make the tables in the
+      * new database
+      * @return A connection to the database if successful, otherwise null.
+      */
     private Connection openCreateDatabase(String dbFileName, String[] tables) {
         Connection c = null;
          try {
@@ -308,9 +323,14 @@ public class DatabaseManager {
     
     /** Asks the database to check if there is a user with the given
       * username and password
+      * @param username The username of the user. The user may be a business
+      * or a customer.
+      * @param password The password of the user. The only restriction is that
+      * the passowrd given should not be blank.
       */
     public boolean checkUser (String username, String password)
         throws SQLException {
+        // Take the hash 
         byte[] password_hash = Digest.sha256(password);
         boolean success = false;
 
@@ -348,9 +368,10 @@ public class DatabaseManager {
      *  @param username The username of the user
      *  @param password The password of the user, to be hashed with sha256
      *  before being stored
-     *  @return Nothing, check for a SQLException. If it was a
-     * SQLIntegrityConstraintViolationException, give a message about the
-     * username already existing
+     *  @throws SQLException If a general database error occurs
+     *  @throws SQLIntegrityConstraintViolationException If this exception is
+     *  thrown, the caller should give a message about the username/password
+     *  already existing.
      */
     private void addUser(String username, String password)
         throws SQLException {
@@ -402,6 +423,10 @@ public class DatabaseManager {
         generalConnection.commit();
     }
     
+    /** Adds a user to the database by asking for their username and password
+      * from the scanner. Used on the command line for testing.
+      * @param sc The method will take input from this Scaner.
+      */
     private void scannerAddUser(Scanner sc) {
         String username, password, name, address, phone;
         byte[] digest;
@@ -472,6 +497,7 @@ public class DatabaseManager {
      *  7 days starting from today
      *  @return An ArrayList of Appointment objects representing all the 
      *  appointments within the date range.
+     *  @throws SQLException If a general database error occurs
      */
     public ArrayList<Appointment> getThisWeeksAppointments() throws SQLException {
         ArrayList<Appointment> appointments = new ArrayList<Appointment>();
@@ -505,6 +531,9 @@ public class DatabaseManager {
         return appointments;
     }
     
+    /** Gets the availability of all employees for the next seven day period.
+      * Each availability is a WeekDate @see org.jabst.jabs.WeekDate
+      */
     public ArrayList<WeekDate> getSevenDayEmployeeAvailability() throws SQLException{
         if (businessConnection == null || businessConnection.isClosed()) {
             throw new SQLException("Not connected to a business");
@@ -666,10 +695,12 @@ public class DatabaseManager {
         return availWeekDates;
     }
 
-    /** Adds an employee with the given name. The ID is generated automatically
-        @param name The name of a new employee to add
-        @return The new ID of the employee if successful, or -1 for failure
-        @throw SQLException If a database error occurs
+    /** Adds an employee with the given name. The ID is generated automatically.
+      * To get the new employee as an object, use getEmployee after calling this
+      * method.
+      * @param name The name of a new employee to add
+      * @return The new ID of the employee if successful, or -1 for failure
+      * @throw SQLException If a database error occurs
     */
     public long addEmployee(String name) throws SQLException {
         if (businessConnection == null || businessConnection.isClosed()) {
@@ -712,6 +743,10 @@ public class DatabaseManager {
         return maxID;
     }
     
+    /** Tries to update the given employee's information in the database.
+      * @param employee The employee object representing the new data.
+      * @return Whether the update was successful.
+      */
     public boolean updateEmployee(Employee employee) throws SQLException {
         if (businessConnection == null || businessConnection.isClosed()) {
             throw new SQLException("Not connected to a business");
