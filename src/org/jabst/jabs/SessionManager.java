@@ -92,7 +92,18 @@ public class SessionManager extends Application {
 						currentWindow = Window.LOGIN;
 						break;
 					}
-					CustomerInfo cInfo = CustomerMenuGUI.display(this, dbm.getCustomer(username));
+                    CustomerInfo cInfo;
+                    try {
+                         cInfo = CustomerMenuGUI.display(
+                                     this, dbm.getCustomer(username)
+                                 );
+                    } catch (SQLException sqle) {
+                        // TODO: Visual cue
+                        System.err.println("Error getting customer info for"
+                            +" customer="+username);
+                        currentWindow = Window.LOGIN;
+                        break;
+                    } 
 					// Only remove these after username is no longer needed
 					username = "";
 					password = "";

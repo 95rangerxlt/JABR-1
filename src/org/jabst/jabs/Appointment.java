@@ -27,7 +27,7 @@ public class Appointment {
 	}
 
 	public Appointment (WeekDate weekDate, int appointmentType,
-		long employeeID, String customer)
+		long employeeID, Customer customer)
 	{
 		this(DayOfWeekConversion.wd2cal(weekDate).getTime(), appointmentType, employeeID, customer);
 	}
@@ -49,7 +49,7 @@ public class Appointment {
 		return employeeID;
 	}
 
-	public String getCustomer() {
+	public Customer getCustomer() {
 		return customer;
 	}
 

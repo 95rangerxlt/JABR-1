@@ -539,8 +539,8 @@ public class DatabaseManager {
                     new Appointment(
                         rs.getDate("DATE_AND_TIME"),
                         rs.getInt("APPOINTMENT_TYPE"),
-                        rs.getInt("EMPLOYEE"),
-                        rs.getString("CUSTOMER")
+                        rs.getLong("EMPLOYEE"),
+                        getCustomer(rs.getString("CUSTOMER"))
                     )
                 );
             }
@@ -561,7 +561,7 @@ public class DatabaseManager {
       * @throws SQLException If a database error occurred
       */
     public boolean saveAppointment(Appointment apt)
-        throws SQLEXception
+        throws SQLException
     {
         if (businessConnection == null || businessConnection.isClosed()) {
             throw new SQLException("Not connected to a business");
@@ -569,8 +569,9 @@ public class DatabaseManager {
         
         // Get the assigned employee
         Employee emp = getEmployee(apt.getEmployeeID());
+        System.out.println("Employee got: "+emp);
         // If they are not free at appointment time, reject
-        if (emp.apppointmentHours.contains(apt.getDate())) {
+        if (emp.appointmentHours.contains(apt.getDate())) {
             return false;
         }
         
@@ -715,8 +716,8 @@ public class DatabaseManager {
                     new Appointment (
                         new Date(rs.getTimestamp(1).getTime()), //DATE_AND_TIME
                         rs.getInt(2), // APPOINTMENT_TYPE
-                        rs.getInt(3), // EMPLOYEE
-                        rs.getString(4) // CUSTOMER
+                        rs.getLong(3), // EMPLOYEE
+                        getCustomer(rs.getString(4)) // CUSTOMER
                     )
                 );
             }
@@ -1061,6 +1062,30 @@ public class DatabaseManager {
                 "Didn't find a user with that username"
         );
     }
+
+    private void scannerSaveAppointment(Scanner sc) throws SQLException {
+        // Create a new Calendar at the start of the requested hour, on Monday.
+        System.out.println("Making appointment for this Monday. Which hour?");
+        int hour = Integer.parseInt(sc.next());
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        cal.set(Calendar.HOUR, hour);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MINUTE, 0);
+        Date dateAndTime = cal.getTime();
+
+        System.out.println("Date and time made: "+dateAndTime);
+        System.out.println("Default customer got as:"
+                +getCustomer("default_customer"));
+
+        // Try booking a new appointment at the given hour with employee 0, of
+        // type 0, as the default customer
+        Appointment apt = new Appointment (
+            dateAndTime, 0, 0, getCustomer("default_customer")
+        );
+        saveAppointment(apt);
+    }
+
     /**
       * This main exists to interactively test the code in DatabaseManager. It is
       * not the entry point to the actual application
@@ -1151,6 +1176,9 @@ public class DatabaseManager {
                     break;
                 case "customers":
                     System.out.println(dbm.getAllCustomers());
+                    break;
+                case "save_appointment":
+                    dbm.scannerSaveAppointment(sc);
                     break;
                 /*case "set_availability":
                     employee = sc.nextInt();
