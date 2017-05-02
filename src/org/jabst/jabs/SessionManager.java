@@ -82,7 +82,6 @@ public class SessionManager extends Application {
 					}
                     break;
                     case CUSTOMERMENU:
-// how do you like your diffs now?
                     try {
                       dbm.connectToBusiness();
                   } catch (SQLException sqle) {
@@ -93,12 +92,6 @@ public class SessionManager extends Application {
                       break;
                   }
                   CustomerInfo cInfo = CustomerMenuGUI.display(this, /*TODO: get customer */);
-// yeah, thats right. i committed code that doesn't even compile. and i put the indentation at the start.
-// how am i meant to make it get appointments for a customer if i dont have a customer to make appointments for?
-// now i know i put this in jordans class but its not nessicarily jordans fault. jason doesn't have any methods for getting the customer. it just loggs you in and boom, you are meant to do a customer booking GUI without a customer object.
-// you are both bad and should both feel bad
-
-// p.s. it throws a SQL exception so idk... fix jason plz
                   if(cInfo.button == CustomerInfo.Buttons.OK) {
                       shutdown();
                   }
