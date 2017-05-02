@@ -22,6 +22,7 @@ import java.util.Date;
 // Logging
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.ConsoleHandler;
 
 // For SHA-256 hashing
 import org.jabst.jabs.util.Digest;
@@ -122,6 +123,8 @@ public class DatabaseManager {
     public static final String defaultBusinessName = "default_business";
     /** Logger. All output should go through logger instead of System.out */
     private Logger logger;
+    /** Sends the logs to stderr */
+    private ConsoleHandler ch;
     /** The JDBC connection to the general (user info) database */
     private Connection generalConnection;
     /** The JDBC connection to the business-specific database*/
@@ -134,12 +137,16 @@ public class DatabaseManager {
      * @throws HsqlException, SQLException
      */
     public DatabaseManager(String dbfile) throws HsqlException, SQLException {
-         this.generalConnection = openCreateDatabase(dbfile, SQL_TABLES_GENERAL);
-         if (generalConnection == null) {
-             throw new SQLException();
-         }
-         generalConnection.setAutoCommit(false);
-         this.logger = Logger.getLogger("org.jabst.jabs.DatabaseManager");
+        this.logger = Logger.getLogger("org.jabst.jabs.DatabaseManager");
+        logger.setLevel(Level.FINEST);
+        this.ch = new ConsoleHandler();
+        logger.addHandler(ch);
+        logger.info("Opened databaseManager logger");
+        this.generalConnection = openCreateDatabase(dbfile, SQL_TABLES_GENERAL);
+        if (generalConnection == null) {
+            throw new SQLException();
+        }
+        generalConnection.setAutoCommit(false);
     }
 
     /** Creates the database tables in case the database is being
