@@ -6,8 +6,6 @@ import java.time.Duration;
 
 /** Holds information about an appointment */
 public class Appointment {
-//fuck yo spaces. now you get horrible diffs
-
 	private Date dateAndTime;
 	/** This should refer to a valid type ID from the database */
 	int appointmentType;// that enum tho
@@ -37,7 +35,7 @@ public class Appointment {
 	}
 
 	public Duration getDuration() {
-	    // Ask the appointment type for the duration
+		// Ask the appointment type for the duration
 		return AppointmentType.getByID(appointmentType).getDuration();
 	}
 

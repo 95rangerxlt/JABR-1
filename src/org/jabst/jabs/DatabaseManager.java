@@ -34,7 +34,11 @@ import java.time.DateTimeException;
 import java.time.DayOfWeek;
 
 public class DatabaseManager {
+    /** The string that all database file connections start with */
     private static final String dbfilePrefix = "jdbc:hsqldb:file:";
+    /** The SQL tables and data that are in the general database by default.
+      * Used for testing without manual insertion.
+      */
     private static final String[] SQL_TABLES_GENERAL = {
         "CREATE TABLE CREDENTIALS ("
             +"USERNAME VARCHAR(20),"
@@ -54,7 +58,7 @@ public class DatabaseManager {
             +"ADDRESS VARCHAR(255) NOT NULL,"
             +"PHONE VARCHAR(10) NOT NULL,"
             +"PRIMARY KEY (USERNAME))",
-            
+
         // Default data
         // password = default
         "INSERT INTO CREDENTIALS VALUES('default_business','37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f')",
@@ -62,6 +66,7 @@ public class DatabaseManager {
         "INSERT INTO BUSINESS VALUES('default_business', 'default business', 'default_owner', 'default_addr', '0420123456')",
         "INSERT INTO CUSTOMERS VALUES('default_customer','default customer','default','0420123546')"
     };
+    /** The SQL tables and data that are in a business database by default */
     private static final String[] SQL_TABLES_BUSINESS = {
         "CREATE TABLE EMPLOYEE ("
             +    "EMPL_ID INTEGER GENERATED ALWAYS AS IDENTITY,"
@@ -70,7 +75,7 @@ public class DatabaseManager {
             +    "PHONE VARCHAR(10),"
             +    "PRIMARY KEY(EMPL_ID)"
             +" )",
-            
+
         "CREATE TABLE AVAILABILITY ("
             +   "EMPLOYEE INTEGER,"
             +   "AVAILABLE_TIME INTEGER,"
@@ -78,14 +83,14 @@ public class DatabaseManager {
             +   "FOREIGN KEY (EMPLOYEE) REFERENCES EMPLOYEE(EMPL_ID),"
             +   "PRIMARY KEY(EMPLOYEE, AVAILABLE_TIME, AVAILABLE_DAY)"
         +")",
-        
+
         "CREATE TABLE APPOINTMENTTYPE ("
             +   "TYPE_ID INTEGER GENERATED ALWAYS AS IDENTITY,"
             +   "NAME VARCHAR(40) NOT NULL,"
             +   "COST_CENTS INTEGER NOT NULL,"
             +   "PRIMARY KEY (TYPE_ID)"
         +")",
-        
+
         "CREATE TABLE APPOINTMENT ("
             +   "APT_ID INTEGER GENERATED ALWAYS AS IDENTITY,"
             +   "DATE_AND_TIME DATETIME NOT NULL,"
@@ -105,12 +110,16 @@ public class DatabaseManager {
         "INSERT INTO APPOINTMENT VALUES (DEFAULT, %s+INTERVAL '9' HOUR, 0, 0, 'default_customer')",
         "INSERT INTO APPOINTMENT VALUES (DEFAULT, %s+INTERVAL '10' HOUR, 0, 0, 'default_customer')"
     };
-    
+
+    /** The name of the general database */
     public static final String dbDefaultFileName = "db/credentials_db";
+    /** The name of the default business' database file */
     public static final String defaultBusinessName = "default_business";
+    /** The JDBC connection to the general (user info) database */
     private Connection generalConnection;
+    /** The JDBC connection to the business-specific database*/
     private Connection businessConnection;
-    
+
     /** Creates a new DatabaseManager
      * Always open the DatabaseManager at program start (call the constructor),
      * and close it at program finish ( see: close() )
@@ -124,7 +133,7 @@ public class DatabaseManager {
          }
          generalConnection.setAutoCommit(false);
     }
-    
+
     /** Creates the database tables in case the database is being
       * created for the first time
       * @param connection The connection: Either businessConnection or generalConnection
@@ -139,16 +148,20 @@ public class DatabaseManager {
         // Get the day of Week in Sun-Sat form
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        
+
+        // Format cal as a string for HyperSQL
         String dateStr = String.format("DATE '%04d-%02d-%02d'",
                  cal.get(Calendar.YEAR),
                  cal.get(Calendar.MONTH)+1,
                  cal.get(Calendar.DAY_OF_MONTH)
                 );
-        //"INSERT INTO APPOINTMENT VALUES (DEFAULT, DATEADD('dd', %d, CURDATE)+INTERVAL '9' HOUR, 0, 0, 'default_customer')",
+
+        // Insert the date into these INSERT statements by String.format
+        // Doing it from Java is easier.
         SQL_TABLES_BUSINESS[8] = String.format(SQL_TABLES_BUSINESS[8], dateStr);
         SQL_TABLES_BUSINESS[9] = String.format(SQL_TABLES_BUSINESS[9], dateStr);
 
+        // Try to execute each SQL statement in tables
         boolean success = false;
         int i = 0;
         for (String currTable : tables) {
@@ -159,7 +172,7 @@ public class DatabaseManager {
                 System.err.println("Error creating statement for table");
                 return false;
             }
-            
+
             try {
                 // Statement.execute returns false if no results were returned,
                 // including for CREATE statements
@@ -175,8 +188,10 @@ public class DatabaseManager {
         }
         return success;
     }
-    
-    /** Asks the database to save the data it has now */
+
+    /** Asks the database to save the data it has now. It should generally do
+      * this by itself, but you can use this to be safe.
+      */
     public void commit() {
         try {
             generalConnection.commit();
@@ -189,9 +204,9 @@ public class DatabaseManager {
         }
     }
 
-    /** Closes the database connection associated with the manager
-        You MUST do this, or data will not be saved on program exit
-     */
+    /** Closes the database connections associated with the manager
+      * You MUST do this, or data will not be saved on program exit
+      */
     public void close() {
         try {
             generalConnection.commit();
@@ -207,13 +222,13 @@ public class DatabaseManager {
             );
         }
     }
-    
+
     /** Tries to connect to the given database, and create it if it doesn't exist already
-        @param dbFileName The name of the database file to connect to
-        @param tables A string array of SQL statements to execute to make the tables in the
-        new database
-        @return A connection to the database if successful, otherwise null.
-     */
+      * @param dbFileName The name of the database file to connect to
+      * @param tables A string array of SQL statements to execute to make the tables in the
+      * new database
+      * @return A connection to the database if successful, otherwise null.
+      */
     private Connection openCreateDatabase(String dbFileName, String[] tables) {
         Connection c = null;
          try {
@@ -238,12 +253,12 @@ public class DatabaseManager {
          }
         return c;
     }
-    
+
     /** Opens the default business database */
     public boolean connectToBusiness() throws SQLException {
         return connectToBusiness(defaultBusinessName);
     }
-    
+
     /** Opens a connection to the business specified with the username
       * The database file is located in db/$username
       * @param String busUsername : The username of the business
@@ -254,10 +269,10 @@ public class DatabaseManager {
         if (businessConnection != null && !businessConnection.isClosed()) {
             businessConnection.close();
         }
-    
+
         // Look up the business name in the table of businesses
         Statement stmt = generalConnection.createStatement();
-        
+
         ResultSet rs = stmt.executeQuery(
             "SELECT COUNT(USERNAME) FROM BUSINESS WHERE USERNAME='"+busUsername+"'"
             );
@@ -271,7 +286,7 @@ public class DatabaseManager {
                 throw new AssertionError("Found 2 of business "+busUsername);
                 // Never happens
         }
-        
+
         // We now know it exists for certain, but not whether it has a database
         // Open or create the business' database
         this.businessConnection = openCreateDatabase("db/"+busUsername, SQL_TABLES_BUSINESS);
@@ -281,7 +296,7 @@ public class DatabaseManager {
         this.businessConnection.setAutoCommit(false);
         return true;
     }
-    
+
     /** Gets the business associated with the username
       * @param businessUsername the username of the business account
       * @return A Business object representing the business, or null if
@@ -294,7 +309,7 @@ public class DatabaseManager {
                 "SELECT * FROM BUSINESS "
             +"WHERE USERNAME='"+businessUsername+"'"
             );
-            
+
             rs.next();
             return new Business (
                 rs.getString("BUSINESS_NAME"),
@@ -307,12 +322,17 @@ public class DatabaseManager {
             return null;
         }
     }
-    
+
     /** Asks the database to check if there is a user with the given
       * username and password
+      * @param username The username of the user. The user may be a business
+      * or a customer.
+      * @param password The password of the user. The only restriction is that
+      * the passowrd given should not be blank.
       */
     public boolean checkUser (String username, String password)
         throws SQLException {
+        // Take the hash 
         byte[] password_hash = Digest.sha256(password);
         boolean success = false;
 
@@ -330,7 +350,7 @@ public class DatabaseManager {
             System.out.format("Result:username,password = %s,%s\n",
                 result_username, Digest.digestToHexString(result_password)
             );
-            
+
             for (int i = 0; i < result_password.length; ++i) {
                 if (result_password[i] != password_hash[i]) {
                     success = false;
@@ -345,14 +365,15 @@ public class DatabaseManager {
 
         return success;
     }
-    
+
     /** Adds a user with the username and password to the database
      *  @param username The username of the user
      *  @param password The password of the user, to be hashed with sha256
      *  before being stored
-     *  @return Nothing, check for a SQLException. If it was a
-     * SQLIntegrityConstraintViolationException, give a message about the
-     * username already existing
+     *  @throws SQLException If a general database error occurs
+     *  @throws SQLIntegrityConstraintViolationException If this exception is
+     *  thrown, the caller should give a message about the username/password
+     *  already existing.
      */
     private void addUser(String username, String password)
         throws SQLException {
@@ -388,7 +409,7 @@ public class DatabaseManager {
     {
         // Add to credentials table
         addUser(username, password);
-        
+
         // Now add to customers table
         PreparedStatement statement = generalConnection.prepareStatement(
             // USERNAME, NAME, ADDRESS, PHONE
@@ -398,12 +419,12 @@ public class DatabaseManager {
         statement.setString(2, name);
         statement.setString(3, address);
         statement.setString(4, phone);
-        
+
         statement.execute();
         statement.close();
         generalConnection.commit();
     }
-    
+
     /** Gets the customer with the given username. Customers are uniquely
       * identified in the database by their username.
       * @param username The customer's username
@@ -427,7 +448,7 @@ public class DatabaseManager {
             rs.getString(4)
         );
     }
-    
+
     /** Returns all the customers in the database as ArrayList<Customer>
       * @throws SQLException If a database error occurs
       */
@@ -451,47 +472,51 @@ public class DatabaseManager {
         }
         return customers;
     }
-    
+
+    /** Adds a user to the database by asking for their username and password
+      * from the scanner. Used on the command line for testing.
+      * @param sc The method will take input from this Scaner.
+      */
     private void scannerAddUser(Scanner sc) {
         String username, password, name, address, phone;
         byte[] digest;
-        
+
         System.out.print("Enter username: ");
         username = sc.next();
         System.out.println();
-        
+
         System.out.print("Enter password: ");
         password = sc.next();
         System.out.println();
-        
+
         System.out.print("Next up: name, address, phone");
         name = sc.next(); System.out.println();
         address = sc.next(); System.out.println();
         phone = sc.next(); System.out.println();
-        
+
         boolean success = false;
         try {
             addUser(username, password, name, address, phone);
             success = true;
         } catch (SQLException se) {
-                
+
             if (se instanceof SQLIntegrityConstraintViolationException) {
                 System.err.println(
                     "Adding user failed: Already a user with that username"
                 );
             }
-            
+
             else {
                 System.err.println("addUser failed...");
                 se.printStackTrace(System.err);
             }
         }
-        
+
         System.out.println(
             success ? "Added user successfully" : "Didn't add user"
         );
     }
-    
+
     /** Checks if there is a business with the given username
         @param username The username to check
         @return Whether the username represents a business or not
@@ -503,7 +528,7 @@ public class DatabaseManager {
         ResultSet rs = stmt.executeQuery(
             "SELECT COUNT(USERNAME) FROM BUSINESS WHERE USERNAME='"+username+"'"
         );
-        
+
         rs.next();
         switch(rs.getInt(1)) {
             case 0:
@@ -516,26 +541,27 @@ public class DatabaseManager {
                     );
         }
     }
-    
-    
+
+
     /** Gets all of the appointments in the system within the date range of
      *  7 days starting from today
      *  @return An ArrayList of Appointment objects representing all the 
      *  appointments within the date range.
+     *  @throws SQLException If a general database error occurs
      */
     public ArrayList<Appointment> getThisWeeksAppointments() throws SQLException {
         ArrayList<Appointment> appointments = new ArrayList<Appointment>();
         Statement stmt = businessConnection.createStatement();
-        
+
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-        
+
         String dateStr = String.format("DATE '%04d-%02d-%02d'",
                  cal.get(Calendar.YEAR),
                  cal.get(Calendar.MONTH)+1,
                  cal.get(Calendar.DAY_OF_MONTH)
                 );
-        
+
         ResultSet rs = stmt.executeQuery(
             "SELECT * FROM Appointment "
             +"WHERE ("
@@ -578,7 +604,7 @@ public class DatabaseManager {
         if (businessConnection == null || businessConnection.isClosed()) {
             throw new SQLException("Not connected to a business");
         }
-        
+
         // Get the assigned employee
         Employee emp = getEmployee(apt.getEmployeeID());
         System.out.println("Employee got: "+emp);
@@ -588,7 +614,7 @@ public class DatabaseManager {
                 + " employee has appointment at given time");
             return false;
         }
-        
+
         // Add the appointment to the database
         PreparedStatement pstmt = businessConnection.prepareStatement(
             "INSERT INTO APPOINTMENT "
@@ -608,10 +634,10 @@ public class DatabaseManager {
         }
 
         businessConnection.commit();
-        
+
         return true;
     }
-    
+
     /** Returns the availability of employees for these 7 days.
       * @param distinct If set to true, do not return duplicate
       * WeekDates if there is more than one employee available at a given time
@@ -619,14 +645,14 @@ public class DatabaseManager {
       * employees, optionally containing duplicates if
       * called with distinct = false
       */ 
-    public ArrayList<WeekDate> 
+    public ArrayList<WeekDate>
     getSevenDayEmployeeAvailability(boolean distinct)
         throws SQLException
     {
         if (businessConnection == null || businessConnection.isClosed()) {
             throw new SQLException("Not connected to a business");
         }
-        
+
         ArrayList<WeekDate> availableDates = new ArrayList<WeekDate>();
         Statement stmt = businessConnection.createStatement();
         ResultSet rs;
@@ -642,19 +668,19 @@ public class DatabaseManager {
             sqle.printStackTrace();
             throw sqle;
         }
-        
+
         while (rs.next()) {
             availableDates.add(
                 new WeekDate(DayOfWeek.of(rs.getInt(1)), rs.getInt(2))
             );
         }
-        
+
         System.out.println("Available dates:"+availableDates);
         System.out.flush();
-        
+
         return availableDates;
     }
-    
+
     /** Gets an ArrayList containg all the names and IDs of all employees
       * as preformatted Strings.
       * @return All employees listed in the form name+" #"+employee_Id
@@ -664,7 +690,7 @@ public class DatabaseManager {
         if (businessConnection == null || businessConnection.isClosed()) {
             throw new SQLException("Not connected to a business");
         }
-        
+
         ArrayList<String> emplNames = new ArrayList<String>();
         Statement stmt = businessConnection.createStatement();
         ResultSet rs = null;
@@ -677,11 +703,11 @@ public class DatabaseManager {
             sqle.printStackTrace();
             throw sqle;
         }
-        
+
         while(rs.next()) {
             emplNames.add(rs.getString("EMPL_NAME") +" #"+ rs.getString("EMPL_ID"));
         }
-        
+
         return emplNames;
     }
 
@@ -694,29 +720,29 @@ public class DatabaseManager {
         if (businessConnection == null || businessConnection.isClosed()) {
             throw new SQLException("Not connected to a business");
         }
-        
+
         // Data needed for an employee
         Employee employee;
         String empl_name;
         ArrayList<WeekDate> available_hours = new ArrayList<WeekDate>();
         ArrayList<Appointment> appointments = new ArrayList<Appointment>();
-        
+
         Statement stmt = businessConnection.createStatement();
         ResultSet rs = null;
-        
+
         // Get name
         try {
             rs = stmt.executeQuery(
                 "SELECT EMPL_NAME FROM EMPLOYEE WHERE EMPL_ID = "+empl_id
             );
-            
+
             rs.next();
             empl_name = (rs.getString(1));
         } catch (SQLException sqle) {
             // Employee does not exist, ignore error
             throw sqle;
         }
-            
+
         // Get working hours
         try {
             available_hours = getEmployeeAvailability((int)empl_id);
@@ -724,7 +750,7 @@ public class DatabaseManager {
             sqle.printStackTrace();
             throw sqle;
         }
-        
+
         // Get appointment hours
         try {
             rs = stmt.executeQuery (
@@ -749,10 +775,10 @@ public class DatabaseManager {
             sqle.printStackTrace();
             throw sqle;
         }
-        
+
         return new Employee(empl_id, empl_name, available_hours, appointments);
     }
-    
+
     /** Gets the given employee's available days and times on the roster
       * You may want to just fetch the whole Employee with getEmployee
       * @return ArrayList<WeekDate> representing the availability
@@ -777,7 +803,7 @@ public class DatabaseManager {
                 "ON EMP.EMPL_ID = AVA.EMPLOYEE "+
                 "WHERE EMPL_ID = "+employeeID
             );
-            
+
             while (rs.next()) {
                 WeekDate wd = new WeekDate(
                         DayOfWeek.of(rs.getInt(1)), rs.getInt(2)
@@ -790,20 +816,22 @@ public class DatabaseManager {
             throw new SQLException("Cannot get available WeekDates (empl_id = )"
                     +employeeID);
         }
-        
+
         return availWeekDates;
     }
 
-    /** Adds an employee with the given name. The ID is generated automatically
-        @param name The name of a new employee to add
-        @return The new ID of the employee if successful, or -1 for failure
-        @throw SQLException If a database error occurs
+    /** Adds an employee with the given name. The ID is generated automatically.
+      * To get the new employee as an object, use getEmployee after calling this
+      * method.
+      * @param name The name of a new employee to add
+      * @return The new ID of the employee if successful, or -1 for failure
+      * @throw SQLException If a database error occurs
     */
     public long addEmployee(String name) throws SQLException {
         if (businessConnection == null || businessConnection.isClosed()) {
             throw new SQLException("Not connected to a business");
         }
-        
+
         // Insert an employee with the given name
         Statement stmt = businessConnection.createStatement();
         try {
@@ -818,7 +846,7 @@ public class DatabaseManager {
             sqle.printStackTrace();
             return -1;
         }
-        
+
         // Return max ID
         long maxID;
         ResultSet rs = null;
@@ -836,19 +864,23 @@ public class DatabaseManager {
             // It was added, but we can't know the ID, so throw an exception
             throw sqle;
         }
-        
+
         return maxID;
     }
-    
+
+    /** Tries to update the given employee's information in the database.
+      * @param employee The employee object representing the new data.
+      * @return Whether the update was successful.
+      */
     public boolean updateEmployee(Employee employee) throws SQLException {
         if (businessConnection == null || businessConnection.isClosed()) {
             throw new SQLException("Not connected to a business");
         }
-        
+
         businessConnection.commit();
         int updateCount = 0;
         Statement stmt = businessConnection.createStatement();
-        
+
         /* Update name */
         try {
             updateCount = stmt.executeUpdate(
@@ -863,7 +895,7 @@ public class DatabaseManager {
             sqle.printStackTrace();
             businessConnection.rollback();
         }
-        
+
         /* Remove all availability for this employee - so we can add all given 
            availability. Rollback will save us if we fail */
         for (WeekDate currAvailability : employee.workingHours) {
@@ -917,18 +949,18 @@ public class DatabaseManager {
                 businessConnection.rollback();
             }
         }
-        
+
         /* Update appointments? - no, do that seperately  
             Remember: appointments belong in a separate table and are returned 
             to the Employee object at runtime, but only for convenience
             of access */
-        
+
         // Return true even if no updates occurred - it still means we
         // guarantee the record is correct
         businessConnection.commit();
         return true;
     }
-    
+
     /** Deletes the employee and their appointments and availability from the
       * database, forcing if necessary.
       * The employee will not be permanently deleted until save.
@@ -1009,7 +1041,7 @@ public class DatabaseManager {
         if (businessConnection == null || businessConnection.isClosed()) {
             throw new SQLException ("The business connection is closed.");
         }
-        
+
         int resultUpdates = 0;
         WeekDate givenWeekDate;
         for (int dateIdx = 0; dateIdx < dates.size(); ++dateIdx) {
@@ -1053,25 +1085,25 @@ public class DatabaseManager {
                     throw sqle;
                 }
             }
-            
+
         }
-        
+
         System.out.println("resultUpdates:"+resultUpdates);
         return (resultUpdates > 0 ? true : false);
     }
-    
+
     private void scannerCheckUser(Scanner sc) {
         String username, password;
         byte[] digest;
-        
+
         System.out.print("Enter username: ");
         username = sc.next();
         System.out.println();
-        
+
         System.out.print("Enter password: ");
         password = sc.next();
         System.out.println();
-        
+
         boolean success = false;
         try {
             success = checkUser(username, password);
@@ -1079,7 +1111,7 @@ public class DatabaseManager {
                 System.err.println("checkUser failed...");
                 se.printStackTrace(System.err);
         }
-        
+
         System.out.println(
             success ?
                 "Found a user with that username (NYI: and password" :
@@ -1218,7 +1250,7 @@ public class DatabaseManager {
                         dbm.getSevenDayEmployeeAvailability(false);
                     ArrayList<Appointment> weekAppointments =
                         dbm.getThisWeeksAppointments();
-            
+
                     // Check if seven day availability has this date
                     // Generate the Date for all availability
                     boolean cont = false;
@@ -1236,7 +1268,7 @@ public class DatabaseManager {
                     }
                     // Quit if weekAvailability contains no matching date
                     if (!cont) { System.out.println("No matches. Quitting early.\nfalse"); break; }
-                    
+
                     // Count how many employees are free at reqDate
                     int freeEmpCount;
                     for (freeEmpCount = 0; availIdx < weekAvailability.size();
@@ -1249,12 +1281,12 @@ public class DatabaseManager {
                             continue;
                         } else break;
                     }
-                    
+
                     // Count how many appointments are occuring at reqDate
                     // FIXME: THIS IS STARTING FROM THE START OF APPOINTMENTS
                     // AND BREAKING IMMEDIATELY. FIRST PARSE FROM THE START OF THE ARRAY
                     // UNTIL WE FIND IT, THEN BREAK WHEN WE ARE DONE
-                    
+
                     // Find the array index of the first appointment
                     int aptCount = 0;
                     int aptIdx;
@@ -1268,7 +1300,7 @@ public class DatabaseManager {
                             break;
                         } else continue;
                     }
-                    
+
                     // Starting from the second appointment, keep adding until
                     // we reach something else or end of array
                     for (++aptIdx; aptIdx < weekAppointments.size(); ++aptIdx) {
@@ -1281,7 +1313,7 @@ public class DatabaseManager {
                             continue;
                         } else break;
                     }
-                    
+
                     // If there are more availabilities than appointments occuring, the
                     // time slot must be bookable (but we don't know who the employee
                     // will be)
@@ -1290,7 +1322,7 @@ public class DatabaseManager {
                     if (freeEmpCount - aptCount > 0) {
                         System.out.println("Yea");
                     } else System.out.println("Nay");
-                    
+
                     }
                 break;
                 /*case "set_availability":

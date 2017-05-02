@@ -70,6 +70,39 @@ public class RegisterGUI {
 				System.out.println("Name: "+tfName.getText());
 				System.out.println("Address: "+tfAddress.getText());
 				System.out.println("Phone: "+tfPhone.getText());
+				
+				// Validate user input
+				if (!session.validateNameInput(tfName.getText())){
+					// Error message
+					System.out.println("Invalid Name");
+					NotificationGUI.display("Invalid Name Input:\nPlease enter your name containing only letters (A-Z,a-z).", "Registration Error");
+					return;
+				}
+				if (!session.validateAddressInput(tfAddress.getText())){
+					// Error message
+					System.out.println("Invalid Address");
+					NotificationGUI.display("Invalid Address Input:\nPlease enter your address in the correct format.", "Registration Error");
+					return;
+				}
+				if (!session.validatePhoneInput(tfPhone.getText())){
+					// Error message
+					System.out.println("Invalid Phone Number");
+					NotificationGUI.display("Invalid Phone Number Input:\nPlease enter a valid Australian phone number including area code", "Registration Error");
+					return;
+				}
+				if (!session.validateUsernameInput(tfUName.getText())){
+					// Error message
+					System.out.println("Invalid Username");
+					NotificationGUI.display("Invalid Username Input:\nPlease enter a Username containing only letters (A-Z,a-z)", "Registration Error");
+					return;
+				}
+				if (!session.validatePasswordStrength(tfPWord.getText())){
+					// Error message
+					System.out.println("Invalid Password");
+					NotificationGUI.display("Invalid Password Input:\nPlease enter a stronger Password", "Registration Error");
+					return;
+				}
+				
 
 				// register user or clear fields
 				if(session.registerUser(tfUName.getText(), tfPWord.getText(), tfName.getText(), tfAddress.getText(), tfPhone.getText())) {
@@ -108,43 +141,64 @@ public class RegisterGUI {
 			}
 		});
 
-		tfUName.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		tfUName.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
-				// TODO: input validation
+				// Character restrictions
 				System.out.println("key pressed in username text field");
+				tfUName.setStyle (
+						session.validateUsernameInput(tfUName.getText())
+						? "" : redBorder
+				);
 			}
 		});
 
-		tfPWord.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		tfPWord.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
-				// TODO: input validation
+				// Password strength
 				System.out.println("key pressed in password text field");
+				tfPWord.setStyle (
+						session.validatePasswordStrength(tfUName.getText())
+						? "" : redBorder
+				);
 			}
 		});
 
-		tfName.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		tfName.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
 				// TODO: input validation
 				System.out.println("Key pressed in Name text field");
+				tfName.setStyle (
+						session.validateNameInput(tfName.getText())
+						? "" : redBorder
+				);
 			}
 		});
 
-		tfAddress.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		tfAddress.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
 				// TODO: input validation
 				System.out.println("Key pressed in Address text field");
+				tfAddress.setStyle (
+						session.validateAddressInput(tfUName.getText())
+						? "" : redBorder
+				);
+
 			}
 		});
 
-		tfPhone.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		tfPhone.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
 				// TODO: input validation
 				System.out.println("Key pressed in Phone text field");
+				tfPhone.setStyle (
+						session.validatePhoneInput(tfPhone.getText())
+						? "" : redBorder
+				);
 			}
 		});
 
@@ -162,7 +216,7 @@ public class RegisterGUI {
 
 		Scene scene = new Scene(root/*, 300, 200*/);//create area inside window
 /*
-		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
 				// TODO: input validation
@@ -182,3 +236,4 @@ public class RegisterGUI {
 	}
 
 }
+
