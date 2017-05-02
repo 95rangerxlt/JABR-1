@@ -14,6 +14,7 @@ class TimetableGUI extends GridPane {
 	public TimetableCellGUI cells[][];//GUI
 	public TimetableCellGUI.Type type;
 	public Timetable timetable;
+	ToggleGroup tg;
 
 	public TimetableGUI() {
 		this(new Timetable(true));
@@ -24,12 +25,12 @@ class TimetableGUI extends GridPane {
 		this.timetable = table;
 		System.out.println("TimetableGUI:table.table.size (days) ="+table.table.size());
 		if(table.table.size() > 0) {
-					System.out.println("TimetableGUI:table.table.get(0).size (hours in first day) ="+table.table.get(0).size());
-					cells = new TimetableCellGUI[this.table.size()][this.table.get(0).size()];
-				} else {
-					System.out.println("TimetableGUI:constructing empty table");
-					cells = new TimetableCellGUI[0][0];
-				}
+			System.out.println("TimetableGUI:table.table.get(0).size (hours in first day) ="+table.table.get(0).size());
+			cells = new TimetableCellGUI[this.table.size()][this.table.get(0).size()];
+		} else {
+			System.out.println("TimetableGUI:constructing empty table");
+			cells = new TimetableCellGUI[0][0];
+		}
 		type = TimetableCellGUI.Type.CHECKBOX;
 		System.out.println("a");
 		setupSpacing();
@@ -42,15 +43,17 @@ class TimetableGUI extends GridPane {
 		this.table = table.table;
 		this.type = type;
 		this.timetable = table;
+		if(type == TimetableCellGUI.Type.RADIOBUTTON) {
+			this.tg = new ToggleGroup();
+		}
 		System.out.println("TimetableGUI:table.table.size (days) ="+table.table.size());
 		if(table.table.size() > 0) {
-					System.out.println("TimetableGUI:table.table.get(0).size (hours in first day) ="+table.table.get(0).size());
-					cells = new TimetableCellGUI[this.table.size()][this.table.get(0).size()];
-				} else {
-					System.out.println("TimetableGUI:constructing empty table");
-					cells = new TimetableCellGUI[0][0];
-				}
-		type = TimetableCellGUI.Type.CHECKBOX;
+			System.out.println("TimetableGUI:table.table.get(0).size (hours in first day) ="+table.table.get(0).size());
+			cells = new TimetableCellGUI[this.table.size()][this.table.get(0).size()];
+		} else {
+			System.out.println("TimetableGUI:constructing empty table");
+			cells = new TimetableCellGUI[0][0];
+		}
 		System.out.println("a");
 		setupSpacing();
 		System.out.println("a");
@@ -123,7 +126,11 @@ class TimetableGUI extends GridPane {
 				switch(this.table.get(i).get(j)) {
 					case FREE:
 						// System.out.println("CELL TYPE: FREE");
-						cells[i][j] = new TimetableCellGUI(type, new String[] {"FREE", "BOOKED_BY_YOU", "BOOKED"}, false, 120, 40);
+						if(this.type == TimetableCellGUI.Type.RADIOBUTTON) {
+							cells[i][j] = new TimetableCellGUI(type, new String[] {"FREE", "BOOKED_BY_YOU", "BOOKED"}, false, 120, 40, tg);
+						} else {
+							cells[i][j] = new TimetableCellGUI(type, new String[] {"FREE", "BOOKED_BY_YOU", "BOOKED"}, false, 120, 40);
+						}
 						// cells[i][j].border.setFill(Color.WHITE);
 					break;
 					case BOOKED:
@@ -133,7 +140,11 @@ class TimetableGUI extends GridPane {
 					break;
 					case BOOKED_BY_YOU:
 						// System.out.println("CELL TYPE: BOOKED_BY_YOU");
-						cells[i][j] = new TimetableCellGUI(type, new String[] {"FREE", "BOOKED_BY_YOU", "BOOKED"}, true, 120, 40);
+						if(this.type == TimetableCellGUI.Type.RADIOBUTTON) {
+							cells[i][j] = new TimetableCellGUI(type, new String[] {"FREE", "BOOKED_BY_YOU", "BOOKED"}, true, 120, 40, tg);
+						} else {
+							cells[i][j] = new TimetableCellGUI(type, new String[] {"FREE", "BOOKED_BY_YOU", "BOOKED"}, true, 120, 40);
+						}
 						// cells[i][j].border.setFill(Color.LIGHTGRAY);
 					break;
 					case UNAVAILABLE:

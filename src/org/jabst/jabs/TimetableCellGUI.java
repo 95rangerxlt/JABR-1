@@ -62,6 +62,11 @@ public class TimetableCellGUI extends StackPane {
 		});
 	}
 
+	public TimetableCellGUI(Type type, String[] states, boolean selected, int width, int height, ToggleGroup tg) {
+		this(type, states, selected, width, height);
+		selectable.setToggleGroup(tg);
+	}
+
 	public void update() {
 		if(type == Type.NONE) {
 			return;
@@ -105,6 +110,10 @@ class Selectable extends StackPane {
 	public Selectable(TimetableCellGUI.Type type, String name) {
 		this(type);
 		get().setText(name);
+	}
+
+	public void setToggleGroup(ToggleGroup tg) {
+		button.setToggleGroup(tg);
 	}
 
 	public ButtonBase get() {

@@ -39,7 +39,7 @@ public class CustomerMenuGUI {
 		System.out.println("a");
 		table.createTablesOfType(Timetable.CellStatus.UNAVAILABLE);
 		System.out.println("a");
-		TimetableGUI tableGUI = new TimetableGUI(createTableFromAppointments(constructAppointments(employeeManager), table), TimetableCellGUI.Type.CHECKBOX);
+		TimetableGUI tableGUI = new TimetableGUI(createTableFromAppointments(constructAppointments(employeeManager), table), TimetableCellGUI.Type.RADIOBUTTON);
 		//the constructor already calls setupSpacing
 		// tableGUI.update();
 		System.out.println("CUST MENU: table created");
@@ -96,12 +96,16 @@ public class CustomerMenuGUI {
 		for(int i = 0; i < apts.size(); i++) {
 
 			int dayIdx = DayOfWeekConversion.dat2wd(apts.get(i).getDate()).dayOfWeek.getValue();
-			int hourIdx = DayOfWeekConversion.dat2wd(apts.get(i).getDate()).getTime() - Employee.startingHour;//this still isnt properly defined
+			int hourIdx = DayOfWeekConversion.dat2wd(apts.get(i).getDate()).getStartingHour() - Employee.startingHour;//this still isnt properly defined
+			System.out.println("appointment date: "+ apts.get(i).getDate().toString());
+			System.out.println("appointment weekdate: "+ DayOfWeekConversion.dat2wd(apts.get(i).getDate()).toString());
 
 			if (hourIdx < 0 || hourIdx > table.hours) {
+				System.out.println("Skipping Appointment:\n"+apts.get(i).toString());
+				System.out.println("HourIDX ("+hourIdx+") was less than 0 or greater than "+table.hours);
 				continue;
 			}
-			table.table.get(dayIdx).set(hourIdx, Timetable.CellStatus.BOOKED_BY_YOU);
+			table.table.get(dayIdx).set(hourIdx, Timetable.CellStatus.FREE);
 			c++;
 		}
 		System.out.println("CREATETABLEFROMAPPOINTMENTS: number of available cells: "+c);
@@ -126,15 +130,19 @@ public class CustomerMenuGUI {
 		ArrayList<Appointment> fakeAppointments = new ArrayList<Appointment>();
 		ArrayList<String> emps = empMan.getEmployeeNameIDs();
 		ArrayList<Employee> employees = new ArrayList<Employee>();
+		System.out.println(emps.toString());
 
 		for(int i = 0; i < emps.size(); i++) {//need a better way to get all employees
 			String [] employeeFields = emps.get(i).toString().split(" #");
+			System.out.println(employeeFields.toString());
 			long employeeID = Long.parseLong(employeeFields[1]);
 			employees.add(empMan.getEmployee(employeeID));
+			System.out.println(employees.toString());
 
 			System.out.println("b");
 			//this will only go out of bounds if the ID is somehow wrong
 			ArrayList<WeekDate> dates = employees.get(i).getWorkingHours();
+			System.out.println(dates.toString());
 			System.out.println("b");
 			for(int j = 0; j < dates.size(); j++) {
 				fakeAppointments.add(new Appointment(dates.get(i), -1, employeeID, theCustomerIDontHave));
@@ -142,6 +150,7 @@ public class CustomerMenuGUI {
 
 			System.out.println("b");
 		}
+		System.out.println(fakeAppointments.toString());
 		System.out.println("bb");
 		//yes, this is java. fuck efficiency.
 		//we have super computers in our pockets
@@ -151,16 +160,15 @@ public class CustomerMenuGUI {
 
 					System.out.println("c");
 					if(employees.get(i).appointments.get(j).getDate().equals(fakeAppointments.get(k).getDate())) {
-						System.out.println("d");
+						System.out.println("deleting appointment:\n"+fakeAppointments.get(k).getDate());
 						fakeAppointments.remove(k);
-						System.out.println("d");
 						break;
 					}
 					System.out.println("c");
 				}
 			}
 		}
-		System.out.println("constructAppointments finished");
+		System.out.println("constructAppointments finished ("+fakeAppointments.size()+" appointments)");
 		return fakeAppointments;
 	}/*
 
