@@ -24,10 +24,12 @@ public class Appointment {
         
     }
     
+    /** Gets the date that the appointment starts at **/
     public Date getDate() {
         return dateAndTime;
     }
     
+    /** Gets the duration of this appointment type */
     public Duration getDuration() {
         // Ask the appointment type for the duration
         return AppointmentType.getByID(appointmentType).getDuration();
