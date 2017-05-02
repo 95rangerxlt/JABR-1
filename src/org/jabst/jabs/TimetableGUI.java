@@ -22,14 +22,40 @@ class TimetableGUI extends GridPane {
 	public TimetableGUI(Timetable table) {
 		this.table = table.table;
 		this.timetable = table;
-		System.out.println("TimetableGUI:table.table.size="+table.table.size());
-		if(table.table.size() > 0)
-			cells = new TimetableCellGUI[this.table.size()][this.table.get(0).size()];
-		else
-			cells = new TimetableCellGUI[0][0];
+		System.out.println("TimetableGUI:table.table.size (days) ="+table.table.size());
+		if(table.table.size() > 0) {
+					System.out.println("TimetableGUI:table.table.get(0).size (hours in first day) ="+table.table.get(0).size());
+					cells = new TimetableCellGUI[this.table.size()][this.table.get(0).size()];
+				} else {
+					System.out.println("TimetableGUI:constructing empty table");
+					cells = new TimetableCellGUI[0][0];
+				}
 		type = TimetableCellGUI.Type.CHECKBOX;
+		System.out.println("a");
 		setupSpacing();
+		System.out.println("a");
 		update();
+		System.out.println("a");
+	}
+
+	public TimetableGUI(Timetable table, TimetableCellGUI.Type type) {
+		this.table = table.table;
+		this.type = type;
+		this.timetable = table;
+		System.out.println("TimetableGUI:table.table.size (days) ="+table.table.size());
+		if(table.table.size() > 0) {
+					System.out.println("TimetableGUI:table.table.get(0).size (hours in first day) ="+table.table.get(0).size());
+					cells = new TimetableCellGUI[this.table.size()][this.table.get(0).size()];
+				} else {
+					System.out.println("TimetableGUI:constructing empty table");
+					cells = new TimetableCellGUI[0][0];
+				}
+		type = TimetableCellGUI.Type.CHECKBOX;
+		System.out.println("a");
+		setupSpacing();
+		System.out.println("a");
+		update();
+		System.out.println("a");
 	}
 
 	public void setTable(ArrayList<ArrayList<Timetable.CellStatus>> table) {
@@ -61,12 +87,17 @@ class TimetableGUI extends GridPane {
 
 	//sets GUI from data
 	public void update() {
+		System.out.println("Updating GUI table from DATA");
 		if(this.table.size() == 0)
 			return;//something went wrong
-		for(int j = 0; j < this.table.get(0).size(); j++) {
-			for(int i = 0; i < this.table.size(); i++) {
+		for(int i = 0; i < this.table.size(); i++) {
+			for(int j = 0; j < this.table.get(i).size(); j++) {
+				// System.out.println("HOUR IDX: "+j);
+				// System.out.println("DAY IDX: "+i);
 				if(allEmployees) {
+					// System.out.println("constructing for all employee\ncreating cell:");
 					cells[i][j] = new TimetableCellGUI(TimetableCellGUI.Type.NONE, new String[] {"", "", ""}, false, 120, 40);
+					// System.out.println("cell constructed");
 					switch(this.table.get(i).get(j)) {
 						case FREE:
 							// System.out.println("setting border fill to WHITE");
@@ -80,23 +111,38 @@ class TimetableGUI extends GridPane {
 							// System.out.println("setting border fill to LIGHTGRAY");
 							cells[i][j].border.setFill(Color.LIGHTGRAY);
 						break;
+						default:
+							System.out.println("ERROR: CellStatus "+this.table.get(i).get(j)+" not found");
+						break;
 					}
 					cells[i][j].border.setStroke(Color.GRAY);
 					this.add(cells[i][j], i, j);
 					continue;
 				}
+				// System.out.println("not constructing for all employees");
 				switch(this.table.get(i).get(j)) {
 					case FREE:
+						// System.out.println("CELL TYPE: FREE");
 						cells[i][j] = new TimetableCellGUI(type, new String[] {"FREE", "BOOKED_BY_YOU", "BOOKED"}, false, 120, 40);
 						// cells[i][j].border.setFill(Color.WHITE);
 					break;
 					case BOOKED:
+						// System.out.println("CELL TYPE: BOOKED");
 						cells[i][j] = new TimetableCellGUI(TimetableCellGUI.Type.NONE, new String[] {"FREE", "BOOKED_BY_YOU", "BOOKED"}, false, 120, 40);
 						cells[i][j].border.setFill(Color.RED);//special case, color is not decided by selectable
 					break;
 					case BOOKED_BY_YOU:
+						// System.out.println("CELL TYPE: BOOKED_BY_YOU");
 						cells[i][j] = new TimetableCellGUI(type, new String[] {"FREE", "BOOKED_BY_YOU", "BOOKED"}, true, 120, 40);
 						// cells[i][j].border.setFill(Color.LIGHTGRAY);
+					break;
+					case UNAVAILABLE:
+						// System.out.println("CELL TYPE: UNAVAILABLE");
+						cells[i][j] = new TimetableCellGUI(TimetableCellGUI.Type.NONE, new String[] {"", "", ""}, false, 120, 40);
+						cells[i][j].border.setFill(Color.RED);//special case, color is not decided by selectable
+					break;
+					default:
+						System.out.println("ERROR: CellStatus "+this.table.get(i).get(j)+" not found");
 					break;
 				}
 				cells[i][j].border.setStroke(Color.GRAY);
@@ -104,6 +150,7 @@ class TimetableGUI extends GridPane {
 				this.add(cells[i][j], i, j);
 			}
 		}
+		System.out.println("TIMETABLEGUI: FINISHED Updating GUI table from DATA");
 	}
 
 	public void setupSpacing() {

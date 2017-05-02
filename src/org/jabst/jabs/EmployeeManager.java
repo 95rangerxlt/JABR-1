@@ -92,6 +92,9 @@ public class EmployeeManager {
 				System.out.println("getting Employee: " + employeeID);
 				return dbm.getEmployee(employeeID);
 			} catch (SQLException sqle) {
+				//stacktrace plz
+				System.out.println("EMPLOYEE MANAGER: can not get employee "+ employeeID);
+				sqle.printStackTrace();
 				return null;
 			}
 		}
