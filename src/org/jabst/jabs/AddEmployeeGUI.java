@@ -75,10 +75,14 @@ public class AddEmployeeGUI {
 			public void handle(ActionEvent event) {
 				info.button = AddEmployeeInfo.Buttons.SAVE;
 				//sets data = GUI
+				System.out.println("Saving Employees");
 				table.updateTableFromCells();
 				if (currEmployee != null) {
 					currEmployee.name = tfName.getText();
 					currEmployee.createWeekDatesFromTable();
+					if(employeeManager == null) {
+						System.out.println("employeeManager is null");
+					}
 					System.out.println(
 						employeeManager.updateEmployee(currEmployee) ?
 						"Succesfully saved employee." :

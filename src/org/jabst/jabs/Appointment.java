@@ -10,7 +10,7 @@ public class Appointment {
 
 	private Date dateAndTime;
 	/** This should refer to a valid type ID from the database */
-	private int appointmentType;// that enum tho
+	int appointmentType;// that enum tho
 	/** Should refer to a valid employee ID from the database */
 	private long employeeID;
 	/** Customer object */

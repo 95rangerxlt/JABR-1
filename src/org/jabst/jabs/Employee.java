@@ -44,11 +44,11 @@ public class Employee {
 		if(table.table.size() > 0) {//make sure there is data
 			// nested loops for nested arrays
 			for(int i = 0; i < table.table.size(); i++) {//days
-				for(int j = 0; j < table.table.get(0).size(); j++) {//hours
+				for(int j = 0; j < table.table.get(i).size(); j++) {//hours
 
 					if(table.table.get(i).get(j) == Timetable.CellStatus.BOOKED_BY_YOU) {
 						// create weekdate
-						WeekDate timeSlot = new WeekDate(DayOfWeek.of(i), 0);
+						WeekDate timeSlot = new WeekDate(DayOfWeek.of(i == 0 ? 7 : i), 0);//index starts at 1 for some reason
                         // Hour = cellIdx + startingHour
 						timeSlot.setTimeOfDayHour(j+startingHour);
                         this.workingHours.add(timeSlot);
@@ -88,6 +88,7 @@ public class Employee {
 		// fill tables
 		for(int i = 0; i < dates.size(); i++) {
 			int dayIdx = dates.get(i).getDayOfWeek().getValue();
+			dayIdx = (dayIdx == 7 ? 0 : dayIdx);
 			int hourIdx = dates.get(i).getStartingHour() - startingHour;
 
             if (hourIdx < 0) {
@@ -95,7 +96,6 @@ public class Employee {
                         +"WeekDate:"+dates.get(i));
                 continue;
             }
-
 			table.table.get(dayIdx).set(hourIdx, Timetable.CellStatus.BOOKED_BY_YOU);
 		}
 		return table;

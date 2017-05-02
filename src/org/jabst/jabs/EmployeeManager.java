@@ -46,6 +46,34 @@ public class EmployeeManager {
 		try {
 			return dbm.updateEmployee(employee);
 		} catch (SQLException sqle) {
+			sqle.printStackTrace();//PLZ PRINT STACK TRACES
+			return false;
+		}
+	}
+
+	public ArrayList<Appointment> getThisWeeksAppointments() {
+		try {
+			return dbm.getThisWeeksAppointments();
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();//PLZ PRINT STACK TRACE
+			return null;
+		}
+	}
+
+	public ArrayList<WeekDate> getSevenDayEmployeeAvailability(boolean duplicates) {
+		try {
+			return dbm.getSevenDayEmployeeAvailability(!duplicates);
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();//PLZ PRINT STACK TRACE
+			return null;
+		}
+	}
+
+	public boolean saveAppointment(Appointment apt) {
+		try {
+			return dbm.saveAppointment(apt);
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();//PLZ PRINT STACK TRACE
 			return false;
 		}
 	}

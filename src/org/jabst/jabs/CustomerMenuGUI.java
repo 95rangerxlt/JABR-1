@@ -19,10 +19,12 @@ public class CustomerMenuGUI {
 
 	private static String redBorder = "-fx-border-color: red ; -fx-border-width: 2px ;";
 
-	static Customer theCustomerIDontHave = new Customer("fake_username", "NeEdCuRrEnTlYlOgGeDiNcUsToMeR", "noaddress", "nophone");
+	static Customer customer = new Customer("fake_username", "NeEdCuRrEnTlYlOgGeDiNcUsToMeR", "noaddress", "nophone");
+	static Appointment[][] tableAnalogue;
 
 	public static CustomerInfo display(SessionManager session, Customer cust) {
 		// setup object to return
+		customer = cust;
 		CustomerInfo info = new CustomerInfo();
 		EmployeeManager employeeManager = session.getEmployeeManager();
 		Employee allEmployees = employeeManager.getEmployee(-1, true);//get all employees and allow duplicate WeekDates
@@ -36,9 +38,8 @@ public class CustomerMenuGUI {
 
 		System.out.println("CUST MENU: creating table");
 		Timetable table = new Timetable(true);
-		System.out.println("a");
+		tableAnalogue = new Appointment[table.days][table.hours];
 		table.createTablesOfType(Timetable.CellStatus.UNAVAILABLE);
-		System.out.println("a");
 		TimetableGUI tableGUI = new TimetableGUI(createTableFromAppointments(constructAppointments(employeeManager), table), TimetableCellGUI.Type.RADIOBUTTON);
 		//the constructor already calls setupSpacing
 		// tableGUI.update();
@@ -54,6 +55,19 @@ public class CustomerMenuGUI {
 			@Override
 			public void handle(ActionEvent event) {
 				info.button = CustomerInfo.Buttons.OK;
+				boolean flag = false;
+				for(int i = 0; i < tableGUI.cells.length; i++) {
+					if(flag)
+						break;
+					for(int j = 0; j < tableGUI.cells[i].length; j++) {
+						if(tableGUI.cells[i][j].selectable.isSelected()) {
+							flag = true;
+							tableAnalogue[i][j].appointmentType = 0;
+							if(!employeeManager.saveAppointment(tableAnalogue[i][j]))
+								System.out.println("Appointment not saved");
+						}
+					}
+				}
 				window.close();
 			}
 		});
@@ -96,6 +110,7 @@ public class CustomerMenuGUI {
 		for(int i = 0; i < apts.size(); i++) {
 
 			int dayIdx = DayOfWeekConversion.dat2wd(apts.get(i).getDate()).dayOfWeek.getValue();
+			dayIdx = (dayIdx == 7 ? 0 : dayIdx);
 			int hourIdx = DayOfWeekConversion.dat2wd(apts.get(i).getDate()).getStartingHour() - Employee.startingHour;//this still isnt properly defined
 			System.out.println("appointment date: "+ apts.get(i).getDate().toString());
 			System.out.println("appointment weekdate: "+ DayOfWeekConversion.dat2wd(apts.get(i).getDate()).toString());
@@ -105,6 +120,7 @@ public class CustomerMenuGUI {
 				System.out.println("HourIDX ("+hourIdx+") was less than 0 or greater than "+table.hours);
 				continue;
 			}
+			tableAnalogue[dayIdx][hourIdx] = apts.get(i);
 			table.table.get(dayIdx).set(hourIdx, Timetable.CellStatus.FREE);
 			c++;
 		}
@@ -145,7 +161,7 @@ public class CustomerMenuGUI {
 			System.out.println(dates.toString());
 			System.out.println("b");
 			for(int j = 0; j < dates.size(); j++) {
-				fakeAppointments.add(new Appointment(dates.get(i), -1, employeeID, theCustomerIDontHave));
+				fakeAppointments.add(new Appointment(dates.get(j), -1, employeeID, customer));
 			}
 
 			System.out.println("b");
@@ -170,10 +186,32 @@ public class CustomerMenuGUI {
 		}
 		System.out.println("constructAppointments finished ("+fakeAppointments.size()+" appointments)");
 		return fakeAppointments;
-	}/*
-
+	}
+/*
 	private static ArrayList<Appointment> constructAppointments(EmployeeManager empMan) {
-		//TODO: make a better version
+		ArrayList<Appointment> fakeAppointments = new ArrayList<Appointment>();
+		//get a list of appointments
+		ArrayList<Appointment> realAppointments = empMan.getThisWeeksAppointments();
+		// get a list of availability
+		ArrayList<WeekDate> availability = empMan.getSevenDayEmployeeAvailability(true);//with duplicates please
+		// for each availability
+		for(int i = 0; i < availability.size(); i++) {
+			// for each appointment
+			boolean flag = false;
+			for(int j = 0; j < realAppointments.size(); j++) {
+				// if appointment.time == availability.time && appointment.employee == availability.employee
+				if()
+					flag = true;
+					//flag = true
+			}
+			//if !flag
+			if(!flag) {
+				//create fake appointment
+				Appointment app = new Appointment(availability.get(i), -1, , customer);
+				fakeAppointments.add(app);
+			}
+		}
+		return fakeAppointments;
 	}*/
 
 }

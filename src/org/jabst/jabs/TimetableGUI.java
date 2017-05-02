@@ -76,8 +76,8 @@ class TimetableGUI extends GridPane {
 			return;//something went wrong
 		if(this.cells[0].length == 0)
 			return;//something went wrong
-		for(int j = 0; j < cells[0].length; j++) {
-			for(int i = 0; i < cells.length; i++) {
+		for(int i = 0; i < cells.length; i++) {
+			for(int j = 0; j < cells[i].length; j++) {
 				if(cells[i][j].selectable.isSelected()) {
 					this.table.get(i).set(j, Timetable.CellStatus.BOOKED_BY_YOU);
 				} else {
@@ -95,8 +95,8 @@ class TimetableGUI extends GridPane {
 			return;//something went wrong
 		for(int i = 0; i < this.table.size(); i++) {
 			for(int j = 0; j < this.table.get(i).size(); j++) {
-				// System.out.println("HOUR IDX: "+j);
 				// System.out.println("DAY IDX: "+i);
+				// System.out.println("HOUR IDX: "+j);
 				if(allEmployees) {
 					// System.out.println("constructing for all employee\ncreating cell:");
 					cells[i][j] = new TimetableCellGUI(TimetableCellGUI.Type.NONE, new String[] {"", "", ""}, false, 120, 40);
