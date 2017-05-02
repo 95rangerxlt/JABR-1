@@ -8,6 +8,8 @@ import javafx.scene.layout.HBox;
 import javafx.event.EventHandler;//this activates when a button is pressed
 import javafx.event.ActionEvent;//type of event
 import javafx.scene.paint.Color;
+import javafx.beans.value.*;
+
 
 public class TimetableCellGUI extends StackPane {
 	
@@ -37,6 +39,7 @@ public class TimetableCellGUI extends StackPane {
 			this.getChildren().addAll(border, selectable);
 
 		selectable.setSelected(selected);
+		selectable.parent = this;
 		update();
 
 		// when the checkbox/radiobutton is pressed
@@ -50,7 +53,7 @@ public class TimetableCellGUI extends StackPane {
 						System.out.println("Checkbox checked!");
 					break;
 					case RADIOBUTTON:
-						// TODO
+						// TODO deselect the other one
 						System.out.println("Radiobutton Selected!");
 					break;
 					default:
@@ -60,6 +63,19 @@ public class TimetableCellGUI extends StackPane {
 				update();
 			}
 		});
+
+		//when something is deselected
+		if(type == Type.RADIOBUTTON) {
+			selectable.button.selectedProperty().addListener(new ChangeListener<Boolean>() {
+				@Override
+				public void changed(ObservableValue<? extends Boolean> obs, Boolean wasPreviousySelected, Boolean isNowSelected) {
+					if(wasPreviousySelected) {
+						border.setFill(Color.WHITE);
+						System.out.println(""+type+" Deselected!");
+					}
+				}
+			});
+		}
 	}
 
 	public TimetableCellGUI(Type type, String[] states, boolean selected, int width, int height, ToggleGroup tg) {
@@ -84,7 +100,8 @@ public class TimetableCellGUI extends StackPane {
 class Selectable extends StackPane {
 	public TimetableCellGUI.Type type;
 	private CheckBox checkbox;
-	private RadioButton button;
+	RadioButton button;
+	TimetableCellGUI parent;
 
 	public Selectable() {
 		this(TimetableCellGUI.Type.NONE);
