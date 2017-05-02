@@ -145,4 +145,8 @@ public class Employee {
 		this.workingHours = workingHours;
 	}
 
+    public String toString() {
+        
+    }
+
 }

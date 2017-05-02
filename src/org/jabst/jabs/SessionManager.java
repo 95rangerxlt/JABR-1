@@ -51,60 +51,74 @@ public class SessionManager extends Application {
 					else if (lInfo.button == LoginInfo.Buttons.CLOSE) {
 						shutdown();
 					}
-                    break;
-                    case REGISTER:
-                    RegisterInfo rInfo = RegisterGUI.display(this, username, password);
-                    username = rInfo.username;
-                    password = rInfo.password;
-                    if(rInfo.button == RegisterInfo.Buttons.REGISTER) {
+					break;
+				case REGISTER:
+					RegisterInfo rInfo = RegisterGUI.display(this, username, password);
+					username = rInfo.username;
+					password = rInfo.password;
+					if(rInfo.button == RegisterInfo.Buttons.REGISTER) {
 						// open respective window
-                      load_database();
-                      currentWindow = Window.LOGIN;
-                  } else if(rInfo.button == RegisterInfo.Buttons.LOGIN) {
-						// open register window
-                      currentWindow = Window.LOGIN;
-                  }
-                  break;
-                  case BUSINESSMENU:
-                  try {
-                   dbm.connectToBusiness(username);
-               } catch (SQLException sqle) {
-						// TODO: Visual cue
-                  System.err.println("Cannot connect to business:"+username);
-                  currentWindow = Window.LOGIN;
-                  break;
-              }
-              username = "";
-              password = "";
-              BusinessInfo bInfo = BusinessMenuGUI.display(this);
-              if(bInfo.button == BusinessInfo.Buttons.LOGOUT) {
-                  currentWindow = Window.LOGIN;
+						load_database();
+						currentWindow = Window.LOGIN;
 					}
-                    break;
-                    case CUSTOMERMENU:
-                    try {
-                      dbm.connectToBusiness();
-                  } catch (SQLException sqle) {
+					else if(rInfo.button == RegisterInfo.Buttons.LOGIN) {
+						// open register window
+						currentWindow = Window.LOGIN;
+					}
+					break;
+				case BUSINESSMENU:
+					try {
+						dbm.connectToBusiness(username);
+					} catch (SQLException sqle) {
 						// TODO: Visual cue
-                      System.err.println("Error connecting to default"
-                         +" business for customer menu");
-                      currentWindow = Window.LOGIN;
-                      break;
-                  }
-                  CustomerInfo cInfo = CustomerMenuGUI.display(this, /*TODO: get customer */);
-                  if(cInfo.button == CustomerInfo.Buttons.OK) {
-                      shutdown();
-                  }
-                  break;
-                  case ADDEMPLOYEE:
-                  AddEmployeeInfo aInfo = AddEmployeeGUI.display(this);
-                  if(aInfo.button == AddEmployeeInfo.Buttons.SAVE) {
-                      shutdown();
-                  }
-                  break;
-              }
-          }
-
+						System.err.println("Cannot connect to business:"+username);
+						currentWindow = Window.LOGIN;
+						break;
+					}
+					username = "";
+					password = "";
+					BusinessInfo bInfo = BusinessMenuGUI.display(this);
+					if(bInfo.button == BusinessInfo.Buttons.LOGOUT) {
+						currentWindow = Window.LOGIN;
+					}
+						break;
+				case CUSTOMERMENU:
+					try {
+					dbm.connectToBusiness();
+					} catch (SQLException sqle) {
+						// TODO: Visual cue
+						System.err.println("Error connecting to default"
+							+" business for customer menu");
+						currentWindow = Window.LOGIN;
+						break;
+					}
+                    CustomerInfo cInfo;
+                    try {
+                         cInfo = CustomerMenuGUI.display(
+                                     this, dbm.getCustomer(username)
+                                 );
+                    } catch (SQLException sqle) {
+                        // TODO: Visual cue
+                        System.err.println("Error getting customer info for"
+                            +" customer="+username);
+                        currentWindow = Window.LOGIN;
+                        break;
+                    } 
+					// Only remove these after username is no longer needed
+					username = "";
+					password = "";
+					if(cInfo.button == CustomerInfo.Buttons.OK) {
+						shutdown();
+					}
+					break;
+				case ADDEMPLOYEE:
+					AddEmployeeInfo aInfo = AddEmployeeGUI.display(this);
+					if(aInfo.button == AddEmployeeInfo.Buttons.SAVE) {
+						shutdown();
+					}
+					break;
+			}
+		}
 	}
 	
 	void shutdown() {

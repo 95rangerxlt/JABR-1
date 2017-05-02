@@ -402,6 +402,54 @@ public class DatabaseManager {
         generalConnection.commit();
     }
     
+    /** Gets the customer with the given username. Customers are uniquely
+      * identified in the database by their username.
+      * @param username The customer's username
+      * @return A Customer object with the customer's username, name,
+      * address, and phone number.
+      * @throws SQLException If a database error occurs
+      */
+    public Customer getCustomer(String username) throws SQLException {
+        // Get the customer by username
+        Statement stmt = generalConnection.createStatement();
+        ResultSet rs = stmt.executeQuery(
+            "SELECT USERNAME, NAME, ADDRESS, PHONE FROM CUSTOMERS "
+           +"WHERE USERNAME='"+username+"'"
+        );
+        // Construct the customer as object and return
+        rs.next();
+        return new Customer (
+            rs.getString(1),
+            rs.getString(2),
+            rs.getString(3),
+            rs.getString(4)
+        );
+    }
+    
+    /** Returns all the customers in the database as ArrayList<Customer>
+      * @throws SQLException If a database error occurs
+      */
+    public ArrayList<Customer> getAllCustomers() throws SQLException {
+        ArrayList<Customer> customers = new ArrayList<Customer>();
+        // Ask database for all customers
+        PreparedStatement pstmt = generalConnection.prepareStatement(
+            "SELECT USERNAME, NAME, ADDRESS, PHONE FROM CUSTOMERS "
+        );
+        ResultSet rs = pstmt.executeQuery();
+        // Construct the customer as object and return
+        while (rs.next()) {
+            customers.add (
+                new Customer (
+                    rs.getString(1),
+                    rs.getString(2),
+                    rs.getString(3),
+                    rs.getString(4)
+                )
+            );
+        }
+        return customers;
+    }
+    
     private void scannerAddUser(Scanner sc) {
         String username, password, name, address, phone;
         byte[] digest;
@@ -491,8 +539,8 @@ public class DatabaseManager {
                     new Appointment(
                         rs.getDate("DATE_AND_TIME"),
                         rs.getInt("APPOINTMENT_TYPE"),
-                        rs.getInt("EMPLOYEE"),
-                        rs.getString("CUSTOMER")
+                        rs.getLong("EMPLOYEE"),
+                        getCustomer(rs.getString("CUSTOMER"))
                     )
                 );
             }
@@ -503,6 +551,42 @@ public class DatabaseManager {
             }
         }
         return appointments;
+    }
+
+    /** Attempts to save the appointment
+      * @param cust The customer to ask for a booking
+      * @param time The time to ask for a booking
+      * @return Whether the booking could be made. This depends on whether
+      * there is a free employee at the given time.
+      * @throws SQLException If a database error occurred
+      */
+    public boolean saveAppointment(Appointment apt)
+        throws SQLException
+    {
+        if (businessConnection == null || businessConnection.isClosed()) {
+            throw new SQLException("Not connected to a business");
+        }
+        
+        // Get the assigned employee
+        Employee emp = getEmployee(apt.getEmployeeID());
+        System.out.println("Employee got: "+emp);
+        // If they are not free at appointment time, reject
+        if (emp.appointmentHours.contains(apt.getDate())) {
+            return false;
+        }
+        
+        // Add the appointment to the database
+        PreparedStatement pstmt = businessConnection.prepareStatement(
+            "INSERT INTO APPOINTMENT "
+           +"VALUES (default, ?, ?, ?, ?)"
+        );
+        pstmt.setTimestamp(1, new java.sql.Timestamp(apt.getDate().getTime()));
+        pstmt.setInt(2, apt.getAppointmentType());
+        pstmt.setLong(3, apt.getEmployeeID());
+        pstmt.setString(4, apt.getCustomer().username);
+        pstmt.execute();
+        
+        return true;
     }
     
     /** Returns the availability of employees for these 7 days.
@@ -526,8 +610,9 @@ public class DatabaseManager {
         try {
             rs = stmt.executeQuery (
                 "SELECT "+(distinct ? "DISTINCT " : "")
-                +"AVAILABLE_DAY, AVAILABLE_TIME"
-                +"FROM AVAILABILITY"
+                +"AVAILABLE_DAY, AVAILABLE_TIME "
+                +"FROM AVAILABILITY "
+                +"ORDER BY AVAILABLE_DAY, AVAILABLE_TIME "
             );
         }
         catch (SQLException sqle) {
@@ -631,8 +716,8 @@ public class DatabaseManager {
                     new Appointment (
                         new Date(rs.getTimestamp(1).getTime()), //DATE_AND_TIME
                         rs.getInt(2), // APPOINTMENT_TYPE
-                        rs.getInt(3), // EMPLOYEE
-                        rs.getString(4) // CUSTOMER
+                        rs.getLong(3), // EMPLOYEE
+                        getCustomer(rs.getString(4)) // CUSTOMER
                     )
                 );
             }
@@ -977,6 +1062,30 @@ public class DatabaseManager {
                 "Didn't find a user with that username"
         );
     }
+
+    private void scannerSaveAppointment(Scanner sc) throws SQLException {
+        // Create a new Calendar at the start of the requested hour, on Monday.
+        System.out.println("Making appointment for this Monday. Which hour?");
+        int hour = Integer.parseInt(sc.next());
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        cal.set(Calendar.HOUR, hour);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MINUTE, 0);
+        Date dateAndTime = cal.getTime();
+
+        System.out.println("Date and time made: "+dateAndTime);
+        System.out.println("Default customer got as:"
+                +getCustomer("default_customer"));
+
+        // Try booking a new appointment at the given hour with employee 0, of
+        // type 0, as the default customer
+        Appointment apt = new Appointment (
+            dateAndTime, 0, 0, getCustomer("default_customer")
+        );
+        saveAppointment(apt);
+    }
+
     /**
       * This main exists to interactively test the code in DatabaseManager. It is
       * not the entry point to the actual application
@@ -1057,6 +1166,19 @@ public class DatabaseManager {
                     for (WeekDate d : availability) {
                         System.out.println(d);
                     }
+                    break;
+                case "7days":
+                    ArrayList<WeekDate> avail =
+                        dbm.getSevenDayEmployeeAvailability(false);
+                    break;
+                case "customer":
+                    System.out.println(dbm.getCustomer(sc.next()));
+                    break;
+                case "customers":
+                    System.out.println(dbm.getAllCustomers());
+                    break;
+                case "save_appointment":
+                    dbm.scannerSaveAppointment(sc);
                     break;
                 /*case "set_availability":
                     employee = sc.nextInt();

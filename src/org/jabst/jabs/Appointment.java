@@ -13,11 +13,11 @@ public class Appointment {
 	private int appointmentType;// that enum tho
 	/** Should refer to a valid employee ID from the database */
 	private long employeeID;
-	/** Customer's name */
-	private String customer;
+	/** Customer object */
+	private Customer customer;
 
 	public Appointment (Date dateAndTime, int appointmentType,
-		long employeeID, String customer)
+		long employeeID, Customer customer)
 	{
 		this.dateAndTime = dateAndTime;
 		this.appointmentType = appointmentType;
@@ -27,7 +27,7 @@ public class Appointment {
 	}
 
 	public Appointment (WeekDate weekDate, int appointmentType,
-		long employeeID, String customer)
+		long employeeID, Customer customer)
 	{
 		this(DayOfWeekConversion.wd2cal(weekDate).getTime(), appointmentType, employeeID, customer);
 	}
@@ -49,7 +49,7 @@ public class Appointment {
 		return employeeID;
 	}
 
-	public String getCustomer() {
+	public Customer getCustomer() {
 		return customer;
 	}
 

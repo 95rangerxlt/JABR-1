@@ -19,7 +19,7 @@ public class CustomerMenuGUI {
 
 	private static String redBorder = "-fx-border-color: red ; -fx-border-width: 2px ;";
 
-	static Customer theCustomerIDontHave = new Customer("NeEdCuRrEnTlYlOgGeDiNcUsToMeR", "noaddress", "nophone");
+	static Customer theCustomerIDontHave = new Customer("fake_username", "NeEdCuRrEnTlYlOgGeDiNcUsToMeR", "noaddress", "nophone");
 
 	public static CustomerInfo display(SessionManager session, Customer cust) {
 		// setup object to return
@@ -143,7 +143,7 @@ public class CustomerMenuGUI {
 
 			ArrayList<WeekDate> dates = empMan.getWorkingHours(employeeID);
 			for(int j = 0; j < dates.size(); j++) {
-				fakeAppointments.add(new Appointment(dates.get(i), -1, employeeID, theCustomerIDontHave.name));
+				fakeAppointments.add(new Appointment(dates.get(i), -1, employeeID, theCustomerIDontHave));
 			}
 		}
 		//yes, this is java. fuck efficiency.
