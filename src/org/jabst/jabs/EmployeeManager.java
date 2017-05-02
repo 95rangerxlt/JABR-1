@@ -5,6 +5,9 @@ import java.util.Date;
 
 import java.sql.SQLException;
 
+import org.jabst.jabs.util.DayOfWeekConversion;
+import java.util.Calendar;
+
 public class EmployeeManager {
 	//Fields
 	ArrayList<Employee> employees = new ArrayList<Employee>();
@@ -184,6 +187,97 @@ public class EmployeeManager {
 		} catch(SQLException sqle) {
 			System.out.println("EMPLOYEE MANAGER: \t\ncannot remove employee:");
 			sqle.printStackTrace();
+			return false;
+		}
+	}
+	
+	/** Checks whether there is an employee who is free at the given Date
+	  */
+	public boolean checkFreeEmployeeAt(Date reqDate) {
+		ArrayList<WeekDate> weekAvailability;
+		ArrayList<Appointment> weekAppointments;
+		try {
+			weekAvailability =
+				dbm.getSevenDayEmployeeAvailability(false);
+			weekAppointments =
+				dbm.getThisWeeksAppointments();
+		} catch (SQLException sqle) {
+			return false;
+		}
+
+		// Check if seven day availability has this date
+		// Generate the Date for all availability
+		boolean cont = false;
+		int availIdx;
+		for (availIdx = 0; availIdx < weekAvailability.size(); ++availIdx) {
+			Date queryDate =
+				DayOfWeekConversion.wd2cal(
+					weekAvailability.get(availIdx)
+				).getTime();
+			System.out.println("Compare converted date: "+queryDate);
+			if (queryDate.equals(reqDate)) {
+				cont = true;
+				break;
+			}
+		}
+		// Quit if weekAvailability contains no matching date
+		if (!cont) return false;
+		
+		// Count how many employees are free at reqDate
+		int freeEmpCount;
+		for (freeEmpCount = 0; availIdx < weekAvailability.size();
+			++availIdx, ++freeEmpCount)
+		{
+			if (DayOfWeekConversion.wd2cal(
+					weekAvailability.get(availIdx)
+				).getTime().equals(reqDate))
+			{
+				continue;
+			} else break;
+		}
+		
+		// Count how many appointments are occuring at reqDate
+		// FIXME: THIS IS STARTING FROM THE START OF APPOINTMENTS
+		// AND BREAKING IMMEDIATELY. FIRST PARSE FROM THE START OF THE ARRAY
+		// UNTIL WE FIND IT, THEN BREAK WHEN WE ARE DONE
+		
+		// Find the array index of the first appointment
+		int aptCount = 0;
+		int aptIdx;
+		for (aptIdx = 0; aptIdx < weekAppointments.size(); ++aptIdx) {
+			// Get the date
+			Date aptDate = weekAppointments.get(aptIdx).getDate();
+			System.out.println("aptDate="+aptDate);
+			System.out.println("reqDate="+reqDate);
+			if (aptDate.equals(reqDate)) {
+				++aptCount;
+				break;
+			} else continue;
+		}
+		
+		// Starting from the second appointment, keep adding until
+		// we reach something else or end of array
+		for (++aptIdx; aptIdx < weekAppointments.size(); ++aptIdx) {
+			// Get the date
+			Date aptDate = weekAppointments.get(aptIdx).getDate();
+			System.out.println("aptDate="+aptDate);
+			System.out.println("reqDate="+reqDate);
+			if (aptDate.equals(reqDate)) {
+				++aptCount;
+				continue;
+			} else break;
+		}
+		
+		// If there are more availabilities than appointments occuring, the
+		// time slot must be bookable (but we don't know who the employee
+		// will be)
+		System.out.println("freeEmpCount="+freeEmpCount);
+		System.out.println("aptCount="+aptCount);
+		if (freeEmpCount - aptCount > 0) {
+			System.out.println("Yea");
+			return true;
+		} else {
+			System.out.println("Nay");
 			return false;
 		}
 	}

@@ -28,6 +28,8 @@ import java.util.ArrayList;
 
 // Time imports
 import java.util.Calendar;
+import java.util.Calendar.Builder;
+import java.util.TimeZone;
 import java.time.DateTimeException;
 import java.time.DayOfWeek;
 
@@ -524,12 +526,22 @@ public class DatabaseManager {
     public ArrayList<Appointment> getThisWeeksAppointments() throws SQLException {
         ArrayList<Appointment> appointments = new ArrayList<Appointment>();
         Statement stmt = businessConnection.createStatement();
+        
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        
+        String dateStr = String.format("DATE '%04d-%02d-%02d'",
+                 cal.get(Calendar.YEAR),
+                 cal.get(Calendar.MONTH)+1,
+                 cal.get(Calendar.DAY_OF_MONTH)
+                );
+        
         ResultSet rs = stmt.executeQuery(
             "SELECT * FROM Appointment "
             +"WHERE ("
-            +"    date_and_time >= DATE_SUB(CURDATE(),  DAYOFWEEK(CURDATE())-1)"
+            +"    date_and_time >= "+dateStr
             +"    AND"
-            +"    date_and_time <= DATE_SUB(CURDATE(),  DAYOFWEEK(CURDATE())-1) + INTERVAL '7' DAY"
+            +"    date_and_time <= "+dateStr+" + INTERVAL '7' DAY"
             +") "
             +"ORDER BY DATE_AND_TIME"
         );
@@ -537,7 +549,7 @@ public class DatabaseManager {
             try {
                 appointments.add(
                     new Appointment(
-                        rs.getDate("DATE_AND_TIME"),
+                        new Date(rs.getTimestamp("DATE_AND_TIME").getTime()),
                         rs.getInt("APPOINTMENT_TYPE"),
                         rs.getLong("EMPLOYEE"),
                         getCustomer(rs.getString("CUSTOMER"))
@@ -1193,6 +1205,94 @@ public class DatabaseManager {
                 case "save_appointment":
                     System.out.println("Sucess="+Boolean.toString(dbm.scannerSaveAppointment(sc)));
                     break;
+                case "check_available":
+                {
+                    Calendar cal = Calendar.getInstance();
+                    cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+                    cal.set(Calendar.HOUR_OF_DAY, 10);
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    Date reqDate = cal.getTime();
+                    ArrayList<WeekDate> weekAvailability =
+                        dbm.getSevenDayEmployeeAvailability(false);
+                    ArrayList<Appointment> weekAppointments =
+                        dbm.getThisWeeksAppointments();
+            
+                    // Check if seven day availability has this date
+                    // Generate the Date for all availability
+                    boolean cont = false;
+                    int availIdx;
+                    for (availIdx = 0; availIdx < weekAvailability.size(); ++availIdx) {
+                        Date queryDate =
+                            DayOfWeekConversion.wd2cal(
+                                weekAvailability.get(availIdx)
+                            ).getTime();
+                        System.out.println("Compare converted date: "+queryDate);
+                        if (queryDate.equals(reqDate)) {
+                            cont = true;
+                            break;
+                        }
+                    }
+                    // Quit if weekAvailability contains no matching date
+                    if (!cont) { System.out.println("No matches. Quitting early.\nfalse"); break; }
+                    
+                    // Count how many employees are free at reqDate
+                    int freeEmpCount;
+                    for (freeEmpCount = 0; availIdx < weekAvailability.size();
+                        ++availIdx, ++freeEmpCount)
+                    {
+                        if (DayOfWeekConversion.wd2cal(
+                                weekAvailability.get(availIdx)
+                            ).getTime().equals(reqDate))
+                        {
+                            continue;
+                        } else break;
+                    }
+                    
+                    // Count how many appointments are occuring at reqDate
+                    // FIXME: THIS IS STARTING FROM THE START OF APPOINTMENTS
+                    // AND BREAKING IMMEDIATELY. FIRST PARSE FROM THE START OF THE ARRAY
+                    // UNTIL WE FIND IT, THEN BREAK WHEN WE ARE DONE
+                    
+                    // Find the array index of the first appointment
+                    int aptCount = 0;
+                    int aptIdx;
+                    for (aptIdx = 0; aptIdx < weekAppointments.size(); ++aptIdx) {
+                        // Get the date
+                        Date aptDate = weekAppointments.get(aptIdx).getDate();
+                        System.out.println("aptDate="+aptDate);
+                        System.out.println("reqDate="+reqDate);
+                        if (aptDate.equals(reqDate)) {
+                            ++aptCount;
+                            break;
+                        } else continue;
+                    }
+                    
+                    // Starting from the second appointment, keep adding until
+                    // we reach something else or end of array
+                    for (++aptIdx; aptIdx < weekAppointments.size(); ++aptIdx) {
+                        // Get the date
+                        Date aptDate = weekAppointments.get(aptIdx).getDate();
+                        System.out.println("aptDate="+aptDate);
+                        System.out.println("reqDate="+reqDate);
+                        if (aptDate.equals(reqDate)) {
+                            ++aptCount;
+                            continue;
+                        } else break;
+                    }
+                    
+                    // If there are more availabilities than appointments occuring, the
+                    // time slot must be bookable (but we don't know who the employee
+                    // will be)
+                    System.out.println("freeEmpCount="+freeEmpCount);
+                    System.out.println("aptCount="+aptCount);
+                    if (freeEmpCount - aptCount > 0) {
+                        System.out.println("Yea");
+                    } else System.out.println("Nay");
+                    
+                    }
+                break;
                 /*case "set_availability":
                     employee = sc.nextInt();
                     ArrayList<Date> availableDates = new ArrayList<Date>();
