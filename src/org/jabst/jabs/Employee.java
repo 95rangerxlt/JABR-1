@@ -31,6 +31,11 @@ public class Employee {
 		if(workingHours.size() > 0) {
 			table = createTableFromWeekDates(workingHours);
 		}
+
+		appointmentHours = new ArrayList<Date>();
+		for (Appointment apt : appointments) {
+			appointmentHours.add(apt.getDate());
+		}
 	}
 
 	public void createWeekDatesFromTable() {
@@ -146,7 +151,20 @@ public class Employee {
 	}
 
     public String toString() {
-        return "EMPLOYEE TOSTRING NOT FINISHED";
+        StringBuffer sb = new StringBuffer();
+        sb.append("Employee {");
+        sb.append("id=");
+        sb.append(id);
+        sb.append(", name=\"");
+        sb.append(name);
+        sb.append("\", workingHours=");
+        sb.append(workingHours);
+        sb.append(", appointmentHours=");
+        sb.append(appointmentHours);
+        sb.append(", appointments=");
+        sb.append(appointments);
+        sb.append("}");
+        return sb.toString();
     }
 
 }
