@@ -16,7 +16,11 @@ public class SessionManager extends Application {
 		LOGIN, REGISTER, BUSINESSMENU, CUSTOMERMENU, ADDEMPLOYEE
 	}
 
-	// ++++++++++++THIS IS YOUR NEW MAIN++++++++++++++++
+	/** This now operates as the Main method.
+	 *  This is the entry point into the program.
+	 *  GUI windows are launched from here.
+	 * @param primaryStage
+	 */
 	@Override
 	public void start(Stage primaryStage) {
 		Window currentWindow = Window.LOGIN;
@@ -98,15 +102,25 @@ public class SessionManager extends Application {
 
 	}
 	
+	/**
+	 * System Exit
+	 */
 	void shutdown() {
 		dbm.close();
 		System.exit(0);
 	}
 	
+	/**
+	 * Saves changes to the Database
+	 */
 	public void save() {
 		dbm.commit();
 	}
 	
+	/**
+	 * Creates a new DatabaseManager object
+	 * This is used to handle all database queries
+	 */
 	public void load_database() {
 		try {
 			dbm = new DatabaseManager(DatabaseManager.dbDefaultFileName);
@@ -116,21 +130,35 @@ public class SessionManager extends Application {
 		}
 	}
 	
+	/**
+	 * Constructor for SessionManager object
+	 */
 	public SessionManager() {
 		load_database();
 		this.employeeManager = new EmployeeManager(this);
 	}
-	
-	// Methods
-	
+	/**
+	 * Get method for EmployeeManager object
+	 * @return : EmployeeManager object if one exists
+	 */
 	public EmployeeManager getEmployeeManager() {
 		return this.employeeManager;
 	}
 	
+	/**
+	 * Get method for DatabaseManager object
+	 * @return : DatabaseManager object if one exists
+	 */
 	public DatabaseManager getDatabaseManager() {
 		return this.dbm;
 	}
 	
+	/**
+	 * Queries user login input against the Database
+	 * @param username : Username to query
+	 * @param password : password to query
+	 * @return : a boolean result
+	 */
 	public boolean loginUser(String username, String password){
 		try {
 			return dbm.checkUser(username, password);
@@ -139,6 +167,15 @@ public class SessionManager extends Application {
 		}
 	}
 
+	/**
+	 * Attempts to add a new dataset to the Database
+	 * @param username : String, unique user data to be added
+	 * @param password : String, user data to be added
+	 * @param name : String, user data to be added
+	 * @param address : String, user data to be added
+	 * @param phone : String, user data to be added
+	 * @return : A boolean result
+	 */
 	public boolean registerUser(String username, String password,
 		String name, String address, String phone)
 	{
@@ -184,12 +221,22 @@ public class SessionManager extends Application {
 		//Application.launch(BusinessMenu.class);
 	}
 	
+	/**
+	 * Validates the user input for the Name value
+	 * @param input : String, user input
+	 * @return : a boolean success result
+	 */
 	public boolean validateNameInput(String input){
 		boolean valid = input.chars().allMatch(Character::isLetter);
 		valid &= !(input.equals(""));
 		return valid;
 	}
 	
+	/**
+	 * Validates the user input for the Phone value
+	 * @param input : String, user input
+	 * @return : a boolean success result
+	 */
 	public boolean validatePhoneInput(String input){
 		boolean valid = input.chars().allMatch(Character::isDigit);
 		if (!(input.length() == 10)){
@@ -198,6 +245,11 @@ public class SessionManager extends Application {
 		return valid;		
 	}
 	
+	/**
+	 * Validates the user input for the Username value
+	 * @param input : String, user input
+	 * @return : a boolean success result
+	 */
 	public boolean validateUsernameInput(String input){
 		boolean valid = input.chars().allMatch(Character::isLetter);
 		valid &= !(input.equals(""));
@@ -207,6 +259,11 @@ public class SessionManager extends Application {
 		return valid;
 	}
 	
+	/**
+	 * Validates the user input for the Password value
+	 * @param input : String, user input
+	 * @return : a boolean success result
+	 */
 	public boolean validatePasswordStrength(String input){
 		// TODO: Strength Conditions
 		boolean valid = true;
@@ -214,6 +271,11 @@ public class SessionManager extends Application {
 		return valid;
 	}
 	
+	/**
+	 * Validates the user input for the Address value
+	 * @param input : String, user input
+	 * @return : a boolean success result
+	 */
 	public boolean validateAddressInput(String input){
 		// TODO: determine conditions
 		boolean valid = true;
