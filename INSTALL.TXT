@@ -1,0 +1,44 @@
+Compilation 
+===========
+
+Prerequisites
+-------------
+
+To compile JABS, you will need have the Java Development Kit installed. It does
+not need to be on your system path. If you are on GNU/Linux, you will also need
+to have JavaFX installed, since this usually comes separately from OpenJDK.
+
+Compilation can run with Windows Command Prompt or any *nix shell.
+
+How to Build
+------------
+Run build.cmd to compile on Windows.
+Run build.sh to compile on Mac OS X and other *nix operating systems.
+
+After running the build shell script, the program folder 'deployment' will be
+created. Copy the folder deployment wherever you want to take the program.
+
+Other files:
+    build-dbg.cmd/sh : Builds with debugging symbols.
+    build-dbm.cmd/sh : Builds the program but with DatabaseManager command
+    line as the main class. This is not a complete program interface and it is
+    used for developer testing.
+
+
+Installation
+============
+
+Setup
+-----
+After compilation, copy the contents of the deployment folder wherever you 
+want to install JABS.  Note that the files JABS uses are all in the same 
+directory, with no registry entries or files hidden away. Be sure to copy 
+all files in the JABS directory when moving the program if you want to keep 
+your data.
+
+How to Run
+----------
+Open jabs.jar by double-clicking it in your file browser.
+
+You can also run jabs on the command line to see logging output:
+$ java -jar jabs.jar
