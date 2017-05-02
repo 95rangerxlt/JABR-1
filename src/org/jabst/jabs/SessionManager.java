@@ -6,11 +6,16 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import org.hsqldb.HsqlException;
 
+import java.util.logging.Logger;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
 
 public class SessionManager extends Application {
 	// Fields
 	private DatabaseManager dbm;
 	private EmployeeManager employeeManager;
+	private Logger logger;
+	private ConsoleHandler ch;
 
 	public enum Window {
 		LOGIN, REGISTER, BUSINESSMENU, CUSTOMERMENU, ADDEMPLOYEE
@@ -75,7 +80,7 @@ public class SessionManager extends Application {
 						dbm.connectToBusiness(username);
 					} catch (SQLException sqle) {
 						// TODO: Visual cue
-						System.err.println("Cannot connect to business:"+username);
+						logger.warning("Cannot connect to business:"+username);
 						currentWindow = Window.LOGIN;
 						break;
 					}
@@ -91,7 +96,7 @@ public class SessionManager extends Application {
 					dbm.connectToBusiness();
 					} catch (SQLException sqle) {
 						// TODO: Visual cue
-						System.err.println("Error connecting to default"
+						logger.warning("Error connecting to default"
 							+" business for customer menu");
 						currentWindow = Window.LOGIN;
 						break;
@@ -103,7 +108,7 @@ public class SessionManager extends Application {
 								);
 					} catch (SQLException sqle) {
 						// TODO: Visual cue
-						System.err.println("Error getting customer info for"
+						logger.warning("Error getting customer info for"
 							+" customer="+username);
 						currentWindow = Window.LOGIN;
 						break;
@@ -148,7 +153,7 @@ public class SessionManager extends Application {
 		try {
 			dbm = new DatabaseManager(DatabaseManager.dbDefaultFileName);
 		} catch (SQLException sqle) {
-			System.err.println("FATAL: SessionManager: Could not open DatabaseManager");
+			logger.severe("FATAL: Could not open DatabaseManager");
 			System.exit(1);
 		}
 	}
@@ -157,6 +162,11 @@ public class SessionManager extends Application {
 	 * Constructor for SessionManager object
 	 */
 	public SessionManager() {
+		this.logger = Logger.getLogger("org.jabst.jabs.DatabaseManager");
+		logger.setLevel(Level.FINEST);
+		this.ch = new ConsoleHandler();
+		logger.addHandler(ch);
+		logger.info("Opened sessionManager logger");
 		load_database();
 		this.employeeManager = new EmployeeManager(this);
 	}
@@ -205,17 +215,17 @@ public class SessionManager extends Application {
 		// If it throws an exception, it failed. Otherwise it succeeded
 		try {
 			dbm.addUser(username, password, name, address, phone);
-			System.out.println("SessionManager: Successfully added user with dbm");
+			logger.info("SessionManager: Successfully added user with dbm");
 			return true;
 		} catch (SQLException sqle) {
 			// false if user exists or the database is somehow broken
 			if (sqle instanceof SQLIntegrityConstraintViolationException) {
-				System.err.println(
+				logger.warning(
 					"SessionManager: Adding user failed: Already a user with that username"
 				);
 			}
 			else {
-				System.err.println(
+				logger.warning(
 					"SessionManager: Adding user failed: Other database error"
 				);
 				sqle.printStackTrace();
