@@ -192,7 +192,7 @@ public class SessionManager extends Application {
 	
 	public boolean validatePhoneInput(String input){
 		boolean valid = input.chars().allMatch(Character::isDigit);
-		if ((input.length() < 8) || (input.length() > 10)){
+		if (!(input.length() == 10)){
 			valid = false;
 		}
 		return valid;		
@@ -209,6 +209,7 @@ public class SessionManager extends Application {
 	
 	public boolean validatePasswordStrength(String input){
 		// Strength Conditions
+		valid &= !(input.equals(""));
 		return true;
 	}
 	
