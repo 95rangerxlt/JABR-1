@@ -572,6 +572,8 @@ public class DatabaseManager {
         System.out.println("Employee got: "+emp);
         // If they are not free at appointment time, reject
         if (emp.appointmentHours.contains(apt.getDate())) {
+            System.out.println("DBM:saveAppointment: Returning false because"
+                + " employee has appointment at given time");
             return false;
         }
         
@@ -584,7 +586,16 @@ public class DatabaseManager {
         pstmt.setInt(2, apt.getAppointmentType());
         pstmt.setLong(3, apt.getEmployeeID());
         pstmt.setString(4, apt.getCustomer().username);
-        pstmt.execute();
+        try {
+            pstmt.execute();
+        } catch (SQLIntegrityConstraintViolationException sqlie) {
+            // Return false e.g. if employee, appointmentType were bogus
+            // SQLException is meant to indicate error, but this is expected
+            // behaviour for referential integrity
+            return false;
+        }
+
+        businessConnection.commit();
         
         return true;
     }
@@ -711,10 +722,11 @@ public class DatabaseManager {
                );
 
             while (rs.next()) {
-            System.out.println("Found appointment date: "+rs.getDate(1));
+                System.out.println("Found appointment date: "+rs.getDate(1));
+                Date currAptDate = new Date(rs.getTimestamp(1).getTime());
                 appointments.add(
                     new Appointment (
-                        new Date(rs.getTimestamp(1).getTime()), //DATE_AND_TIME
+                        currAptDate, //DATE_AND_TIME
                         rs.getInt(2), // APPOINTMENT_TYPE
                         rs.getLong(3), // EMPLOYEE
                         getCustomer(rs.getString(4)) // CUSTOMER
@@ -1063,15 +1075,16 @@ public class DatabaseManager {
         );
     }
 
-    private void scannerSaveAppointment(Scanner sc) throws SQLException {
+    private boolean scannerSaveAppointment(Scanner sc) throws SQLException {
         // Create a new Calendar at the start of the requested hour, on Monday.
         System.out.println("Making appointment for this Monday. Which hour?");
         int hour = Integer.parseInt(sc.next());
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        cal.set(Calendar.HOUR, hour);
+        cal.set(Calendar.HOUR_OF_DAY, hour);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.MILLISECOND, 0);
         Date dateAndTime = cal.getTime();
 
         System.out.println("Date and time made: "+dateAndTime);
@@ -1083,7 +1096,7 @@ public class DatabaseManager {
         Appointment apt = new Appointment (
             dateAndTime, 0, 0, getCustomer("default_customer")
         );
-        saveAppointment(apt);
+        return saveAppointment(apt);
     }
 
     /**
@@ -1178,7 +1191,7 @@ public class DatabaseManager {
                     System.out.println(dbm.getAllCustomers());
                     break;
                 case "save_appointment":
-                    dbm.scannerSaveAppointment(sc);
+                    System.out.println("Sucess="+Boolean.toString(dbm.scannerSaveAppointment(sc)));
                     break;
                 /*case "set_availability":
                     employee = sc.nextInt();
