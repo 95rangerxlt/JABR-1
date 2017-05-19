@@ -16,6 +16,7 @@ public class SuperUserGUI {
 
     private static DatabaseManager dbm;
 
+
     public static void display(SessionManager session) {
         /* Data getters */
         dbm = session.getDatabaseManager();
@@ -48,7 +49,7 @@ public class SuperUserGUI {
                                 dbm.deleteBusiness(
                                     cbBusSelect.getValue()
                                 );
-                                //FIXME: SuperUserGUI.updateComboBox(cbBusSelect);
+                                SuperUserGUI.updateCombobox(cbBusSelect);
                             } catch (SQLException sqle) { 
                                 /* TODO: Error reporting */
                             }
@@ -90,5 +91,5 @@ public class SuperUserGUI {
         cb.getItems().clear();
         cb.getItems().setAll(dbm.getAllBusinesses());
     }
-
 }
+
