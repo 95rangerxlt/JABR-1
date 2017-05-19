@@ -10,10 +10,15 @@ import javafx.scene.Scene;//area inside stage
 import javafx.stage.WindowEvent;//when window closes
 import javafx.stage.Stage;//window
 
+import java.sql.SQLException;//for error handling
+
 public class SuperUserGUI {
+
+    private static DatabaseManager dbm;
+
     public static void display(SessionManager session) {
         /* Data getters */
-        DatabaseManager dbm = session.getDatabaseManager();
+        dbm = session.getDatabaseManager();
 
         /* Commons elements */
         Insets ins = new Insets(3.0, 3.0, 3.0, 3.0);
@@ -22,9 +27,10 @@ public class SuperUserGUI {
         VBox root = new VBox();//layout manager
             HBox hbDeleteBus = new HBox();
                 ComboBox<Business> cbBusSelect = new ComboBox<Business>();
-                cbBusSelect.getItems().addAll(
+                updateCombobox(cbBusSelect);
+                /*cbBusSelect.getItems().addAll(
                     dbm.getBusiness("default_business")
-                );
+                );*/
                 Label lbBusSelect = new Label("Delete business");
                 lbBusSelect.setLabelFor(cbBusSelect);
                 lbBusSelect.setPadding(ins);
@@ -32,11 +38,22 @@ public class SuperUserGUI {
                 btDelBusiness.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent event) {
-                        ConfirmGUI.display(
+                        boolean delete = ConfirmGUI.display(
                             "Are you sure you want to delete business\n '"
                             +cbBusSelect.getValue()
                             +"'?. \nThere is no way to undo this!"
                         );
+                        if (delete) {
+                            try {
+                                dbm.deleteBusiness(
+                                    cbBusSelect.getValue()
+                                );
+                                //FIXME: SuperUserGUI.updateComboBox(cbBusSelect);
+                            } catch (SQLException sqle) { 
+                                /* TODO: Error reporting */
+                            }
+                        }
+                        
                     }
                 });
             hbDeleteBus.getChildren().addAll(
@@ -68,4 +85,10 @@ public class SuperUserGUI {
         window.setScene(scene);//add scene to window
         window.showAndWait();//put the window on the desktop
     }
+    
+    static void updateCombobox(ComboBox<Business> cb) {
+        cb.getItems().clear();
+        cb.getItems().setAll(dbm.getAllBusinesses());
+    }
+
 }

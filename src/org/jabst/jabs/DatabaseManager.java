@@ -346,6 +346,55 @@ public class DatabaseManager {
             return null;
         }
     }
+    
+    public ArrayList<Business> getAllBusinesses() {
+        ArrayList<Business> businesses = new ArrayList<Business>();
+        try {
+            Statement stmt = generalConnection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM BUSINESS ");
+
+            while(rs.next()) {
+                businesses.add(new Business (
+                    rs.getString("BUSINESS_NAME"),
+                    rs.getString("OWNER_NAME"),
+                    rs.getString("ADDRESS"),
+                    rs.getString("PHONE")
+                ));
+            }
+        }
+        catch (SQLException sqle) {
+            return null;
+        }
+        return businesses;
+    }
+    
+    /** Deletes the business from given object representation.
+      * @return true if the business existed and was deleted; false if it did not
+      * @param bus The business to delete
+      * @throws SQLException If a database error occurred, which does not
+      * include when the business does not exist */
+    public boolean deleteBusiness(Business bus) throws SQLException {
+        Statement stmt = generalConnection.createStatement();
+        stmt.execute(
+            String.format(
+                "DELETE FROM BUSINESS "
+                    +"WHERE business_name='%s'"
+                    +"AND   owner_name='%s'"
+                    +"AND   address='%s'"
+                    +"AND   phone='%s'",
+                    bus.businessName,
+                    bus.businessOwner,
+                    bus.address,
+                    bus.phone
+            )
+        );
+        if (stmt.getUpdateCount() == 0) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
 
     /** Asks the database to check if there is a user with the given
       * username and password
