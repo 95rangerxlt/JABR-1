@@ -498,6 +498,28 @@ public class DatabaseManager {
         generalConnection.commit();
     }
 
+    /** Attempts to register a new business in the system with a
+      * given set of attributes.
+      * @throws SQLException If a database error occurs 
+      */
+    public void registerBusiness(
+        String username, String password,
+        String busname, String ownername,
+        String address, String phone
+    ) throws SQLException
+    {
+        addUser(username, password);
+        Statement stmt = generalConnection.createStatement();
+        stmt.execute(String.format(
+            "INSERT INTO BUSINESS VALUES ('%s', '%s', '%s', '%s', '%s')",
+            username,
+            busname, ownername,
+            address, phone
+        ));
+        stmt.close();
+        generalConnection.commit();
+    }
+
     /** Gets the customer with the given username. Customers are uniquely
       * identified in the database by their username.
       * @param username The customer's username

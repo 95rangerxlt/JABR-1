@@ -64,6 +64,13 @@ public class SuperUserGUI {
             
             HBox hbNewBus = new HBox();
             Button btNewBus = new Button("Create...");
+            btNewBus.setOnAction(new EventHandler<ActionEvent>()  {
+                @Override
+                public void handle(ActionEvent e) {
+                    CreateBusinessGUI.display(session);
+                    updateCombobox(cbBusSelect);
+                }
+            });
             Label lbNewBus = new Label("Create business");
             lbNewBus.setLabelFor(btNewBus);
             lbNewBus.setPadding(ins);
