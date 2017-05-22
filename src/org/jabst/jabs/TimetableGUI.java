@@ -15,6 +15,12 @@ class TimetableGUI extends GridPane {
 	public TimetableCellGUI.Type type;
 	public Timetable timetable;
 
+	//space around the cells
+	public Insets insets = new Insets(3, 3, 3, 3);
+	//space between the cells
+	public int vGap = 2;
+	public int hGap = 2;
+
 	public TimetableGUI() {
 		this(new Timetable(true));
 	}
@@ -29,12 +35,12 @@ class TimetableGUI extends GridPane {
 			cells = new TimetableCellGUI[0][0];
 		type = TimetableCellGUI.Type.CHECKBOX;
 		setupSpacing();
-		update();
+		updateTableFromData();
 	}
 
 	public void setTable(ArrayList<ArrayList<Timetable.CellStatus>> table) {
 		this.table = table;
-		update();
+		updateTableFromData();
 	}
 
 	public ArrayList<ArrayList<Timetable.CellStatus>> getTable() {
@@ -60,7 +66,7 @@ class TimetableGUI extends GridPane {
 	}
 
 	//sets GUI from data
-	public void update() {
+	public void updateTableFromData() {
 		if(this.table.size() == 0)
 			return;//something went wrong
 		for(int j = 0; j < this.table.get(0).size(); j++) {
@@ -107,9 +113,9 @@ class TimetableGUI extends GridPane {
 	}
 
 	public void setupSpacing() {
-		this.setPadding(new Insets(3, 3, 3, 3));
-		this.setVgap(2);
-		this.setHgap(2);
+		this.setPadding(this.insets);
+		this.setVgap(this.vGap);
+		this.setHgap(this.hGap);
 	}
 
 	public void removeData() {

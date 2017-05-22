@@ -17,3 +17,4 @@ javac -d bin -classpath .\lib\hsqldb.jar -sourcepath src src\org\jabst\jabs\*.ja
 jar cvfm jabs.jar MANIFEST.MF -C bin .
 move jabs.jar deployment
 copy lib\hsqldb.jar deployment\hsqldb.jar
+pause

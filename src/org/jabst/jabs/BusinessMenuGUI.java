@@ -34,6 +34,8 @@ public class BusinessMenuGUI {
 		Menu mBusinessMenu = new Menu("Business");
 		MenuItem miEditBusInfo = new MenuItem("Edit Info"); 
 
+		TimetableGUI table = new TimetableGUI(/*Set timetable on combobox update*/);
+
 		//block events to other window
 		window.initModality(Modality.APPLICATION_MODAL);
 
@@ -91,13 +93,13 @@ public class BusinessMenuGUI {
  		root.setPadding(new Insets(3.0, 3.0, 3.0, 3.0));
 
 		//add elements to the layout
- 		root.getChildren().addAll(mb);
+ 		root.getChildren().addAll(mb, table);
  		mb.getMenus().addAll(mFileMenu, mEmployeesMenu, mBusinessMenu);
  		mFileMenu.getItems().addAll(miFileSave, miFileLogout, miFileQuit);
  		mEmployeesMenu.getItems().addAll(miEditEmployee, miAvailabilitySummary);
  		mBusinessMenu.getItems().add(miEditBusInfo);
 
-		Scene scene = new Scene(root, 300, 200);//create area inside window
+		Scene scene = new Scene(root, 900, 450);//create area inside window
 
 		window.setTitle("Business GUI");//text at the top of the window
 		window.setScene(scene);//add scene to window

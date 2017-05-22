@@ -85,7 +85,7 @@ public class AvailabilityGUI {
 
 		table.allEmployees = true;
 		table.table = allEmployees.table.table;
-		table.update();
+		table.updateTableFromData();
 	}
 
 }

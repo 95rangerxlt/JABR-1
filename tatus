@@ -1,0 +1,159 @@
+warning: CRLF will be replaced by LF in build.cmd.
+The file will have its original line endings in your working directory.
+[1mdiff --git a/build.cmd b/build.cmd[m
+[1mindex 41e20e8..eb1b009 100644[m
+[1m--- a/build.cmd[m
+[1m+++ b/build.cmd[m
+[36m@@ -16,4 +16,5 @@[m [mrem Compilation[m
+ javac -d bin -classpath .\lib\hsqldb.jar -sourcepath src src\org\jabst\jabs\*.java[m
+ jar cvfm jabs.jar MANIFEST.MF -C bin .[m
+ move jabs.jar deployment[m
+[31m-copy lib\hsqldb.jar deployment\hsqldb.jar[m
+\ No newline at end of file[m
+[32m+[m[32mcopy lib\hsqldb.jar deployment\hsqldb.jar[m
+[32m+[m[32mpause[m
+\ No newline at end of file[m
+[1mdiff --git a/src/org/jabst/jabs/AddEmployeeGUI.java b/src/org/jabst/jabs/AddEmployeeGUI.java[m
+[1mindex d46052f..037f137 100644[m
+[1m--- a/src/org/jabst/jabs/AddEmployeeGUI.java[m
+[1m+++ b/src/org/jabst/jabs/AddEmployeeGUI.java[m
+[36m@@ -3,6 +3,7 @@[m [mpackage org.jabst.jabs;[m
+ import javafx.event.ActionEvent;//type of event[m
+ import javafx.event.EventHandler;//this activates when a button is pressed[m
+ import javafx.scene.Scene;//area inside stage[m
+[32m+[m[32mimport javafx.scene.input.KeyEvent;//key listener[m
+ import javafx.scene.control.*;//buttons, labels  etc.[m
+ import javafx.scene.layout.VBox;//layout manager[m
+ import javafx.scene.layout.HBox;[m
+[36m@@ -82,6 +83,8 @@[m [mpublic class AddEmployeeGUI {[m
+ 						"Succesfully saved employee." :[m
+ 						"Could not save employee."[m
+ 					);[m
+[32m+[m
+[32m+[m					[32mcurrEmployee.createDatesFromTable();[m
+ 				}[m
+ 				else {[m
+ 					System.out.println("Not saving null employee");[m
+[36m@@ -134,6 +137,14 @@[m [mpublic class AddEmployeeGUI {[m
+ [m
+ 		Scene scene = new Scene(root, 900, 450);//create area inside window[m
+ [m
+[32m+[m		[32mscene.setOnKeyPressed(new EventHandler<KeyEvent>() {[m
+[32m+[m			[32m@Override[m
+[32m+[m			[32mpublic void handle(KeyEvent event) {[m
+[32m+[m				[32m// TODO: input validation[m
+[32m+[m				[32mSystem.out.println("key pressed");[m
+[32m+[m			[32m}[m
+[32m+[m		[32m});[m
+[32m+[m
+ 		window.setTitle("Add Employee GUI -placeholder-");//text at the top of the window[m
+ 		window.setScene(scene);//add scene to window[m
+ 		window.showAndWait();//put the window on the desktop[m
+[1mdiff --git a/src/org/jabst/jabs/Employee.java b/src/org/jabst/jabs/Employee.java[m
+[1mindex 54f45fe..a0db64a 100644[m
+[1m--- a/src/org/jabst/jabs/Employee.java[m
+[1m+++ b/src/org/jabst/jabs/Employee.java[m
+[36m@@ -47,6 +47,8 @@[m [mpublic class Employee {[m
+ 				}[m
+ 			}[m
+ 		}[m
+[32m+[m
+[32m+[m		[32mSystem.out.println("dates: \n" + workingHours.toString());[m
+ 	}[m
+ [m
+ 	public Timetable createTableFromDates() {[m
+[36m@@ -89,6 +91,9 @@[m [mpublic class Employee {[m
+ 	}[m
+ [m
+ 	private ArrayList<Calendar> getCalendars(ArrayList<Date> list) {[m
+[32m+[m		[32mif(list.size() == 0) {[m
+[32m+[m			[32mSystem.out.println("cannot get calendars: \tlist size is 0");[m
+[32m+[m		[32m}[m
+ 		ArrayList<Calendar> newList = new ArrayList<Calendar>();[m
+ 		for(int i = 0; i < list.size(); i++) {[m
+ 			Calendar cal = Calendar.getInstance();[m
+[36m@@ -110,6 +115,7 @@[m [mpublic class Employee {[m
+ 			}[m
+ 			return min;[m
+ 		} else {[m
+[32m+[m			[32mSystem.out.println("calendar is null");[m
+ 			return null;[m
+ 		}[m
+ 	}[m
+[1mdiff --git a/src/org/jabst/jabs/LoginGUI.java b/src/org/jabst/jabs/LoginGUI.java[m
+[1mindex 14ab64c..8bc03b6 100644[m
+[1m--- a/src/org/jabst/jabs/LoginGUI.java[m
+[1m+++ b/src/org/jabst/jabs/LoginGUI.java[m
+[36m@@ -4,6 +4,7 @@[m [mpackage org.jabst.jabs;[m
+ import javafx.event.ActionEvent;//type of event[m
+ import javafx.event.EventHandler;//this activates when a button is pressed[m
+ import javafx.scene.Scene;//area inside stage[m
+[32m+[m[32mimport javafx.scene.input.KeyEvent;//key listener[m
+ import javafx.scene.control.*;//buttons, labels  etc.[m
+ import javafx.scene.layout.VBox;//layout manager[m
+ import javafx.scene.layout.HBox;[m
+[36m@@ -74,6 +75,22 @@[m [mpublic class LoginGUI {[m
+ 			}[m
+ 		});[m
+ [m
+[32m+[m		[32mtfUName.setOnKeyPressed(new EventHandler<KeyEvent>() {[m
+[32m+[m			[32m@Override[m
+[32m+[m			[32mpublic void handle(KeyEvent event) {[m
+[32m+[m				[32m// TODO: input validation[m
+[32m+[m				[32mSystem.out.println("key pressed in username text field");[m
+[32m+[m			[32m}[m
+[32m+[m		[32m});[m
+[32m+[m
+[32m+[m		[32mtfPWord.setOnKeyPressed(new EventHandler<KeyEvent>() {[m
+[32m+[m			[32m@Override[m
+[32m+[m			[32mpublic void handle(KeyEvent event) {[m
+[32m+[m				[32m// TODO: input validation[m
+[32m+[m				[32mSystem.out.println("key pressed in password text field");[m
+[32m+[m			[32m}[m
+[32m+[m		[32m});[m
+[32m+[m
+ 		// when the window is closed[m
+ 		window.setOnCloseRequest(new EventHandler<WindowEvent>() {[m
+ 			public void handle(WindowEvent we) {[m
+[36m@@ -94,6 +111,14 @@[m [mpublic class LoginGUI {[m
+ [m
+ 		Scene scene = new Scene(root/*, 300, 200*/);//create area inside window[m
+ [m
+[32m+[m		[32mscene.setOnKeyPressed(new EventHandler<KeyEvent>() {[m
+[32m+[m			[32m@Override[m
+[32m+[m			[32mpublic void handle(KeyEvent event) {[m
+[32m+[m				[32m// TODO: input validation[m
+[32m+[m				[32mSystem.out.println("key pressed");[m
+[32m+[m			[32m}[m
+[32m+[m		[32m});[m
+[32m+[m
+ 		window.setTitle("JABLS System: JABLS Automatic Booking Login System");//text at the top of the window[m
+ 		window.setScene(scene);//add scene to window[m
+ 		window.showAndWait();//put the window on the desktop[m
+[1mdiff --git a/src/org/jabst/jabs/RegisterGUI.java b/src/org/jabst/jabs/RegisterGUI.java[m
+[1mindex 74c1bd5..867d3d4 100644[m
+[1m--- a/src/org/jabst/jabs/RegisterGUI.java[m
+[1m+++ b/src/org/jabst/jabs/RegisterGUI.java[m
+[36m@@ -4,6 +4,7 @@[m [mpackage org.jabst.jabs;[m
+ import javafx.event.ActionEvent;//type of event[m
+ import javafx.event.EventHandler;//this activates when a button is pressed[m
+ import javafx.scene.Scene;//area inside stage[m
+[32m+[m[32mimport javafx.scene.input.KeyEvent;//key listener[m
+ import javafx.scene.control.*;//buttons, labels  etc.[m
+ import javafx.scene.layout.VBox;//layout manager[m
+ import javafx.scene.layout.HBox;[m
+[36m@@ -120,6 +121,14 @@[m [mpublic class RegisterGUI {[m
+ [m
+ 		Scene scene = new Scene(root/*, 300, 200*/);//create area inside window[m
+ [m
+[32m+[m		[32mscene.setOnKeyPressed(new EventHandler<KeyEvent>() {[m
+[32m+[m			[32m@Override[m
+[32m+[m			[32mpublic void handle(KeyEvent event) {[m
+[32m+[m				[32m// TODO: input validation[m
+[32m+[m				[32mSystem.out.println("key pressed");[m
+[32m+[m			[32m}[m
+[32m+[m		[32m});[m
+[32m+[m
+ 		window.setTitle("JABRS System: JABRS Automatic Booking Registration System");//text at the top of the window[m
+ 		window.setScene(scene);//add scene to window[m
+ 		window.showAndWait();//put the window on the desktop[m

@@ -110,7 +110,7 @@ public class AddEmployeeGUI {
 				table.table = currEmployee.table.table;
 
 				//set the GUI = data
-				table.update();
+				table.updateTableFromData();
 
 				updateCombobox(cbEmployeeSelect);
 				cbEmployeeSelect.setValue(currEmployee.getName() + " #" + currEmployee.id);
@@ -138,7 +138,7 @@ public class AddEmployeeGUI {
 				currEmployee = null;
 				tfName.setText("Select Employee");
 				table.removeData();
-				table.update();
+				table.updateTableFromData();
 			}
 		});
 
@@ -232,7 +232,7 @@ public class AddEmployeeGUI {
 		System.out.println("...Success!");
 
 		table.table = currEmployee.table.table;
-		table.update();
+		table.updateTableFromData();
 	}
 
 	static void updateCombobox(ComboBox cb) {

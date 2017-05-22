@@ -65,7 +65,7 @@ public class CustomerMenuGUI {
 
 		Scene scene = new Scene(root, 600, 200);//create area inside window
 
-		tableGUI.update();
+		tableGUI.updateTableFromData();
 
 		window.setTitle("Customer GUI -placeholder-");//text at the top of the window
 		window.setScene(scene);//add scene to window
