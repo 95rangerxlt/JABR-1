@@ -490,6 +490,37 @@ public class DatabaseManager {
         return customers;
     }
 
+    public ArrayList<String> getCustomerInfoForDropDown() {
+        ArrayList<String> customers = new ArrayList<String>();
+        try {
+            // Ask database for all customers
+            PreparedStatement pstmt = generalConnection.prepareStatement(
+                    "SELECT NAME, USERNAME, PHONE, ADDRESS FROM CUSTOMERS"
+            );
+            ResultSet rs = pstmt.executeQuery();
+            // Construct the customer as object and return
+            while (rs.next()) {
+                StringBuffer s = new StringBuffer();
+                s.append("Name: ");
+                s.append(rs.getString("NAME"));
+                s.append(" | Username: ");
+                s.append(rs.getString("USERNAME"));
+                s.append(" | Phone: ");
+                s.append(rs.getString("PHONE"));
+                s.append(" | Address: ");
+                s.append(rs.getString("ADDRESS"));
+                customers.add(s.toString());
+            }
+
+        }
+        catch (SQLException sqle) {
+            customers = new ArrayList<String>();
+            logger.warning("Error getting customers for dropdown.");
+            customers.add("Database Error getting customers for dropdown");
+        }
+        return customers;
+    }
+
     /** Adds a user to the database by asking for their username and password
       * from the scanner. Used on the command line for testing.
       * @param sc The method will take input from this Scaner.
@@ -1258,7 +1289,7 @@ public class DatabaseManager {
                     System.out.println("Sucess="+Boolean.toString(dbm.scannerSaveAppointment(sc)));
                     break;
                 case "check_available":
-                {
+                    {
                     Calendar cal = Calendar.getInstance();
                     cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
                     cal.set(Calendar.HOUR_OF_DAY, 10);
@@ -1344,7 +1375,7 @@ public class DatabaseManager {
                     } else System.out.println("Nay");
 
                     }
-                break;
+                    break;
                 /*case "set_availability":
                     employee = sc.nextInt();
                     ArrayList<Date> availableDates = new ArrayList<Date>();
