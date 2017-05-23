@@ -23,6 +23,10 @@ public class RegisterGUI {
 		// create the window
 		Stage window = new Stage();
 		// create all elements
+		ComboBox cbBusinessSelect = new ComboBox();
+		updateCombobox(cbBusinessSelect);
+		cbBusinessSelect.setValue("Select Business");
+
 		Button bLogin = new Button("Login");
 		Button bRegister = new Button("Register");
 		Label lUName = new Label("Username: ");
@@ -103,6 +107,7 @@ public class RegisterGUI {
 					return;
 				}
 				
+				//TODO: also do business combobox
 
 				// register user or clear fields
 				if(session.registerUser(tfUName.getText(), tfPWord.getText(), tfName.getText(), tfAddress.getText(), tfPhone.getText())) {
@@ -212,7 +217,7 @@ public class RegisterGUI {
 
 		//add elements to the layout
 		buttons.getChildren().addAll(bRegister, bLogin);
-		root.getChildren().addAll(lName, tfName, lAddress, tfAddress, lPhone, tfPhone, lUName, tfUName, lPWord, tfPWord, lPWord2, tfPWord2, buttons);
+		root.getChildren().addAll(cbBusinessSelect, lName, tfName, lAddress, tfAddress, lPhone, tfPhone, lUName, tfUName, lPWord, tfPWord, lPWord2, tfPWord2, buttons);
 
 		Scene scene = new Scene(root/*, 300, 200*/);//create area inside window
 /*
@@ -233,6 +238,17 @@ public class RegisterGUI {
 
 	public static RegisterInfo display(SessionManager session) {
 		return display(session, "", "");
+	}
+
+	static void updateCombobox(ComboBox cb) {
+		System.out.println("not sure why but 'cb.getItems().clear();' makes this error every time");
+		cb.getItems().clear();
+		System.out.println("not sure why but 'cb.getItems().clear();' makes this error every time");
+
+		cb.getItems().add("Select Business");
+		cb.getItems().addAll(
+			"NOT FINISHED"//make sure you also handle the register button so it saves as the correct business
+		);
 	}
 
 }
