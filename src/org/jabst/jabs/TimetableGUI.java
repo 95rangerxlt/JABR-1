@@ -93,6 +93,22 @@ class TimetableGUI extends GridPane {
 		System.out.println("Updating GUI table from DATA");
 		if(this.table.size() == 0)
 			return;//something went wrong
+
+		// headings
+		for(int i = 0; i < this.table.size(); i++) {
+			TimetableCellGUI cell = new TimetableCellGUI(TimetableCellGUI.Type.HEADING, new String[] {"DAY: "+i, "", ""}, false, 120, 40);
+			cell.border.setFill(Color.WHITE);
+			cell.border.setStroke(Color.GRAY);
+			this.add(cell, i+1, 0);
+		}
+		for(int j = 0; j < this.table.get(0).size(); j++) {
+			TimetableCellGUI cell = new TimetableCellGUI(TimetableCellGUI.Type.HEADING, new String[] {""+((j+8) > 12 ? (j+8)-12 : j+8)+":00", "", ""}, false, 120, 40);
+			cell.border.setFill(Color.WHITE);
+			cell.border.setStroke(Color.GRAY);
+			this.add(cell, 0, j+1);
+		}
+
+		// table data
 		for(int i = 0; i < this.table.size(); i++) {
 			for(int j = 0; j < this.table.get(i).size(); j++) {
 				// System.out.println("DAY IDX: "+i);
@@ -119,7 +135,7 @@ class TimetableGUI extends GridPane {
 						break;
 					}
 					cells[i][j].border.setStroke(Color.GRAY);
-					this.add(cells[i][j], i, j);
+					this.add(cells[i][j], i+1, j+1);
 					continue;
 				}
 				// System.out.println("not constructing for all employees");
@@ -158,7 +174,7 @@ class TimetableGUI extends GridPane {
 				}
 				cells[i][j].border.setStroke(Color.GRAY);
 
-				this.add(cells[i][j], i, j);
+				this.add(cells[i][j], i+1, j+1);//add each cell to the gridpane
 			}
 		}
 		System.out.println("TIMETABLEGUI: FINISHED Updating GUI table from DATA");
