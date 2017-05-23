@@ -83,6 +83,15 @@ public class BusinessMenuGUI {
 				System.out.println("Business Menu window Closed");
 			}
 		});
+
+		miEditBusInfo.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				//launch business settings
+				BusinessEditInfoGUI.display(session);
+			}
+		});
 		
 		// Setup Window and layout
  		VBox root = new VBox();//layout manager
