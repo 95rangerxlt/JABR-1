@@ -14,7 +14,7 @@ import javafx.beans.value.*;
 public class TimetableCellGUI extends StackPane {
 	
 	public static enum Type {
-		CHECKBOX, RADIOBUTTON, NONE
+		CHECKBOX, RADIOBUTTON, NONE, HEADING
 	}
 
 	public Type type;
@@ -33,10 +33,13 @@ public class TimetableCellGUI extends StackPane {
 		border = new Rectangle(width, height);
 
 		selectable = new Selectable(type);
-		if(type == Type.NONE)//the selectable shouldnt be added, so it shouldnt show... yet it does
+		if(type == Type.NONE) {//the selectable shouldnt be added, so it shouldnt show... yet it does
 			this.getChildren().addAll(border);
-		else
+		} else if(type == Type.HEADING) {
+			this.getChildren().addAll(border, new Label(states[0]));
+		} else {
 			this.getChildren().addAll(border, selectable);
+		}
 
 		selectable.setSelected(selected);
 		selectable.parent = this;
