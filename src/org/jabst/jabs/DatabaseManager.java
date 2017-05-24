@@ -55,8 +55,11 @@ public class DatabaseManager {
             +"NAME VARCHAR(40) NOT NULL,"
             +"ADDRESS VARCHAR(255) NOT NULL,"
             +"PHONE VARCHAR(10) NOT NULL,"
+            +"BUSINESS VARCHAR(4) NOT NULL,"
             +"PRIMARY KEY(USERNAME),"
-            +"FOREIGN KEY (USERNAME) REFERENCES CREDENTIALS(USERNAME));",
+            +"FOREIGN KEY(BUSINESS) REFERENCES BUSINESS(USERNAME),"
+            +"FOREIGN KEY (USERNAME) REFERENCES CREDENTIALS(USERNAME)"
+        +");",
         "CREATE TABLE BUSINESS ("
             +"USERNAME VARCHAR (40),"
             +"BUSINESS_NAME VARCHAR(40) NOT NULL,"
@@ -75,7 +78,7 @@ public class DatabaseManager {
         "INSERT INTO CREDENTIALS VALUES('default_customer','37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f')",
         "INSERT INTO CREDENTIALS VALUES ('root', '37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f')",
         "INSERT INTO BUSINESS VALUES('default_business', 'default business', 'default_owner', 'default_addr', '0420123456')",
-        "INSERT INTO CUSTOMERS VALUES('default_customer','default customer','default','0420123546')",
+        "INSERT INTO CUSTOMERS VALUES('default_customer','default customer','default','0420123546','default_business')",
         "INSERT INTO SUPERUSER VALUES ('root')"
     };
     /** The SQL tables and data that are in a business database by default */
@@ -336,6 +339,7 @@ public class DatabaseManager {
 
             rs.next();
             return new Business (
+                rs.getString("USERNAME"),
                 rs.getString("BUSINESS_NAME"),
                 rs.getString("OWNER_NAME"),
                 rs.getString("ADDRESS"),
@@ -346,7 +350,26 @@ public class DatabaseManager {
             return null;
         }
     }
-    
+
+    public String getCustomerBusinessName(String username) {
+        try {
+            Statement stmt = generalConnection.createStatement();
+            ResultSet rs = stmt.executeQuery(
+                "SELECT BUSINESS FROM CUSTOMERS WHERE USERNAME='"+username+"'"
+            );
+            if (rs.next()) {
+                return rs.getString("BUSINESS");
+            }
+            else {
+                return null;
+            }
+        }
+    catch (SQLException sqle) {
+        logger.severe("Database error getting customer business name:"+username);
+        return null;
+    }
+    }
+
     public ArrayList<Business> getAllBusinesses() {
         ArrayList<Business> businesses = new ArrayList<Business>();
         try {
@@ -355,6 +378,7 @@ public class DatabaseManager {
 
             while(rs.next()) {
                 businesses.add(new Business (
+                    rs.getString("USERNAME"),
                     rs.getString("BUSINESS_NAME"),
                     rs.getString("OWNER_NAME"),
                     rs.getString("ADDRESS"),
@@ -478,7 +502,7 @@ public class DatabaseManager {
         @throws SQLException if the database size constraints were exceeded
       */
     public void addUser(String username, String password,
-        String name, String address, String phone) throws SQLException
+        String name, String address, String phone, String business) throws SQLException
     {
         // Add to credentials table
         addUser(username, password);
@@ -486,12 +510,13 @@ public class DatabaseManager {
         // Now add to customers table
         PreparedStatement statement = generalConnection.prepareStatement(
             // USERNAME, NAME, ADDRESS, PHONE
-            "INSERT INTO CUSTOMERS VALUES (?, ?, ?, ?)"
+            "INSERT INTO CUSTOMERS VALUES (?, ?, ?, ?, ?)"
         );
         statement.setString(1, username);
         statement.setString(2, name);
         statement.setString(3, address);
         statement.setString(4, phone);
+        statement.setString(5, business);
 
         statement.execute();
         statement.close();
@@ -622,7 +647,7 @@ public class DatabaseManager {
 
         boolean success = false;
         try {
-            addUser(username, password, name, address, phone);
+            addUser(username, password, name, address, phone, null);
             success = true;
         } catch (SQLException se) {
 

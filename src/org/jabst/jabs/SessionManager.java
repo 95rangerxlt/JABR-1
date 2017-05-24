@@ -105,7 +105,25 @@ public class SessionManager extends Application {
 						break;
 				case CUSTOMERMENU:
 					try {
-					dbm.connectToBusiness();
+						// FIXME: Need to use arguments
+						UserType type = dbm.getUserType(username);
+						if (type == UserType.NON_EXISTANT) {
+							logger.severe("User has no type:"+username+"!");
+						}
+						else if (type == UserType.CUSTOMER) {
+							String cbn = dbm.getCustomerBusinessName(username);
+							if (cbn == null) {
+								// TODO: Visual cue
+								currentWindow = Window.LOGIN;
+							}
+							dbm.connectToBusiness(cbn);
+						}
+						else if (type == UserType.BUSINESS) {
+							dbm.connectToBusiness(username);
+						}
+						else if (type == UserType.SUPERUSER) {
+							// No need for business connection
+						}
 					} catch (SQLException sqle) {
 						// TODO: Visual cue
 						logger.warning("Error connecting to default"
@@ -226,11 +244,11 @@ public class SessionManager extends Application {
 	 * @return : A boolean result
 	 */
 	public boolean registerUser(String username, String password,
-		String name, String address, String phone)
+		String name, String address, String phone, String business)
 	{
 		// If it throws an exception, it failed. Otherwise it succeeded
 		try {
-			dbm.addUser(username, password, name, address, phone);
+			dbm.addUser(username, password, name, address, phone, business);
 			logger.info("SessionManager: Successfully added user with dbm");
 			return true;
 		} catch (SQLException sqle) {
