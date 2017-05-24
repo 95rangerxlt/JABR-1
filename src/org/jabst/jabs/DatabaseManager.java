@@ -359,7 +359,7 @@ public class DatabaseManager {
         try {
             Statement stmt = generalConnection.createStatement();
             ResultSet rs = stmt.executeQuery(
-                "SELECT BUSINESS FROM CUSTOMERS WHERE USERNAME='"+username+"'"
+                "SELECT BUSINESS FROM CREDENTIALS WHERE USERNAME='"+username+"'"
             );
             if (rs.next()) {
                 return rs.getString("BUSINESS");
@@ -540,6 +540,7 @@ public class DatabaseManager {
         String address, String phone
     ) throws SQLException
     {
+        /* Insert entries into the general database */
         Business bus = new Business(username, busname, ownername, address, phone);
         addUser(username, password, new BusinessSelection(bus));
         Statement stmt = generalConnection.createStatement();
@@ -551,6 +552,10 @@ public class DatabaseManager {
         ));
         stmt.close();
         generalConnection.commit();
+        
+        /* Open the business database for setup */
+        connectToBusiness(username);
+        businessConnection.close();
     }
 
     /** Gets the customer with the given username. Customers are uniquely
