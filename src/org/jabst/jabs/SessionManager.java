@@ -237,11 +237,11 @@ public class SessionManager extends Application {
 	 * @return : A boolean result
 	 */
 	public boolean registerUser(String username, String password,
-		String name, String address, String phone, String business)
+		String name, String address, String phone, BusinessSelection business)
 	{
 		// If it throws an exception, it failed. Otherwise it succeeded
 		try {
-			dbm.addUser(username, password, name, address, phone, business);
+			dbm.addCustomer(username, password, name, address, phone, business);
 			logger.info("SessionManager: Successfully added user with dbm");
 			return true;
 		} catch (SQLException sqle) {
