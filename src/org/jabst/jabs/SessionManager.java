@@ -104,12 +104,23 @@ public class SessionManager extends Application {
 					}
 						break;
 				case CUSTOMERMENU:
+					String cbn = null;
 					try {
-					dbm.connectToBusiness();
+						// FIXME: Need to use arguments
+						cbn = dbm.getCustomerBusinessName(username);
+						logger.info("Customer belongs to business:"+cbn);
+						if (cbn == null) {
+							// TODO: Visual cue
+							currentWindow = Window.LOGIN;
+						}
+						if (!dbm.connectToBusiness(cbn)) {
+							logger.warning("Connection error "
+								+"connecting to business:"+cbn);
+						}
 					} catch (SQLException sqle) {
 						// TODO: Visual cue
-						logger.warning("Error connecting to default"
-							+" business for customer menu");
+						logger.warning("SQL Error connecting to "
+							+" business:"+cbn+" for customer menu");
 						currentWindow = Window.LOGIN;
 						break;
 					}
@@ -226,11 +237,11 @@ public class SessionManager extends Application {
 	 * @return : A boolean result
 	 */
 	public boolean registerUser(String username, String password,
-		String name, String address, String phone)
+		String name, String address, String phone, BusinessSelection business)
 	{
 		// If it throws an exception, it failed. Otherwise it succeeded
 		try {
-			dbm.addUser(username, password, name, address, phone);
+			dbm.addCustomer(username, password, name, address, phone, business);
 			logger.info("SessionManager: Successfully added user with dbm");
 			return true;
 		} catch (SQLException sqle) {
