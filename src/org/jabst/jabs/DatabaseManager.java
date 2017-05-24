@@ -63,14 +63,20 @@ public class DatabaseManager {
             +"OWNER_NAME VARCHAR(40) NOT NULL,"
             +"ADDRESS VARCHAR(255) NOT NULL,"
             +"PHONE VARCHAR(10) NOT NULL,"
-            +"PRIMARY KEY (USERNAME))",
-
+            +"PRIMARY KEY (USERNAME),"
+            +"FOREIGN KEY (USERNAME) REFERENCES CREDENTIALS(USERNAME))",
+        "CREATE TABLE SUPERUSER ("
+            +"USERNAME VARCHAR(20),"
+            +"PRIMARY KEY (USERNAME),"
+            +"FOREIGN KEY (USERNAME) REFERENCES CREDENTIALS(USERNAME));",
         // Default data
         // password = default
         "INSERT INTO CREDENTIALS VALUES('default_business','37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f')",
         "INSERT INTO CREDENTIALS VALUES('default_customer','37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f')",
+        "INSERT INTO CREDENTIALS VALUES ('root', '37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f')",
         "INSERT INTO BUSINESS VALUES('default_business', 'default business', 'default_owner', 'default_addr', '0420123456')",
-        "INSERT INTO CUSTOMERS VALUES('default_customer','default customer','default','0420123546')"
+        "INSERT INTO CUSTOMERS VALUES('default_customer','default customer','default','0420123546')",
+        "INSERT INTO SUPERUSER VALUES ('root')"
     };
     /** The SQL tables and data that are in a business database by default */
     private static final String[] SQL_TABLES_BUSINESS = {
@@ -196,7 +202,8 @@ public class DatabaseManager {
                 success = true;
             } catch (SQLException se) {
                 logger.severe("Failed to create"
-                        +"table:"+SQL_TABLES_BUSINESS[i]);
+                        +"table:"+tables[i]);
+                se.printStackTrace();
                 return false;
             }
             ++i;
@@ -339,6 +346,55 @@ public class DatabaseManager {
             return null;
         }
     }
+    
+    public ArrayList<Business> getAllBusinesses() {
+        ArrayList<Business> businesses = new ArrayList<Business>();
+        try {
+            Statement stmt = generalConnection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM BUSINESS ");
+
+            while(rs.next()) {
+                businesses.add(new Business (
+                    rs.getString("BUSINESS_NAME"),
+                    rs.getString("OWNER_NAME"),
+                    rs.getString("ADDRESS"),
+                    rs.getString("PHONE")
+                ));
+            }
+        }
+        catch (SQLException sqle) {
+            return null;
+        }
+        return businesses;
+    }
+    
+    /** Deletes the business from given object representation.
+      * @return true if the business existed and was deleted; false if it did not
+      * @param bus The business to delete
+      * @throws SQLException If a database error occurred, which does not
+      * include when the business does not exist */
+    public boolean deleteBusiness(Business bus) throws SQLException {
+        Statement stmt = generalConnection.createStatement();
+        stmt.execute(
+            String.format(
+                "DELETE FROM BUSINESS "
+                    +"WHERE business_name='%s'"
+                    +"AND   owner_name='%s'"
+                    +"AND   address='%s'"
+                    +"AND   phone='%s'",
+                    bus.businessName,
+                    bus.businessOwner,
+                    bus.address,
+                    bus.phone
+            )
+        );
+        if (stmt.getUpdateCount() == 0) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
 
     /** Asks the database to check if there is a user with the given
       * username and password
@@ -439,6 +495,28 @@ public class DatabaseManager {
 
         statement.execute();
         statement.close();
+        generalConnection.commit();
+    }
+
+    /** Attempts to register a new business in the system with a
+      * given set of attributes.
+      * @throws SQLException If a database error occurs 
+      */
+    public void registerBusiness(
+        String username, String password,
+        String busname, String ownername,
+        String address, String phone
+    ) throws SQLException
+    {
+        addUser(username, password);
+        Statement stmt = generalConnection.createStatement();
+        stmt.execute(String.format(
+            "INSERT INTO BUSINESS VALUES ('%s', '%s', '%s', '%s', '%s')",
+            username,
+            busname, ownername,
+            address, phone
+        ));
+        stmt.close();
         generalConnection.commit();
     }
 
@@ -565,31 +643,39 @@ public class DatabaseManager {
         );
     }
 
-    /** Checks if there is a business with the given username
-        @param username The username to check
-        @return Whether the username represents a business or not
-        @throws SQLException If the database encountered an error
-      */
-    public boolean isBusiness(String username) throws SQLException {
-        // NYI: Check if in Business(name)
+    /** Gets the type of the user with given username as an enum UserType.
+      * Type may be NON_EXISTANT, CUSTOMER, BUSINESS or SUPERUSER.
+      * @param username The username to request type of
+      * @return The UserType of the given username
+      * @throws SQLException If there was a database error */
+    public UserType getUserType(String username) throws SQLException {
         Statement stmt = generalConnection.createStatement();
-        ResultSet rs = stmt.executeQuery(
-            "SELECT COUNT(USERNAME) FROM BUSINESS WHERE USERNAME='"+username+"'"
-        );
-
-        rs.next();
-        switch(rs.getInt(1)) {
-            case 0:
-                return false;
-            case 1:
-                return true;
-            default:
-                throw new AssertionError(
-                    "Found more than one business with username="+username
-                    );
+        String queryStr = "SELECT COUNT(USERNAME) FROM %s WHERE USERNAME='%s'";
+        
+        String[] userTypes = {"BUSINESS", "SUPERUSER"};
+        /* Check for business or superuser */
+        for (String userType : userTypes) {
+            ResultSet rs = stmt.executeQuery(
+                String.format(queryStr, userType, username)
+            );
+            rs.next();
+            if (rs.getInt(1) == 1) {
+                if (userType.equals("BUSINESS")) {
+                    return UserType.BUSINESS;
+                }
+                else if (userType.equals("SUPERUSER")) {
+                    return UserType.SUPERUSER;
+                }
+            }
         }
+        /* Check for customer - if not customer, then non-existant */
+        ResultSet rs = stmt.executeQuery(
+            String.format(queryStr, "CREDENTIALS", username)
+        );
+        rs.next();
+        if (rs.getInt(1) == 1) { return UserType.CUSTOMER; }
+        else { return UserType.NON_EXISTANT; }
     }
-
 
     /** Gets all of the appointments in the system within the date range of
      *  7 days starting from today

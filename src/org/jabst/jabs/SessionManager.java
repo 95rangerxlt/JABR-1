@@ -18,7 +18,7 @@ public class SessionManager extends Application {
 	private ConsoleHandler ch;
 
 	public enum Window {
-		LOGIN, REGISTER, BUSINESSMENU, CUSTOMERMENU, ADDEMPLOYEE
+		LOGIN, REGISTER, BUSINESSMENU, CUSTOMERMENU, SUPERUSERMENU, ADDEMPLOYEE, 
 	}
 
 	/** This now operates as the Main method.
@@ -41,12 +41,24 @@ public class SessionManager extends Application {
 					if(lInfo.button == LoginInfo.Buttons.LOGIN) {
 						// Open business menu for business,
 						// customer menu for customer
+						
 						try {
-							if (dbm.isBusiness(lInfo.username)) {
-								currentWindow = Window.BUSINESSMENU;
-							} else {
+							UserType userType = dbm.getUserType(username);
+							if (userType == UserType.NON_EXISTANT) {
+								// Loop around
+								// TODO: Feedback
+								currentWindow = Window.LOGIN;
+							}
+							else if (userType == UserType.CUSTOMER) {
 								currentWindow = Window.CUSTOMERMENU;
 							}
+							else if (userType == UserType.BUSINESS) {
+								currentWindow = Window.BUSINESSMENU;
+							}
+							else if (userType == UserType.SUPERUSER) {
+								currentWindow = Window.SUPERUSERMENU;
+							}
+							
 						} catch (SQLException sqle) {
 							// TODO: Handle updating interface to show database error
 							sqle.printStackTrace();
@@ -119,6 +131,10 @@ public class SessionManager extends Application {
 					if(cInfo.button == CustomerInfo.Buttons.OK) {
 						shutdown();
 					}
+					break;
+				case SUPERUSERMENU:
+					SuperUserGUI.display(this);
+					currentWindow = Window.LOGIN;
 					break;
 				case ADDEMPLOYEE:
 					AddEmployeeInfo aInfo = AddEmployeeGUI.display(this);
