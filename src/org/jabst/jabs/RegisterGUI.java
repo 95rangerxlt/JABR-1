@@ -13,6 +13,7 @@ import javafx.stage.Modality;
 import javafx.stage.WindowEvent;//when window closes
 import javafx.geometry.Insets;//insets = padding
 
+import java.util.ArrayList;
 
 public class RegisterGUI {
 
@@ -24,7 +25,7 @@ public class RegisterGUI {
 		Stage window = new Stage();
 		// create all elements
 		ComboBox cbBusinessSelect = new ComboBox();
-		updateCombobox(cbBusinessSelect);
+		updateCombobox(session, cbBusinessSelect);
 		cbBusinessSelect.setValue("Select Business");
 
 		Button bLogin = new Button("Login");
@@ -110,7 +111,14 @@ public class RegisterGUI {
 				//TODO: also do business combobox
 
 				// register user or clear fields
-				if(session.registerUser(tfUName.getText(), tfPWord.getText(), tfName.getText(), tfAddress.getText(), tfPhone.getText())) {
+				if(session.registerUser(
+					tfUName.getText(),
+					tfPWord.getText(),
+					tfName.getText(),
+					tfAddress.getText(),
+					tfPhone.getText(),
+					((BusinessSelection) cbBusinessSelect.getValue()).business.username)
+				) {
 					info.username = tfUName.getText();
 					info.password = tfPWord.getText();
 					info.address = tfAddress.getText();
@@ -240,15 +248,23 @@ public class RegisterGUI {
 		return display(session, "", "");
 	}
 
-	static void updateCombobox(ComboBox cb) {
-		System.out.println("not sure why but 'cb.getItems().clear();' makes this error every time");
+	static void updateCombobox(SessionManager session, ComboBox cb) {
 		cb.getItems().clear();
-		System.out.println("not sure why but 'cb.getItems().clear();' makes this error every time");
 
-		cb.getItems().add("Select Business");
-		cb.getItems().addAll(
-			"NOT FINISHED"//make sure you also handle the register button so it saves as the correct business
+		/* Get all businesses*/
+		ArrayList<Business> allBusinesses 
+			= session.getDatabaseManager().getAllBusinesses();
+		/* Place them in containers which have a user-friendly toString() */
+		ArrayList<BusinessSelection> comboBoxVals
+			= new ArrayList<BusinessSelection>();
+		for (Business b : allBusinesses) {
+			comboBoxVals.add(new BusinessSelection(b));
+		}
+		
+		cb.getItems().setAll(
+			comboBoxVals
 		);
+		cb.getItems().add(0, "Select Business");
 	}
 
 }
