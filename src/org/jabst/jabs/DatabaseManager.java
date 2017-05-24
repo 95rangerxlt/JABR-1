@@ -560,13 +560,21 @@ public class DatabaseManager {
            +"WHERE USERNAME='"+username+"'"
         );
         // Construct the customer as object and return
-        rs.next();
-        return new Customer (
-            rs.getString(1),
-            rs.getString(2),
-            rs.getString(3),
-            rs.getString(4)
-        );
+        if (rs.next()) {
+            return new Customer (
+                rs.getString(1),
+                rs.getString(2),
+                rs.getString(3),
+                rs.getString(4)
+            );
+        }
+        else {
+            logger.severe("Error getting customer:"+username+"\nNo results.");
+            logger.severe("Query was:");
+            logger.severe("SELECT USERNAME, NAME, ADDRESS, PHONE FROM CUSTOMERS"
+                +" WHERE USERNAME='"+username+"'");
+            return null;
+        }
     }
 
     /** Returns all the customers in the database as ArrayList<Customer>

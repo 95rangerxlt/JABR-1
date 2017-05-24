@@ -104,30 +104,23 @@ public class SessionManager extends Application {
 					}
 						break;
 				case CUSTOMERMENU:
+					String cbn = null;
 					try {
 						// FIXME: Need to use arguments
-						UserType type = dbm.getUserType(username);
-						if (type == UserType.NON_EXISTANT) {
-							logger.severe("User has no type:"+username+"!");
+						cbn = dbm.getCustomerBusinessName(username);
+						logger.info("Customer belongs to business:"+cbn);
+						if (cbn == null) {
+							// TODO: Visual cue
+							currentWindow = Window.LOGIN;
 						}
-						else if (type == UserType.CUSTOMER) {
-							String cbn = dbm.getCustomerBusinessName(username);
-							if (cbn == null) {
-								// TODO: Visual cue
-								currentWindow = Window.LOGIN;
-							}
-							dbm.connectToBusiness(cbn);
-						}
-						else if (type == UserType.BUSINESS) {
-							dbm.connectToBusiness(username);
-						}
-						else if (type == UserType.SUPERUSER) {
-							// No need for business connection
+						if (!dbm.connectToBusiness(cbn)) {
+							logger.warning("Connection error "
+								+"connecting to business:"+cbn);
 						}
 					} catch (SQLException sqle) {
 						// TODO: Visual cue
-						logger.warning("Error connecting to default"
-							+" business for customer menu");
+						logger.warning("SQL Error connecting to "
+							+" business:"+cbn+" for customer menu");
 						currentWindow = Window.LOGIN;
 						break;
 					}
