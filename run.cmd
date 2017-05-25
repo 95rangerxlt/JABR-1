@@ -1,1 +1,1 @@
-java -jar deployment/jabs.jar 
+java -jar deployment/JABS-1.1.jar
