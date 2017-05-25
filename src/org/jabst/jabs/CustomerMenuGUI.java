@@ -88,7 +88,7 @@ public class CustomerMenuGUI {
 		//add elements to the layout
 		root.getChildren().addAll(bOk, tableGUI);
 
-		Scene scene = new Scene(root, 900, 400);//create area inside window
+		Scene scene = new Scene(root, 1000, 425);//create area inside window
 
 		tableGUI.update();
 
