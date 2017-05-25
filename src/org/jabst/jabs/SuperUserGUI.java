@@ -77,7 +77,7 @@ public class SuperUserGUI {
             hbNewBus.getChildren().addAll(lbNewBus, btNewBus);
         root.getChildren().addAll(hbDeleteBus, hbNewBus);
         /* Root spacing and padding */
-        root.setSpacing(2);
+        root.setSpacing(SessionManager.spacing);
         root.setPadding(new Insets(5.0, 0.0, 5.0, 10.0));
         
         Scene scene = new Scene(root, 400, 200);//create area inside window

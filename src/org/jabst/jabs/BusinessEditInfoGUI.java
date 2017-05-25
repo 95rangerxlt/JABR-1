@@ -72,10 +72,10 @@ public class BusinessEditInfoGUI {
  		VBox root = new VBox();//layout manager
  		HBox buttonBox = new HBox();
 
- 		root.setSpacing(2);
- 		root.setPadding(new Insets(3.0, 3.0, 3.0, 3.0));
+ 		root.setSpacing(SessionManager.spacing);
+ 		root.setPadding(SessionManager.padding);
 
- 		buttonBox.setSpacing(2);
+ 		buttonBox.setSpacing(SessionManager.spacing);
 
 		//add elements to the layout
  		root.getChildren().addAll(lBusinessName, tfBusinessName, lBusinessOwner, tfBusinessOwner, lAddress, tfAddress, lPhone, tfPhone, buttonBox);

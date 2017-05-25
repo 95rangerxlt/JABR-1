@@ -221,9 +221,9 @@ public class RegisterGUI {
 		VBox root = new VBox();//layout manager
 		HBox buttons = new HBox();
 
-		root.setSpacing(2);
-		root.setPadding(new Insets(3.0, 3.0, 3.0, 3.0));
-		buttons.setSpacing(2);
+		root.setSpacing(SessionManager.spacing);
+		root.setPadding(SessionManager.padding);
+		buttons.setSpacing(SessionManager.spacing);
 
 		//add elements to the layout
 		buttons.getChildren().addAll(bRegister, bLogin);

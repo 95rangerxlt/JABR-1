@@ -184,14 +184,14 @@ public class AddEmployeeGUI {
  		HBox selEmpAndName = new HBox();
  		HBox saveAndDelete = new HBox();
 
-		root.setSpacing(2);
-		root.setPadding(new Insets(3.0, 3.0, 3.0, 3.0));
+		root.setSpacing(SessionManager.spacing);
+		root.setPadding(SessionManager.padding);
 
-		selEmpAndName.setSpacing(2);
-		// selEmpAndName.setPadding(new Insets(3.0, 3.0, 3.0, 3.0));
+		selEmpAndName.setSpacing(SessionManager.spacing);
+		// selEmpAndName.setPadding(SessionManager.padding);
 
-		saveAndDelete.setSpacing(2);
-		// saveAndDelete.setPadding(new Insets(3.0, 3.0, 3.0, 3.0));
+		saveAndDelete.setSpacing(SessionManager.spacing);
+		// saveAndDelete.setPadding(SessionManager.padding);
 
 		//add elements to the layout
 		selEmpAndName.getChildren().addAll(cbEmployeeSelect, bNew);

@@ -9,6 +9,7 @@ import org.hsqldb.HsqlException;
 import java.util.logging.Logger;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
+import javafx.geometry.Insets;//insets = padding
 
 public class SessionManager extends Application {
 	// Fields
@@ -16,6 +17,9 @@ public class SessionManager extends Application {
 	private EmployeeManager employeeManager;
 	private Logger logger;
 	private ConsoleHandler ch;
+
+	public static int spacing = 200;
+	public static Insets padding = new Insets(3.0, 3.0, 3.0, 3.0);
 
 	public enum Window {
 		LOGIN, REGISTER, BUSINESSMENU, CUSTOMERMENU, SUPERUSERMENU, ADDEMPLOYEE, 

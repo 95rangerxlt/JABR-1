@@ -56,8 +56,8 @@ public class AvailabilityGUI {
 		// Setup Window and layout
  		VBox root = new VBox();//layout manager
 
-		root.setSpacing(2);
-		root.setPadding(new Insets(3.0, 3.0, 3.0, 3.0));
+		root.setSpacing(SessionManager.spacing);
+		root.setPadding(SessionManager.padding);
 
 		//add elements to the layout
 		root.getChildren().addAll(table, bClose);
