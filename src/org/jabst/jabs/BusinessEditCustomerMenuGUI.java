@@ -51,7 +51,7 @@ public class BusinessEditCustomerMenuGUI {
 
 		cbCustomerSelect = new ComboBox();
 		updateCombobox(cbCustomerSelect);
-		cbCustomerSelect.setValue("Select Employee");
+		cbCustomerSelect.setValue("Select Customer");
 
 		//block events to other window
 		window.initModality(Modality.APPLICATION_MODAL);

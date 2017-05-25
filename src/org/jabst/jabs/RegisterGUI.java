@@ -119,16 +119,10 @@ public class RegisterGUI {
 					return;
 				}
 				
+				System.out.println("registering a business "+isBusiness);
 				boolean userRegistered = false;
-				if(!isBusiness) {
-					userRegistered = session.registerUser(
-									tfUName.getText(),
-									tfPWord.getText(),
-									tfName.getText(),
-									tfAddress.getText(),
-									tfPhone.getText(),
-									((BusinessSelection) cbBusinessSelect.getValue()));
-				} else {
+				if(isBusiness) {
+					System.out.println("doing from business "+business.toString());
 					userRegistered = session.registerUser(
 									tfUName.getText(),
 									tfPWord.getText(),
@@ -137,6 +131,16 @@ public class RegisterGUI {
 									tfPhone.getText(),
 									new BusinessSelection(business)
 									);
+					System.out.println("done");
+				} else {
+					System.out.println("doing from dropdown");
+					userRegistered = session.registerUser(
+									tfUName.getText(),
+									tfPWord.getText(),
+									tfName.getText(),
+									tfAddress.getText(),
+									tfPhone.getText(),
+									((BusinessSelection) cbBusinessSelect.getValue()));
 				}
 
 				// register user or clear fields
