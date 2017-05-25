@@ -540,17 +540,40 @@ public class DatabaseManager {
     {
         /* Insert entries into the general database */
         Business bus = new Business(username, busname, ownername, address, phone);
-        addUser(username, password, new BusinessSelection(bus));
-        Statement stmt = generalConnection.createStatement();
-        stmt.execute(String.format(
-            "INSERT INTO BUSINESS VALUES ('%s', '%s', '%s', '%s', '%s')",
-            username,
-            busname, ownername,
-            address, phone
-        ));
-        stmt.close();
         generalConnection.commit();
+        try {
+            addUser(username, password, new BusinessSelection(bus));
+        } catch (SQLException sqle) {
+            // Do not save the user if they were not succesfully added
+            logger.info(String.format(
+                "registerBusiness: SQLException adding business with AddUser"
+               +"(%s, %s, %s)", username, password, busname
+            ));
+            generalConnection.rollback();
+            throw sqle;
+        }
         
+        try {
+            PreparedStatement stmt = generalConnection.prepareStatement(
+                "INSERT INTO BUSINESS VALUES (?, ?, ?, ?, ?)"
+            );
+            stmt.setString(1, username);
+            stmt.setString(2, busname);
+            stmt.setString(3, ownername);
+            stmt.setString(4, address);
+            stmt.setString(5, phone);
+            stmt.executeUpdate();            
+            stmt.close();
+            generalConnection.commit();
+        } catch (SQLException sqle) {
+            logger.info(String.format(
+                "registerBusiness: SQLException adding business to BUSINESS:"
+               +"(%s, %s, %s, %s, %s)",
+                username, busname, ownername, address, phone
+            ));
+            throw sqle;
+        }
+
         /* Open the business database for setup */
         connectToBusiness(username);
         businessConnection.close();
@@ -616,7 +639,7 @@ public class DatabaseManager {
         ArrayList<String> customers = new ArrayList<String>();
         try {
             // Ask database for all customers
-            PreparedStatement pstmt = generalConnection.prepareStatement(
+            PreparedStatement pstmt = businessConnection.prepareStatement(
                     "SELECT NAME, USERNAME, PHONE, ADDRESS FROM CUSTOMERS"
             );
             ResultSet rs = pstmt.executeQuery();
@@ -1371,6 +1394,9 @@ public class DatabaseManager {
                     break;
                 case "save_appointment":
                     System.out.println("Sucess="+Boolean.toString(dbm.scannerSaveAppointment(sc)));
+                    break;
+                case "cust_dropdown":
+                    System.out.println(dbm.getCustomerInfoForDropDown());
                     break;
                 case "check_available":
                     {
