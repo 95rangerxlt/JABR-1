@@ -21,6 +21,9 @@ public class SessionManager extends Application {
 	public static int spacing = 10;
 	public static Insets padding = new Insets(15.0, 15.0, 15.0, 15.0);
 
+	public static int minTfWidth = 160;
+	public static int maxTfWidth = 200;
+
 	public enum Window {
 		LOGIN, REGISTER, BUSINESSMENU, CUSTOMERMENU, SUPERUSERMENU, ADDEMPLOYEE, 
 	}
