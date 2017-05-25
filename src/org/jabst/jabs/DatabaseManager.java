@@ -639,7 +639,7 @@ public class DatabaseManager {
         ArrayList<String> customers = new ArrayList<String>();
         try {
             // Ask database for all customers
-            PreparedStatement pstmt = generalConnection.prepareStatement(
+            PreparedStatement pstmt = businessConnection.prepareStatement(
                     "SELECT NAME, USERNAME, PHONE, ADDRESS FROM CUSTOMERS"
             );
             ResultSet rs = pstmt.executeQuery();
@@ -1394,6 +1394,9 @@ public class DatabaseManager {
                     break;
                 case "save_appointment":
                     System.out.println("Sucess="+Boolean.toString(dbm.scannerSaveAppointment(sc)));
+                    break;
+                case "cust_dropdown":
+                    System.out.println(dbm.getCustomerInfoForDropDown());
                     break;
                 case "check_available":
                     {
