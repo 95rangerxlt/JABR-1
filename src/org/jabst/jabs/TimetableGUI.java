@@ -96,7 +96,6 @@ class TimetableGUI extends GridPane {
 
 		// headings
 		for(int i = 0; i < this.table.size(); i++) {
-			TimetableCellGUI cell = new TimetableCellGUI(TimetableCellGUI.Type.HEADING, new String[] {"DAY: "+i, "", ""}, false, 120, 40);
 			TimetableCellGUI cell = new TimetableCellGUI(
 				TimetableCellGUI.Type.HEADING,
 				new String[] {java.time.DayOfWeek.of(org.jabst.jabs.util.DayOfWeekConversion.cal2dow(i+1)).toString(), "", ""},
