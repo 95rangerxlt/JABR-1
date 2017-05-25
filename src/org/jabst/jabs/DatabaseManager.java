@@ -517,8 +517,7 @@ public class DatabaseManager {
         statement.execute();
 
         statement.close();
-        // After adding a user, they need to be able to log in again
-        generalConnection.commit();
+        // Don't commit, we don't know if we're successful yet
     }
 
     public boolean addCustomer(String username, String password, String name,
@@ -526,6 +525,7 @@ public class DatabaseManager {
         throws SQLException
     {
 
+        generalConnection.commit();
         addUser(username, password, business);
         // Open a connection to the business if it exists
         Connection c = null;
@@ -536,6 +536,7 @@ public class DatabaseManager {
         // If it doesn't exist, error
         catch (HsqlException hse) {
             logger.severe("HqlException conecting to database'"+dbFileName+"': Doesn't exist");
+            generalConnection.rollback();
             c.close();
             return false;
         }
@@ -551,6 +552,8 @@ public class DatabaseManager {
         
         // Disconnect from business
         c.close();
+        // It's now safe to update the credentials database
+        generalConnection.commit();
         return true;
     }
 
