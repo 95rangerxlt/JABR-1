@@ -4,15 +4,13 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 
 <groupId>org.jabst.jabs</groupId>
 <artifactId>JABS</artifactId>
-<version>1.1-FINAL</version>
+<version>1.1</version>
 <packaging>jar</packaging>
 
 <name>JABS</name>
 <url>https://github.com/rmit-s3606501-jason-bigelow/JABR</url>
 
 <build>
-    <directory>${project.basedir}/deployment</directory>
-    <outputDirectory>${project.basedir}/target</outputDirectory>
     <plugins>
     <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -27,11 +25,10 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                     <mainClass>org.jabst.jabs.SessionManager</mainClass>
                 </manifest>
             </archive>
+            <outputDirectory>${project.basedir}/deployment</outputDirectory>
         </configuration>
     </plugin>
-    
 
-    
     <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
@@ -48,11 +45,9 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
         </execution>
         </executions>
     </plugin>
-    
+
     </plugins>
 </build>
-
-
 
 <dependencies>
 
