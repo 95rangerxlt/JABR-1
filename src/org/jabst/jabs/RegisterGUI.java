@@ -15,6 +15,8 @@ import javafx.geometry.Insets;//insets = padding
 
 import java.util.ArrayList;
 
+import java.sql.SQLException;
+
 public class RegisterGUI {
 
 	private static String redBorder = "-fx-border-color: red ; -fx-border-width: 2px ;";
@@ -252,12 +254,17 @@ public class RegisterGUI {
 		cb.getItems().clear();
 
 		/* Get all businesses*/
-		ArrayList<Business> allBusinesses 
-			= session.getDatabaseManager().getAllBusinesses();
+		ArrayList<Business> activeBusinesses;
+		try {
+			activeBusinesses =  session.getDatabaseManager().getActiveBusinesses();
+		} catch (SQLException sqle) {
+			cb.getItems().add("Database error.");
+			return;
+		}
 		/* Place them in containers which have a user-friendly toString() */
 		ArrayList<BusinessSelection> comboBoxVals
 			= new ArrayList<BusinessSelection>();
-		for (Business b : allBusinesses) {
+		for (Business b : activeBusinesses) {
 			comboBoxVals.add(new BusinessSelection(b));
 		}
 		

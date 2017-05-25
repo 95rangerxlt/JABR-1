@@ -31,6 +31,7 @@ import org.jabst.jabs.util.DayOfWeekConversion;
 
 // For returning result sets as native objects
 import java.util.ArrayList;
+import java.util.ListIterator;
 
 // Time imports
 import java.util.Calendar;
@@ -394,6 +395,30 @@ public class DatabaseManager {
         return businesses;
     }
     
+    /** Gets only the businesses who have logged in before. Only these
+      * businesses can be registered with; the others are not ready to take
+      * registrations.
+      * @throws SQLException If the databas(es) have an error
+      */
+    public ArrayList<Business> getActiveBusinesses() throws SQLException {
+        ArrayList<Business> businesses = getAllBusinesses();
+        if (businesses == null) return null;
+        ListIterator<Business> it = businesses.listIterator();
+        while (it.hasNext()){
+            Business b = it.next();
+            try {
+                String busDBFileName = dbfilePrefix+"db/"+b.username+";ifexists=true";
+                Connection c = DriverManager.getConnection(busDBFileName, "sa", "");
+                c.close();
+            }
+            // If we can't establish a connection, it must not exist. Remove it.
+            catch (SQLException sqle) {
+                it.remove();
+            }
+        }
+        return businesses;
+    }
+    
     /** Deletes the business from given object representation.
       * @return true if the business existed and was deleted; false if it did not
       * @param bus The business to delete
@@ -506,7 +531,7 @@ public class DatabaseManager {
         Connection c = null;
         String dbFileName = business.business.username;
         try {
-            c = DriverManager.getConnection(dbfilePrefix+dbFileName+";ifexists=true", "sa", "");
+            c = DriverManager.getConnection(dbfilePrefix+"db/"+dbFileName+";ifexists=true", "sa", "");
         }
         // If it doesn't exist, error
         catch (HsqlException hse) {
@@ -522,6 +547,7 @@ public class DatabaseManager {
         stmt.setString(2, name);
         stmt.setString(3, address);
         stmt.setString(4, phone);
+        stmt.executeUpdate();
         
         // Disconnect from business
         c.close();
