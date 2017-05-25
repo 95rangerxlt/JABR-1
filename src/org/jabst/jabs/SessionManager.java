@@ -18,8 +18,8 @@ public class SessionManager extends Application {
 	private Logger logger;
 	private ConsoleHandler ch;
 
-	public static int spacing = 200;
-	public static Insets padding = new Insets(3.0, 3.0, 3.0, 3.0);
+	public static int spacing = 10;
+	public static Insets padding = new Insets(15.0, 15.0, 15.0, 15.0);
 
 	public enum Window {
 		LOGIN, REGISTER, BUSINESSMENU, CUSTOMERMENU, SUPERUSERMENU, ADDEMPLOYEE, 

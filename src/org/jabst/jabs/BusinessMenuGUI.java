@@ -97,7 +97,7 @@ public class BusinessMenuGUI {
  		VBox root = new VBox();//layout manager
 
  		root.setSpacing(SessionManager.spacing);
- 		root.setPadding(SessionManager.padding);
+ 		// root.setPadding(SessionManager.padding);
 
 		//add elements to the layout
  		root.getChildren().addAll(mb);
