@@ -142,6 +142,8 @@ public class DatabaseManager {
     private Connection generalConnection;
     /** The JDBC connection to the business-specific database*/
     private Connection businessConnection;
+    /** The current business. Used to inform the rest of the system. */
+    private String currBus;
 
     /** Creates a new DatabaseManager
      * Always open the DatabaseManager at program start (call the constructor),
@@ -285,11 +287,6 @@ public class DatabaseManager {
         return c;
     }
 
-    /** Opens the default business database */
-    public boolean connectToBusiness() throws SQLException {
-        return connectToBusiness(defaultBusinessName);
-    }
-
     /** Opens a connection to the business specified with the username
       * The database file is located in db/$username
       * @param String busUsername : The username of the business
@@ -305,17 +302,14 @@ public class DatabaseManager {
         Statement stmt = generalConnection.createStatement();
 
         ResultSet rs = stmt.executeQuery(
-            "SELECT COUNT(USERNAME) FROM BUSINESS WHERE USERNAME='"+busUsername+"'"
-            );
-        rs.next();
-        switch(rs.getInt(1)) {
-            case 0:
-                return false;
-            case 1:
-                break;
-            default:
-                throw new AssertionError("Found 2 of business "+busUsername);
-                // Never happens
+            "SELECT USERNAME, BUSINESS_NAME FROM BUSINESS WHERE USERNAME='"+busUsername+"'"
+        );
+        if (rs.next()) {
+            this.currBus = rs.getString("BUSINESS_NAME");
+        }
+        else {
+            logger.warning("connectToBusiness: No business with that username");
+            return false;
         }
 
         // We now know it exists for certain, but not whether it has a database
@@ -326,6 +320,10 @@ public class DatabaseManager {
         }
         this.businessConnection.setAutoCommit(false);
         return true;
+    }
+    
+    public String getCurrentBusinessName() {
+        return this.currBus;
     }
 
     /** Gets the business associated with the username

@@ -92,7 +92,7 @@ public class CustomerMenuGUI {
 
 		tableGUI.update();
 
-		window.setTitle("Customer GUI -placeholder-");//text at the top of the window
+		window.setTitle("Making a booking with "+session.getDatabaseManager().getCurrentBusinessName());//text at the top of the window
 		window.setScene(scene);//add scene to window
 		window.showAndWait();//put the window on the desktop
 
