@@ -49,16 +49,8 @@ public class DatabaseManager {
         "CREATE TABLE CREDENTIALS ("
             +"USERNAME VARCHAR(20),"
             +"PASSWORD VARBINARY(32) NOT NULL,"
-            +"PRIMARY KEY(USERNAME))",
-        "CREATE TABLE CUSTOMERS ("
-            +"USERNAME VARCHAR(20),"
-            +"NAME VARCHAR(40) NOT NULL,"
-            +"ADDRESS VARCHAR(255) NOT NULL,"
-            +"PHONE VARCHAR(10) NOT NULL,"
-            +"BUSINESS VARCHAR(4) NOT NULL,"
-            +"PRIMARY KEY(USERNAME),"
-            +"FOREIGN KEY(BUSINESS) REFERENCES BUSINESS(USERNAME),"
-            +"FOREIGN KEY (USERNAME) REFERENCES CREDENTIALS(USERNAME)"
+            +"BUSINESS VARCHAR (40)," 
+            +"PRIMARY KEY(USERNAME)"
         +");",
         "CREATE TABLE BUSINESS ("
             +"USERNAME VARCHAR (40),"
@@ -67,22 +59,33 @@ public class DatabaseManager {
             +"ADDRESS VARCHAR(255) NOT NULL,"
             +"PHONE VARCHAR(10) NOT NULL,"
             +"PRIMARY KEY (USERNAME),"
-            +"FOREIGN KEY (USERNAME) REFERENCES CREDENTIALS(USERNAME))",
+            +"FOREIGN KEY (USERNAME) REFERENCES CREDENTIALS(USERNAME)"
+        +");",
+
         "CREATE TABLE SUPERUSER ("
             +"USERNAME VARCHAR(20),"
             +"PRIMARY KEY (USERNAME),"
-            +"FOREIGN KEY (USERNAME) REFERENCES CREDENTIALS(USERNAME));",
+            +"FOREIGN KEY (USERNAME) REFERENCES CREDENTIALS(USERNAME)"
+        +");",
         // Default data
-        // password = default
-        "INSERT INTO CREDENTIALS VALUES('default_business','37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f')",
-        "INSERT INTO CREDENTIALS VALUES('default_customer','37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f')",
-        "INSERT INTO CREDENTIALS VALUES ('root', '37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f')",
+        // passwords = default
+        "INSERT INTO CREDENTIALS VALUES('default_business','37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f', 'default_business')",
+        "INSERT INTO CREDENTIALS VALUES('default_customer','37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f', 'default_business')",
+        "INSERT INTO CREDENTIALS VALUES ('root', '37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f', NULL)",
         "INSERT INTO BUSINESS VALUES('default_business', 'default business', 'default_owner', 'default_addr', '0420123456')",
-        "INSERT INTO CUSTOMERS VALUES('default_customer','default customer','default','0420123546','default_business')",
         "INSERT INTO SUPERUSER VALUES ('root')"
     };
     /** The SQL tables and data that are in a business database by default */
     private static final String[] SQL_TABLES_BUSINESS = {
+        // Always put customers first
+        "CREATE TABLE CUSTOMERS ("
+            +"USERNAME VARCHAR(20),"
+            +"NAME VARCHAR(40) NOT NULL,"
+            +"ADDRESS VARCHAR(255) NOT NULL,"
+            +"PHONE VARCHAR(10) NOT NULL,"
+            +"PRIMARY KEY(USERNAME)"
+        +");",
+
         "CREATE TABLE EMPLOYEE ("
             +    "EMPL_ID INTEGER GENERATED ALWAYS AS IDENTITY,"
             +    "EMPL_NAME VARCHAR(40) NOT NULL,"
@@ -118,12 +121,13 @@ public class DatabaseManager {
             +   "FOREIGN KEY (EMPLOYEE) REFERENCES EMPLOYEE(EMPL_ID)"
         +")",
         // Default data
-        "INSERT INTO EMPLOYEE VALUES (DEFAULT, 'default_employee', 'default', '0420123456')",
+        "INSERT INTO CUSTOMERS VALUES('default_customer','default customer','default','0420123546');",
+        "INSERT INTO EMPLOYEE VALUES (DEFAULT, 'default_employee', 'default', '0420123456');",
         "INSERT INTO APPOINTMENTTYPE VALUES (DEFAULT, 'DEFAULT_APPOINTMENT_TYPE', 99);",
-        "INSERT INTO AVAILABILITY VALUES (0, 36000, 1)",
-        "INSERT INTO AVAILABILITY VALUES (0, 32400, 1)",
-        "INSERT INTO APPOINTMENT VALUES (DEFAULT, %s+INTERVAL '9' HOUR, 0, 0, 'default_customer')",
-        "INSERT INTO APPOINTMENT VALUES (DEFAULT, %s+INTERVAL '10' HOUR, 0, 0, 'default_customer')"
+        "INSERT INTO AVAILABILITY VALUES (0, 36000, 1);",
+        "INSERT INTO AVAILABILITY VALUES (0, 32400, 1);",
+        "INSERT INTO APPOINTMENT VALUES (DEFAULT, %s+INTERVAL '9' HOUR, 0, 0, 'default_customer');",
+        "INSERT INTO APPOINTMENT VALUES (DEFAULT, %s+INTERVAL '10' HOUR, 0, 0, 'default_customer');"
     };
 
     /** The name of the general database */
@@ -138,6 +142,8 @@ public class DatabaseManager {
     private Connection generalConnection;
     /** The JDBC connection to the business-specific database*/
     private Connection businessConnection;
+    /** The current business. Used to inform the rest of the system. */
+    private String currBus;
 
     /** Creates a new DatabaseManager
      * Always open the DatabaseManager at program start (call the constructor),
@@ -182,8 +188,8 @@ public class DatabaseManager {
 
         // Insert the date into these INSERT statements by String.format
         // Doing it from Java is easier.
-        SQL_TABLES_BUSINESS[8] = String.format(SQL_TABLES_BUSINESS[8], dateStr);
-        SQL_TABLES_BUSINESS[9] = String.format(SQL_TABLES_BUSINESS[9], dateStr);
+        SQL_TABLES_BUSINESS[10] = String.format(SQL_TABLES_BUSINESS[10], dateStr);
+        SQL_TABLES_BUSINESS[11] = String.format(SQL_TABLES_BUSINESS[11], dateStr);
 
         // Try to execute each SQL statement in tables
         boolean success = false;
@@ -281,11 +287,6 @@ public class DatabaseManager {
         return c;
     }
 
-    /** Opens the default business database */
-    public boolean connectToBusiness() throws SQLException {
-        return connectToBusiness(defaultBusinessName);
-    }
-
     /** Opens a connection to the business specified with the username
       * The database file is located in db/$username
       * @param String busUsername : The username of the business
@@ -301,17 +302,14 @@ public class DatabaseManager {
         Statement stmt = generalConnection.createStatement();
 
         ResultSet rs = stmt.executeQuery(
-            "SELECT COUNT(USERNAME) FROM BUSINESS WHERE USERNAME='"+busUsername+"'"
-            );
-        rs.next();
-        switch(rs.getInt(1)) {
-            case 0:
-                return false;
-            case 1:
-                break;
-            default:
-                throw new AssertionError("Found 2 of business "+busUsername);
-                // Never happens
+            "SELECT USERNAME, BUSINESS_NAME FROM BUSINESS WHERE USERNAME='"+busUsername+"'"
+        );
+        if (rs.next()) {
+            this.currBus = rs.getString("BUSINESS_NAME");
+        }
+        else {
+            logger.warning("connectToBusiness: No business with that username");
+            return false;
         }
 
         // We now know it exists for certain, but not whether it has a database
@@ -322,6 +320,10 @@ public class DatabaseManager {
         }
         this.businessConnection.setAutoCommit(false);
         return true;
+    }
+    
+    public String getCurrentBusinessName() {
+        return this.currBus;
     }
 
     /** Gets the business associated with the username
@@ -355,7 +357,7 @@ public class DatabaseManager {
         try {
             Statement stmt = generalConnection.createStatement();
             ResultSet rs = stmt.executeQuery(
-                "SELECT BUSINESS FROM CUSTOMERS WHERE USERNAME='"+username+"'"
+                "SELECT BUSINESS FROM CREDENTIALS WHERE USERNAME='"+username+"'"
             );
             if (rs.next()) {
                 return rs.getString("BUSINESS");
@@ -434,7 +436,7 @@ public class DatabaseManager {
         boolean success = false;
 
         PreparedStatement statement = generalConnection.prepareStatement(
-            "SELECT * from CREDENTIALS WHERE USERNAME='"+username+"'"
+            "SELECT USERNAME, PASSWORD FROM CREDENTIALS WHERE USERNAME='"+username+"'"
         );
 
         ResultSet rs = statement.executeQuery(); 
@@ -472,18 +474,19 @@ public class DatabaseManager {
      *  thrown, the caller should give a message about the username/password
      *  already existing.
      */
-    private void addUser(String username, String password)
+    private void addUser(String username, String password, BusinessSelection business)
         throws SQLException {
 
         byte[] password_hash = Digest.sha256(password);
         PreparedStatement statement = null;
 
         statement = generalConnection.prepareStatement(
-            "INSERT INTO CREDENTIALS VALUES (?, ?)"
+            "INSERT INTO CREDENTIALS VALUES (?, ?, ?)"
         );
 
         statement.setString(1, username);
         statement.setBytes(2, password_hash);
+        statement.setString(3, business.business.username);
 
         logger.info("About to execute adding user...");
         statement.execute();
@@ -493,34 +496,36 @@ public class DatabaseManager {
         generalConnection.commit();
     }
 
-    /** Adds a user with the given arguments
-        @param username Must be no longer than 40 characters
-        @param password No size limit
-        @param name Must be no longer than 40 character
-        @param address Must be no longer than 255 characters
-        @param phone Must be no longer than 10 characters (no international numbers)
-        @throws SQLException if the database size constraints were exceeded
-      */
-    public void addUser(String username, String password,
-        String name, String address, String phone, String business) throws SQLException
+    public boolean addCustomer(String username, String password, String name,
+        String address, String phone, BusinessSelection business)
+        throws SQLException
     {
-        // Add to credentials table
-        addUser(username, password);
 
-        // Now add to customers table
-        PreparedStatement statement = generalConnection.prepareStatement(
-            // USERNAME, NAME, ADDRESS, PHONE
-            "INSERT INTO CUSTOMERS VALUES (?, ?, ?, ?, ?)"
+        addUser(username, password, business);
+        // Open a connection to the business if it exists
+        Connection c = null;
+        String dbFileName = business.business.username;
+        try {
+            c = DriverManager.getConnection(dbfilePrefix+dbFileName+";ifexists=true", "sa", "");
+        }
+        // If it doesn't exist, error
+        catch (HsqlException hse) {
+            logger.severe("HqlException conecting to database'"+dbFileName+"': Doesn't exist");
+            c.close();
+            return false;
+        }
+        // Insert data into business table
+        PreparedStatement stmt = c.prepareStatement(
+            "INSERT INTO CUSTOMERS VALUES (?, ?, ?, ?)"
         );
-        statement.setString(1, username);
-        statement.setString(2, name);
-        statement.setString(3, address);
-        statement.setString(4, phone);
-        statement.setString(5, business);
-
-        statement.execute();
-        statement.close();
-        generalConnection.commit();
+        stmt.setString(1, username);
+        stmt.setString(2, name);
+        stmt.setString(3, address);
+        stmt.setString(4, phone);
+        
+        // Disconnect from business
+        c.close();
+        return true;
     }
 
     /** Attempts to register a new business in the system with a
@@ -533,7 +538,9 @@ public class DatabaseManager {
         String address, String phone
     ) throws SQLException
     {
-        addUser(username, password);
+        /* Insert entries into the general database */
+        Business bus = new Business(username, busname, ownername, address, phone);
+        addUser(username, password, new BusinessSelection(bus));
         Statement stmt = generalConnection.createStatement();
         stmt.execute(String.format(
             "INSERT INTO BUSINESS VALUES ('%s', '%s', '%s', '%s', '%s')",
@@ -543,6 +550,10 @@ public class DatabaseManager {
         ));
         stmt.close();
         generalConnection.commit();
+        
+        /* Open the business database for setup */
+        connectToBusiness(username);
+        businessConnection.close();
     }
 
     /** Gets the customer with the given username. Customers are uniquely
@@ -554,19 +565,27 @@ public class DatabaseManager {
       */
     public Customer getCustomer(String username) throws SQLException {
         // Get the customer by username
-        Statement stmt = generalConnection.createStatement();
+        Statement stmt = businessConnection.createStatement();
         ResultSet rs = stmt.executeQuery(
             "SELECT USERNAME, NAME, ADDRESS, PHONE FROM CUSTOMERS "
            +"WHERE USERNAME='"+username+"'"
         );
         // Construct the customer as object and return
-        rs.next();
-        return new Customer (
-            rs.getString(1),
-            rs.getString(2),
-            rs.getString(3),
-            rs.getString(4)
-        );
+        if (rs.next()) {
+            return new Customer (
+                rs.getString(1),
+                rs.getString(2),
+                rs.getString(3),
+                rs.getString(4)
+            );
+        }
+        else {
+            logger.severe("Error getting customer:"+username+"\nNo results.");
+            logger.severe("Query was:");
+            logger.severe("SELECT USERNAME, NAME, ADDRESS, PHONE FROM CUSTOMERS"
+                +" WHERE USERNAME='"+username+"'");
+            return null;
+        }
     }
 
     /** Returns all the customers in the database as ArrayList<Customer>
@@ -624,50 +643,7 @@ public class DatabaseManager {
         return customers;
     }
 
-    /** Adds a user to the database by asking for their username and password
-      * from the scanner. Used on the command line for testing.
-      * @param sc The method will take input from this Scaner.
-      */
-    private void scannerAddUser(Scanner sc) {
-        String username, password, name, address, phone;
-        byte[] digest;
-
-        System.out.print("Enter username: ");
-        username = sc.next();
-        System.out.println();
-
-        System.out.print("Enter password: ");
-        password = sc.next();
-        System.out.println();
-
-        System.out.print("Next up: name, address, phone");
-        name = sc.next(); System.out.println();
-        address = sc.next(); System.out.println();
-        phone = sc.next(); System.out.println();
-
-        boolean success = false;
-        try {
-            addUser(username, password, name, address, phone, null);
-            success = true;
-        } catch (SQLException se) {
-
-            if (se instanceof SQLIntegrityConstraintViolationException) {
-                System.err.println(
-                    "Adding user failed: Already a user with that username"
-                );
-            }
-
-            else {
-                System.err.println("addUser failed...");
-                se.printStackTrace(System.err);
-            }
-        }
-
-        System.out.println(
-            success ? "Added user successfully" : "Didn't add user"
-        );
-    }
-
+ 
     /** Gets the type of the user with given username as an enum UserType.
       * Type may be NON_EXISTANT, CUSTOMER, BUSINESS or SUPERUSER.
       * @param username The username to request type of
@@ -1321,9 +1297,6 @@ public class DatabaseManager {
             sc.nextLine();
             int employee;
             switch (input) {
-                case "add":
-                    dbm.scannerAddUser(sc);
-                    break;
                 case "add_employee":
                     System.out.print("New employee name: ");
                     long result = dbm.addEmployee(sc.next());

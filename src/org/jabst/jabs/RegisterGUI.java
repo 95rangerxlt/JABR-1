@@ -117,7 +117,7 @@ public class RegisterGUI {
 					tfName.getText(),
 					tfAddress.getText(),
 					tfPhone.getText(),
-					((BusinessSelection) cbBusinessSelect.getValue()).business.username)
+					((BusinessSelection) cbBusinessSelect.getValue()))
 				) {
 					info.username = tfUName.getText();
 					info.password = tfPWord.getText();
