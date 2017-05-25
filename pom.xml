@@ -11,6 +11,8 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 <url>https://github.com/rmit-s3606501-jason-bigelow/JABR</url>
 
 <build>
+    <directory>${project.basedir}/deployment</directory>
+    <outputDirectory>${project.basedir}/target</outputDirectory>
     <plugins>
     <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -25,23 +27,23 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                     <mainClass>org.jabst.jabs.SessionManager</mainClass>
                 </manifest>
             </archive>
-            <outputDirectory>deployment</outputDirectory>
         </configuration>
     </plugin>
     
+
+    
     <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.0.1</version>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.0.0</version>
         <executions>
         <execution>
-            <id>copy-dependencies</id>
             <phase>package</phase>
-            <goals>
-                <goal>copy-dependencies</goal>
-            </goals>
+            <goals><goal>shade</goal></goals>
             <configuration>
-                <outputDirectory>deployment</outputDirectory>
+                <createDependencyReducedPom>false</createDependencyReducedPom>
+                <minimizeJar>true</minimizeJar>
+                <shadedArtifactAttached>false</shadedArtifactAttached>
             </configuration>
         </execution>
         </executions>
