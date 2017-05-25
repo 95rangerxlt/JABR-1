@@ -1,0 +1,73 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<modelVersion>4.0.0</modelVersion>
+
+<groupId>org.jabst.jabs</groupId>
+<artifactId>JABS</artifactId>
+<version>1.1</version>
+<packaging>jar</packaging>
+
+<name>JABS</name>
+<url>https://github.com/rmit-s3606501-jason-bigelow/JABR</url>
+
+<build>
+    <plugins>
+    <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.0.2</version>
+        <configuration>
+            <archive>
+                <addMavenDescriptor>false</addMavenDescriptor>
+                <compress>true</compress>
+                <manifest>
+                    <addClasspath>true</addClasspath>
+                    <mainClass>org.jabst.jabs.SessionManager</mainClass>
+                </manifest>
+            </archive>
+            <outputDirectory>${project.basedir}/deployment</outputDirectory>
+        </configuration>
+    </plugin>
+
+    <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+        <execution>
+            <phase>package</phase>
+            <goals><goal>shade</goal></goals>
+            <configuration>
+                <createDependencyReducedPom>false</createDependencyReducedPom>
+                <minimizeJar>true</minimizeJar>
+                <shadedArtifactAttached>false</shadedArtifactAttached>
+            </configuration>
+        </execution>
+        </executions>
+    </plugin>
+
+    </plugins>
+</build>
+
+<dependencies>
+
+    <dependency>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+    <version>4.8.2</version>
+    </dependency>
+
+    <dependency>
+    <groupId>org.hsqldb</groupId>
+    <artifactId>hsqldb-j5</artifactId>
+    <version>2.2.4</version>
+    </dependency>
+
+</dependencies>
+
+<properties>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+</properties>
+
+</project>
