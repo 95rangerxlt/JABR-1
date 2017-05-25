@@ -19,9 +19,8 @@ public class BusinessEditCustomerMenuGUI {
 
 	private static String redBorder = "-fx-border-color: red ; -fx-border-width: 2px ;";
 
-	DatabaseManager dbm;
+	private static DatabaseManager dbm;
 
-	ArrayList<Customer> customers = new ArrayList<Customer>();
 	static Customer customer = new Customer("fake_username", "NeEdCuRrEnTlYlOgGeDiNcUsToMeR", "noaddress", "nophone");
 	static Appointment[][] tableAnalogue;
 
@@ -30,7 +29,6 @@ public class BusinessEditCustomerMenuGUI {
 	public static void display(SessionManager session, Customer cust) {
 		// setup object to return
 		dbm = session.getDatabaseManager();
-		customers = dbm.getAllCustomers();
 		customer = cust;
 		EmployeeManager employeeManager = session.getEmployeeManager();
 		Employee allEmployees = employeeManager.getEmployee(-1, true);//get all employees and allow duplicate WeekDates
@@ -53,7 +51,7 @@ public class BusinessEditCustomerMenuGUI {
 
 		cbCustomerSelect = new ComboBox();
 		updateCombobox(cbCustomerSelect);
-		cbEmployeeSelect.setValue("Select Employee");
+		cbCustomerSelect.setValue("Select Employee");
 
 		//block events to other window
 		window.initModality(Modality.APPLICATION_MODAL);
@@ -64,7 +62,6 @@ public class BusinessEditCustomerMenuGUI {
 			// handle method is called when the button is pressed
 			@Override
 			public void handle(ActionEvent event) {
-				info.button = CustomerInfo.Buttons.OK;
 				boolean flag = false;
 				for(int i = 0; i < tableGUI.cells.length; i++) {
 					if(flag)
@@ -105,8 +102,6 @@ public class BusinessEditCustomerMenuGUI {
 		window.setTitle("Customer GUI -placeholder-");//text at the top of the window
 		window.setScene(scene);//add scene to window
 		window.showAndWait();//put the window on the desktop
-
-		return info;
 	}
 
 	public static Timetable createTableFromAppointments(ArrayList<Appointment> apts) {
@@ -205,7 +200,7 @@ public class BusinessEditCustomerMenuGUI {
 
 		cb.getItems().add("Select Employee");
 		cb.getItems().addAll(
-			employeeManager.getEmployeeNameIDs()
+			dbm.getCustomerInfoForDropDown()
 		);
 	}
 /*
