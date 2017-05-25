@@ -25,6 +25,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                     <mainClass>org.jabst.jabs.SessionManager</mainClass>
                 </manifest>
             </archive>
+            <outputDirectory>deployment</outputDirectory>
         </configuration>
     </plugin>
     
@@ -40,7 +41,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                 <goal>copy-dependencies</goal>
             </goals>
             <configuration>
-                <outputDirectory>${project.build.directory}</outputDirectory>
+                <outputDirectory>deployment</outputDirectory>
             </configuration>
         </execution>
         </executions>
