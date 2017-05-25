@@ -55,6 +55,36 @@ public class BusinessEditInfoGUI {
 
 			@Override
 			public void handle(ActionEvent event) {
+				/* Validate inputs given */
+                		boolean valid = true;
+				valid &=
+				session.validateAddressInput(tfAddress.getText());
+				if (!valid){
+					NotificationGUI.display("Invalid Address Input:\nPlease enter your address in the correct format.", "Registration Error");
+					return;
+				} 
+				System.out.println("Address valid");
+				valid &=
+				session.validateBusinessNameInput(tfBusinessName.getText());
+				if (!valid){
+					NotificationGUI.display("Invalid Business Name Input:\nPlease enter a Business Name containing only letters (A-Z,a-z)", "Registration Error");
+					return;
+				}
+				System.out.println("Business Name valid");
+				valid &=
+				session.validateNameInput(tfBusinessOwner.getText());
+				if (!valid){
+					NotificationGUI.display("Invalid Name Input:\nPlease enter a Name containing only letters (A-Z,a-z)", "Registration Error");
+					return;
+				}
+				System.out.println("Owner Name valid");
+				valid &=
+				session.validatePhoneInput(tfPhone.getText());
+				if (!valid){
+					NotificationGUI.display("Invalid Phone Number Input:\nPlease enter a valid Australian phone number including area code", "Registration Error");
+					return;
+				} 
+				System.out.println("Phone valid, saving");
 				System.out.println("TODO: save button functionality");
 			}
 		});
