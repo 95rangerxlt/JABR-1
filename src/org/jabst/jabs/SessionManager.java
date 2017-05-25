@@ -287,7 +287,18 @@ public class SessionManager extends Application {
 	 * @return : a boolean success result
 	 */
 	public boolean validateNameInput(String input){
-		boolean valid = input.chars().allMatch(Character::isLetter);
+		boolean valid = input.matches("[a-zA-Z ]+");
+		valid &= !(input.equals(""));
+		return valid;
+	}
+	
+	/**
+	 * Validates the user input for the BusinessName value
+	 * @param input : String, user input
+	 * @return : a boolean success result
+	 */
+	public boolean validateBusinessNameInput(String input){
+		boolean valid = (input.matches("[!\"#$%&'()*,\\-. 0-9:;=?@A-Z\\_a-z{|}]+"));
 		valid &= !(input.equals(""));
 		return valid;
 	}
@@ -298,7 +309,7 @@ public class SessionManager extends Application {
 	 * @return : a boolean success result
 	 */
 	public boolean validatePhoneInput(String input){
-		boolean valid = input.chars().allMatch(Character::isDigit);
+		boolean valid = input.matches("[0-9]+");
 		if (!(input.length() == 10)){
 			valid = false;
 		}
@@ -311,7 +322,7 @@ public class SessionManager extends Application {
 	 * @return : a boolean success result
 	 */
 	public boolean validateUsernameInput(String input){
-		boolean valid = input.chars().allMatch(Character::isLetter);
+		boolean valid = input.matches("[a-zA-Z]+");
 		valid &= !(input.equals(""));
 		if (input.length() > 20){
 			valid = false;
@@ -338,7 +349,7 @@ public class SessionManager extends Application {
 	 */
 	public boolean validateAddressInput(String input){
 		// TODO: determine conditions
-		boolean valid = true;
+		boolean valid = input.matches("[a-zA-Z 0-9/]+");
 		valid &= !(input.equals(""));
 		return valid;
 	}
@@ -347,3 +358,4 @@ public class SessionManager extends Application {
 		launch(args);
 	}
 }
+
