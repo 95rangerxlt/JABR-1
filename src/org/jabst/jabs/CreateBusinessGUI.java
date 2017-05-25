@@ -49,19 +49,45 @@ public class CreateBusinessGUI {
                         boolean valid = true;
                         valid &=
                         session.validateUsernameInput(tfUName.getText());
-                        if (!valid) return;
+                        if (!valid){
+							NotificationGUI.display("Invalid Username Input:\nPlease enter a Username containing only letters (A-Z,a-z)", "Registration Error");
+							return;
+						}
                         System.out.println("Username valid");
                         valid &=
                         session.validatePasswordStrength(tfPassword.getText());
-                        if (!valid) return;
+                        if (!valid){
+							NotificationGUI.display("Invalid Password Input:\nPlease enter a stronger Password", "Registration Error");
+							return;
+						}
                         System.out.println("Password valid");
                         valid &=
                         session.validateAddressInput(tfAddress.getText());
-                        if (!valid) return;
+                        if (!valid){
+							NotificationGUI.display("Invalid Address Input:\nPlease enter your address in the correct format.", "Registration Error");
+							return;
+						} 
                         System.out.println("Address valid");
+						valid &=
+                        session.validateBusinessNameInput(tfBusName.getText());
+                        if (!valid){
+							NotificationGUI.display("Invalid Business Name Input:\nPlease enter a Business Name containing only letters (A-Z,a-z)", "Registration Error");
+							return;
+						}
+                        System.out.println("Business Name valid");
+						valid &=
+                        session.validateNameInput(tfOwnerName.getText());
+                        if (!valid){
+							NotificationGUI.display("Invalid Name Input:\nPlease enter a Name containing only letters (A-Z,a-z)", "Registration Error");
+							return;
+						}
+                        System.out.println("Username valid");
                         valid &=
                         session.validatePhoneInput(tfPhone.getText());
-                        if (!valid) return;
+                        if (!valid){
+							NotificationGUI.display("Invalid Phone Number Input:\nPlease enter a valid Australian phone number including area code", "Registration Error");
+							return;
+						} 
                         System.out.println("Phone valid, adding");
                         try {
                             dbm.registerBusiness(
@@ -111,3 +137,4 @@ public class CreateBusinessGUI {
         window.showAndWait();//put the window on the desktop
     }
 }
+
