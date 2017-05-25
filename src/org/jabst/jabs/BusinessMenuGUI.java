@@ -32,7 +32,9 @@ public class BusinessMenuGUI {
 		MenuItem miEditEmployee = new MenuItem("Edit Employee");
 		MenuItem miAvailabilitySummary = new MenuItem("Availability Summary");
 		Menu mBusinessMenu = new Menu("Business");
-		MenuItem miEditBusInfo = new MenuItem("Edit Info"); 
+		MenuItem miEditBusInfo = new MenuItem("Edit Info");
+		MenuItem miEditCustInfo = new MenuItem("Edit Customer Info");
+
 
 		//block events to other window
 		window.initModality(Modality.APPLICATION_MODAL);
@@ -92,6 +94,15 @@ public class BusinessMenuGUI {
 				BusinessEditInfoGUI.display(session);
 			}
 		});
+
+		miEditCustInfo.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				//launch business settings
+				BusinessEditCustomerMenuGUI.display(session);
+			}
+		});
 		
 		// Setup Window and layout
  		VBox root = new VBox();//layout manager
@@ -104,7 +115,7 @@ public class BusinessMenuGUI {
  		mb.getMenus().addAll(mFileMenu, mEmployeesMenu, mBusinessMenu);
  		mFileMenu.getItems().addAll(miFileSave, miFileLogout, miFileQuit);
  		mEmployeesMenu.getItems().addAll(miEditEmployee, miAvailabilitySummary);
- 		mBusinessMenu.getItems().add(miEditBusInfo);
+ 		mBusinessMenu.getItems().addAll(miEditBusInfo, miEditCustInfo);
 
 		Scene scene = new Scene(root, 300, 200);//create area inside window
 

@@ -18,6 +18,17 @@ import java.util.ArrayList;
 public class RegisterGUI {
 
 	private static String redBorder = "-fx-border-color: red ; -fx-border-width: 2px ;";
+	private static boolean isBusiness = false;
+	private static Business business;
+
+	// the qustion is, why would i do it like this?
+	public static RegisterInfo display(SessionManager session, Business business) {
+		RegisterGUI.isBusiness = true;
+		RegisterGUI.business = business;
+		RegisterInfo rInfo = display(session, "", "");
+		RegisterGUI.isBusiness = false;
+		return rInfo;
+	}
 
 	public static RegisterInfo display(SessionManager session, String user, String pass) {
 		RegisterInfo info = new RegisterInfo();
@@ -108,17 +119,28 @@ public class RegisterGUI {
 					return;
 				}
 				
-				//TODO: also do business combobox
+				boolean userRegistered = false;
+				if(!isBusiness) {
+					userRegistered = session.registerUser(
+									tfUName.getText(),
+									tfPWord.getText(),
+									tfName.getText(),
+									tfAddress.getText(),
+									tfPhone.getText(),
+									((BusinessSelection) cbBusinessSelect.getValue()));
+				} else {
+					userRegistered = session.registerUser(
+									tfUName.getText(),
+									tfPWord.getText(),
+									tfName.getText(),
+									tfAddress.getText(),
+									tfPhone.getText(),
+									new BusinessSelection(business)
+									);
+				}
 
 				// register user or clear fields
-				if(session.registerUser(
-					tfUName.getText(),
-					tfPWord.getText(),
-					tfName.getText(),
-					tfAddress.getText(),
-					tfPhone.getText(),
-					((BusinessSelection) cbBusinessSelect.getValue()))
-				) {
+				if(userRegistered) {
 					info.username = tfUName.getText();
 					info.password = tfPWord.getText();
 					info.address = tfAddress.getText();
@@ -224,8 +246,14 @@ public class RegisterGUI {
 		buttons.setSpacing(2);
 
 		//add elements to the layout
-		buttons.getChildren().addAll(bRegister, bLogin);
-		root.getChildren().addAll(cbBusinessSelect, lName, tfName, lAddress, tfAddress, lPhone, tfPhone, lUName, tfUName, lPWord, tfPWord, lPWord2, tfPWord2, buttons);
+		if(!isBusiness) {
+			buttons.getChildren().addAll(bRegister, bLogin);
+			root.getChildren().addAll(cbBusinessSelect, lName, tfName, lAddress, tfAddress, lPhone, tfPhone, lUName, tfUName, lPWord, tfPWord, lPWord2, tfPWord2, buttons);
+		} else {
+			//business is registering
+			buttons.getChildren().addAll(bRegister);
+			root.getChildren().addAll(lName, tfName, lAddress, tfAddress, lPhone, tfPhone, lUName, tfUName, lPWord, tfPWord, lPWord2, tfPWord2, buttons);
+		}
 
 		Scene scene = new Scene(root/*, 300, 200*/);//create area inside window
 /*

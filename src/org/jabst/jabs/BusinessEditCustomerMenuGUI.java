@@ -26,10 +26,9 @@ public class BusinessEditCustomerMenuGUI {
 
 	private static ComboBox cbCustomerSelect;
 
-	public static void display(SessionManager session, Customer cust) {
+	public static void display(SessionManager session) {
 		// setup object to return
 		dbm = session.getDatabaseManager();
-		customer = cust;
 		EmployeeManager employeeManager = session.getEmployeeManager();
 		Employee allEmployees = employeeManager.getEmployee(-1, true);//get all employees and allow duplicate WeekDates
 
@@ -37,6 +36,7 @@ public class BusinessEditCustomerMenuGUI {
 		Stage window = new Stage();
 
 		// create all elements
+		Button bNew = new Button("New");
 		Button bOk = new Button("Ok");
 		bOk.setDefaultButton(true);
 
@@ -79,6 +79,15 @@ public class BusinessEditCustomerMenuGUI {
 			}
 		});
 
+		bNew.setOnAction(new EventHandler<ActionEvent>() {
+			
+			// handle method is called when the button is pressed
+			@Override
+			public void handle(ActionEvent event) {
+				RegisterInfo r_info = RegisterGUI.display(session, dbm.getBusiness(dbm.getCurrentBusinessName()));
+			}
+		});
+
 		// when the window is closed
 		window.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			public void handle(WindowEvent we) {
@@ -88,12 +97,17 @@ public class BusinessEditCustomerMenuGUI {
 		
 		// Setup Window and layout
  		VBox root = new VBox();//layout manager
+ 		HBox comboAndBNew = new HBox();
 
 		root.setSpacing(2);
 		root.setPadding(new Insets(3.0, 3.0, 3.0, 3.0));
 
+		comboAndBNew.setSpacing(2);
+
 		//add elements to the layout
-		root.getChildren().addAll(bOk, tableGUI);
+		root.getChildren().addAll(bOk, comboAndBNew, tableGUI);
+
+		comboAndBNew.getChildren().addAll(cbCustomerSelect, bNew);
 
 		Scene scene = new Scene(root, 900, 400);//create area inside window
 
@@ -198,7 +212,7 @@ public class BusinessEditCustomerMenuGUI {
 		cb.getItems().clear();
 		System.out.println("not sure why but 'cb.getItems().clear();' makes this error every time");
 
-		cb.getItems().add("Select Employee");
+		cb.getItems().add("Select Customer");
 		cb.getItems().addAll(
 			dbm.getCustomerInfoForDropDown()
 		);
