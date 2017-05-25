@@ -74,6 +74,15 @@ public class AddEmployeeGUI {
 			@Override
 			public void handle(ActionEvent event) {
 				info.button = AddEmployeeInfo.Buttons.SAVE;
+				/* Validate inputs given */
+                		boolean valid = true;
+				valid &=
+				session.validateNameInput(tfName.getText());
+                		if (!valid){
+					NotificationGUI.display("Invalid Name Input:\nPlease enter a Name containing only letters (A-Z,a-z)", "Registration Error");
+					return;
+					}
+                		System.out.println("Name valid");
 				//sets data = GUI
 				System.out.println("Saving Employees");
 				table.updateTableFromCells();
