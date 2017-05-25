@@ -8,7 +8,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 <packaging>jar</packaging>
 
 <name>JABS</name>
-<url>https://github.com/rmit-s3606501-jason-bigelow/YSMB</url>
+<url>https://github.com/rmit-s3606501-jason-bigelow/JABR</url>
 
 <build>
     <plugins>
