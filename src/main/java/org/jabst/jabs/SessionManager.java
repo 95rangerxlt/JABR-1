@@ -140,6 +140,7 @@ public class SessionManager extends Application {
 						// TODO: Visual cue
 						logger.warning("Error getting customer info for"
 							+" customer="+username);
+						sqle.printStackTrace();
 						currentWindow = Window.LOGIN;
 						break;
 					} 

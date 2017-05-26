@@ -19,7 +19,7 @@ public class CustomerMenuGUI {
 
 	private static String redBorder = "-fx-border-color: red ; -fx-border-width: 2px ;";
 
-	static Customer customer = new Customer("fake_username", "NeEdCuRrEnTlYlOgGeDiNcUsToMeR", "noaddress", "nophone");
+	static Customer customer = new Customer("fake_username", "NeEdCuRrEnTlYlOgGeDiNcUsToMeR", "noaddress", "nophone", null);
 	static Appointment[][] tableAnalogue;
 
 	public static CustomerInfo display(SessionManager session, Customer cust) {

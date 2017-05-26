@@ -1,5 +1,8 @@
 package org.jabst.jabs;
 
+import java.util.ArrayList;
+import java.util.Date;
+
 /** Customer represents a customer's information as a Java object.
   * Customer information is entered into the database when the customer
   * registers, and retrieve from the database later as needed.
@@ -12,13 +15,19 @@ public class Customer {
 	String address;
 	/** Must be 8-10 digits long */
 	String phone;
+	ArrayList<Date> appointmentTimes;
 
 	// Constructors
-	Customer(String username, String name, String address, String phone) {
+	Customer(
+		String username, String name,
+		String address, String phone,
+		ArrayList<Date> appointmentTimes)
+	{
 		this.username = username;
 		this.name = name;
 		this.address = address;
 		this.phone = phone;
+		this.appointmentTimes = appointmentTimes;
 	}
 	
 	// Methods

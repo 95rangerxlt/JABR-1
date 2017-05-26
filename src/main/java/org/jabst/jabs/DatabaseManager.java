@@ -680,7 +680,8 @@ public class DatabaseManager {
                 rs.getString(1),
                 rs.getString(2),
                 rs.getString(3),
-                rs.getString(4)
+                rs.getString(4),
+                getCustomerTimes(username)
             );
         }
         else {
@@ -690,6 +691,22 @@ public class DatabaseManager {
                 +" WHERE USERNAME='"+username+"'");
             return null;
         }
+    }
+
+    public ArrayList<Date> getCustomerTimes(String username) throws SQLException {
+        PreparedStatement pstmt = businessConnection.prepareStatement(
+            "SELECT DATE_AND_TIME FROM ("
+                +"CUSTOMERS JOIN APPOINTMENT"
+                +"ON CUSTOMERS.USERNAME = APPOINTMENT.CUSTOMER"
+            +")"
+            +"WHERE CUSTOMERS.USERNAME=?"
+        );
+        ResultSet rs = pstmt.executeQuery();
+        ArrayList<Date> customerTimes = new ArrayList<Date>();
+        while (rs.next()) {
+            customerTimes.add(rs.getTimestamp(1));
+        }
+        return customerTimes;
     }
 
     /** Returns all the customers in the database as ArrayList<Customer>
@@ -709,7 +726,8 @@ public class DatabaseManager {
                     rs.getString(1),
                     rs.getString(2),
                     rs.getString(3),
-                    rs.getString(4)
+                    rs.getString(4),
+                    getCustomerTimes(rs.getString(1))
                 )
             );
         }
