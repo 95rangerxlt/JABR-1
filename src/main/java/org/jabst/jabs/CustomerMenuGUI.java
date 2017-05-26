@@ -88,7 +88,7 @@ public class CustomerMenuGUI {
 		//add elements to the layout
 		root.getChildren().addAll(bOk, tableGUI);
 
-		Scene scene = new Scene(root, 1000, 425);//create area inside window
+		Scene scene = new Scene(root/*, 1200, 500*/);//create area inside window
 
 		tableGUI.update();
 
@@ -155,19 +155,15 @@ public class CustomerMenuGUI {
 			employees.add(empMan.getEmployee(employeeID));
 			System.out.println(employees.toString());
 
-			System.out.println("b");
 			//this will only go out of bounds if the ID is somehow wrong
 			ArrayList<WeekDate> dates = employees.get(i).getWorkingHours();
 			System.out.println(dates.toString());
-			System.out.println("b");
 			for(int j = 0; j < dates.size(); j++) {
 				fakeAppointments.add(new Appointment(dates.get(j), -1, employeeID, customer));
 			}
 
-			System.out.println("b");
 		}
 		System.out.println(fakeAppointments.toString());
-		System.out.println("bb");
 		//yes, this is java. fuck efficiency.
 		//we have super computers in our pockets
 		for(int i = 0; i < employees.size(); i++) {

@@ -32,11 +32,8 @@ class TimetableGUI extends GridPane {
 			cells = new TimetableCellGUI[0][0];
 		}
 		type = TimetableCellGUI.Type.CHECKBOX;
-		System.out.println("a");
 		setupSpacing();
-		System.out.println("a");
 		update();
-		System.out.println("a");
 	}
 
 	public TimetableGUI(Timetable table, TimetableCellGUI.Type type) {
@@ -54,11 +51,8 @@ class TimetableGUI extends GridPane {
 			System.out.println("TimetableGUI:constructing empty table");
 			cells = new TimetableCellGUI[0][0];
 		}
-		System.out.println("a");
 		setupSpacing();
-		System.out.println("a");
 		update();
-		System.out.println("a");
 	}
 
 	public void setTable(ArrayList<ArrayList<Timetable.CellStatus>> table) {
@@ -147,9 +141,9 @@ class TimetableGUI extends GridPane {
 					case FREE:
 						// System.out.println("CELL TYPE: FREE");
 						if(this.type == TimetableCellGUI.Type.RADIOBUTTON) {
-							cells[i][j] = new TimetableCellGUI(type, new String[] {"FREE", "BOOKED_BY_YOU", "BOOKED"}, false, 120, 40, tg);
+							cells[i][j] = new TimetableCellGUI(type, new String[] {"Free", "Booked by You", "Unavailable"}, false, 120, 40, tg);
 						} else {
-							cells[i][j] = new TimetableCellGUI(type, new String[] {"FREE", "BOOKED_BY_YOU", "BOOKED"}, false, 120, 40);
+							cells[i][j] = new TimetableCellGUI(type, new String[] {"Free", "Booked by You", "Unavailable"}, false, 120, 40);
 						}
 						// cells[i][j].border.setFill(Color.WHITE);
 					break;
@@ -161,9 +155,9 @@ class TimetableGUI extends GridPane {
 					case BOOKED_BY_YOU:
 						// System.out.println("CELL TYPE: BOOKED_BY_YOU");
 						if(this.type == TimetableCellGUI.Type.RADIOBUTTON) {
-							cells[i][j] = new TimetableCellGUI(type, new String[] {"FREE", "BOOKED_BY_YOU", "BOOKED"}, true, 120, 40, tg);
+							cells[i][j] = new TimetableCellGUI(type, new String[] {"Free", "Booked by You", "Unavailable"}, true, 120, 40, tg);
 						} else {
-							cells[i][j] = new TimetableCellGUI(type, new String[] {"FREE", "BOOKED_BY_YOU", "BOOKED"}, true, 120, 40);
+							cells[i][j] = new TimetableCellGUI(type, new String[] {"Free", "Booked by You", "Unavailable"}, true, 120, 40);
 						}
 						// cells[i][j].border.setFill(Color.LIGHTGRAY);
 					break;

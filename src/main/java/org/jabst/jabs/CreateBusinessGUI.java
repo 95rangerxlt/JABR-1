@@ -29,22 +29,22 @@ public class CreateBusinessGUI {
         VBox root = new VBox();//layout manager
             Label lUsername = new Label("Username:");
             TextField tfUName = new TextField();
-tfUName.setMaxWidth(SessionManager.maxTfWidth);
+			tfUName.setMaxWidth(SessionManager.maxTfWidth);
             Label lPassword = new Label("Password:");
             PasswordField tfPassword = new PasswordField();
-tfPassword.setMaxWidth(SessionManager.maxTfWidth); 
+			tfPassword.setMaxWidth(SessionManager.maxTfWidth); 
             Label lBusName = new Label("Business name:");
             TextField tfBusName = new TextField();
-tfBusName.setMaxWidth(SessionManager.maxTfWidth);
+			tfBusName.setMaxWidth(SessionManager.maxTfWidth);
             Label lOwnerName = new Label("Owner name:");
             TextField tfOwnerName = new TextField();
-tfOwnerName.setMaxWidth(SessionManager.maxTfWidth);
+			tfOwnerName.setMaxWidth(SessionManager.maxTfWidth);
             Label lAddress = new Label("Address:");
             TextField tfAddress = new TextField();
-tfAddress.setMaxWidth(SessionManager.maxTfWidth);
+			tfAddress.setMaxWidth(SessionManager.maxTfWidth);
             Label lPhone = new Label("Phone number:");
             TextField tfPhone = new TextField();
-tfPhone.setMaxWidth(SessionManager.maxTfWidth);
+			tfPhone.setMaxWidth(SessionManager.maxTfWidth);
 
             HBox hbButtons = new HBox();
                 Button btCreate = new Button("Create");
