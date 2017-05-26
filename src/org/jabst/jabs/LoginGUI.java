@@ -27,9 +27,11 @@ public class LoginGUI {
 		Label lUName = new Label("Username: ");
 		Label lPWord = new Label("Password: ");
 		TextField tfUName = new TextField();
-		tfUName.setMaxWidth(180);
-		tfUName.setMinWidth(160);
+tfUName.setMaxWidth(SessionManager.maxTfWidth);
+		// tfUName.setMaxWidth(180);
+		// tfUName.setMinWidth(160);
 		PasswordField tfPWord = new PasswordField();
+tfPWord.setMaxWidth(SessionManager.maxTfWidth);
 
 		// tfUName.setText(user);//homy didnt want this
 		// tfPWord.setText(pass);//homy didnt want this

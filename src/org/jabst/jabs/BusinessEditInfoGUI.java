@@ -23,12 +23,16 @@ public class BusinessEditInfoGUI {
 		// create all elements
 		Label lBusinessName = new Label("BusinessName: ");
 		TextField tfBusinessName = new TextField();
+tfBusinessName.setMaxWidth(SessionManager.maxTfWidth);
 		Label lBusinessOwner = new Label("BusinessOwner: ");
 		TextField tfBusinessOwner = new TextField();
+tfBusinessOwner.setMaxWidth(SessionManager.maxTfWidth);
 		Label lAddress = new Label("Address: ");
 		TextField tfAddress = new TextField();
+tfAddress.setMaxWidth(SessionManager.maxTfWidth);
 		Label lPhone = new Label("Phone: ");
 		TextField tfPhone = new TextField();
+tfPhone.setMaxWidth(SessionManager.maxTfWidth);
 
 		FileChooser fChooser = new FileChooser();
 		fChooser.setTitle("Choose Icon");
