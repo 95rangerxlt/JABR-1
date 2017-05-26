@@ -13,11 +13,8 @@ import javafx.stage.WindowEvent;//when window closes
 import javafx.stage.FileChooser;//choose icon
 import javafx.geometry.Insets;//insets = padding
 
-import java.sql.SQLException;
 
 public class BusinessEditInfoGUI {
-
-	private static File iconFile;
 
 	public static void display(SessionManager session) {
 		// create the window
@@ -26,12 +23,16 @@ public class BusinessEditInfoGUI {
 		// create all elements
 		Label lBusinessName = new Label("BusinessName: ");
 		TextField tfBusinessName = new TextField();
+tfBusinessName.setMaxWidth(SessionManager.maxTfWidth);
 		Label lBusinessOwner = new Label("BusinessOwner: ");
 		TextField tfBusinessOwner = new TextField();
+tfBusinessOwner.setMaxWidth(SessionManager.maxTfWidth);
 		Label lAddress = new Label("Address: ");
 		TextField tfAddress = new TextField();
+tfAddress.setMaxWidth(SessionManager.maxTfWidth);
 		Label lPhone = new Label("Phone: ");
 		TextField tfPhone = new TextField();
+tfPhone.setMaxWidth(SessionManager.maxTfWidth);
 
 		FileChooser fChooser = new FileChooser();
 		fChooser.setTitle("Choose Icon");
@@ -49,7 +50,7 @@ public class BusinessEditInfoGUI {
 
 			@Override
 			public void handle(ActionEvent event) {
-				iconFile = fChooser.showOpenDialog(new Stage());
+				File file = fChooser.showOpenDialog(new Stage());
 				//TODO: set icon
 			}
 		});
@@ -58,55 +59,7 @@ public class BusinessEditInfoGUI {
 
 			@Override
 			public void handle(ActionEvent event) {
-				/* Validate inputs given */
-						boolean valid = true;
-				valid &=
-				session.validateAddressInput(tfAddress.getText());
-				if (!valid){
-					NotificationGUI.display("Invalid Address Input:\nPlease enter your address in the correct format.", "Registration Error");
-					return;
-				} 
-				System.out.println("Address valid");
-				valid &=
-				session.validateBusinessNameInput(tfBusinessName.getText());
-				if (!valid){
-					NotificationGUI.display("Invalid Business Name Input:\n"
-						+"Please enter a Business Name containing only valid"
-						+" characters. Valid characters are letters, numbers and"
-						+"common punctuation",
-						"Registration Error");
-					return;
-				}
-				System.out.println("Business Name valid");
-				valid &=
-				session.validateNameInput(tfBusinessOwner.getText());
-				if (!valid){
-					NotificationGUI.display("Invalid Name Input:\nPlease enter a Name containing only letters (A-Z,a-z)", "Registration Error");
-					return;
-				}
-				System.out.println("Owner Name valid");
-				valid &=
-				session.validatePhoneInput(tfPhone.getText());
-				if (!valid){
-					NotificationGUI.display("Invalid Phone Number Input:\nPlease enter a valid Australian phone number including area code", "Registration Error");
-					return;
-				} 
-				System.out.println("Phone valid, saving");
-				DatabaseManager dbm = session.getDatabaseManager();
-				try {
-					dbm.updateBusinessInfo(
-						dbm.getCurrentBusiness().username,
-						tfBusinessName.getText(),
-						tfBusinessOwner.getText(),
-						tfAddress.getText(),
-						tfPhone.getText(),
-						iconFile
-					);
-				} catch (SQLException sqle) {
-					NotificationGUI.display("Database error prevented the update", "Database error");
-					sqle.printStackTrace();
-					return;
-				}
+				System.out.println("TODO: save button functionality");
 			}
 		});
 
@@ -120,17 +73,17 @@ public class BusinessEditInfoGUI {
 
 		
 		// Setup Window and layout
-		VBox root = new VBox();//layout manager
-		HBox buttonBox = new HBox();
+ 		VBox root = new VBox();//layout manager
+ 		HBox buttonBox = new HBox();
 
-		root.setSpacing(SessionManager.spacing);
-		root.setPadding(SessionManager.padding);
+ 		root.setSpacing(SessionManager.spacing);
+ 		root.setPadding(SessionManager.padding);
 
  		buttonBox.setSpacing(SessionManager.spacing);
 
 		//add elements to the layout
-		root.getChildren().addAll(lBusinessName, tfBusinessName, lBusinessOwner, tfBusinessOwner, lAddress, tfAddress, lPhone, tfPhone, buttonBox);
-		buttonBox.getChildren().addAll(bSetIcon, bSave, bClose);
+ 		root.getChildren().addAll(lBusinessName, tfBusinessName, lBusinessOwner, tfBusinessOwner, lAddress, tfAddress, lPhone, tfPhone, buttonBox);
+ 		buttonBox.getChildren().addAll(bSetIcon, bSave, bClose);
 
 		Scene scene = new Scene(root/*, 300, 200*/);//create area inside window
 

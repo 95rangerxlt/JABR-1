@@ -28,6 +28,7 @@ public class AvailabilityGUI {
 		bClose.setDefaultButton(true);
 
 		TextField tfName = new TextField();
+tfName.setMaxWidth(SessionManager.maxTfWidth);
 		tfName.setPromptText("Name");
 		tfName.setPrefWidth(500);
 
