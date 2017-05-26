@@ -16,6 +16,7 @@ import org.hsqldb.HsqlException;
 // I/O Imports
 import java.io.PrintStream;
 import java.io.InputStream;
+import java.io.File;
 import java.util.Scanner;
 import java.util.Date;
 
@@ -59,6 +60,7 @@ public class DatabaseManager {
             +"OWNER_NAME VARCHAR(40) NOT NULL,"
             +"ADDRESS VARCHAR(255) NOT NULL,"
             +"PHONE VARCHAR(10) NOT NULL,"
+            +"ICONFILE VARCHAR(255),"
             +"PRIMARY KEY (USERNAME),"
             +"FOREIGN KEY (USERNAME) REFERENCES CREDENTIALS(USERNAME)"
         +");",
@@ -73,7 +75,9 @@ public class DatabaseManager {
         "INSERT INTO CREDENTIALS VALUES('default_business','37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f', 'default_business')",
         "INSERT INTO CREDENTIALS VALUES('default_customer','37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f', 'default_business')",
         "INSERT INTO CREDENTIALS VALUES ('root', '37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f', NULL)",
-        "INSERT INTO BUSINESS VALUES('default_business', 'default business', 'default_owner', 'default_addr', '0420123456')",
+        "INSERT INTO BUSINESS"
+            +"(USERNAME, BUSINESS_NAME, OWNER_NAME, ADDRESS, PHONE)"
+            +"VALUES('default_business', 'default business', 'default_owner', 'default_addr', '0420123456')",
         "INSERT INTO SUPERUSER VALUES ('root')"
     };
     /** The SQL tables and data that are in a business database by default */
@@ -144,7 +148,7 @@ public class DatabaseManager {
     /** The JDBC connection to the business-specific database*/
     private Connection businessConnection;
     /** The current business. Used to inform the rest of the system. */
-    private String currBus;
+    private Business currBus;
 
     /** Creates a new DatabaseManager
      * Always open the DatabaseManager at program start (call the constructor),
@@ -303,10 +307,16 @@ public class DatabaseManager {
         Statement stmt = generalConnection.createStatement();
 
         ResultSet rs = stmt.executeQuery(
-            "SELECT USERNAME, BUSINESS_NAME FROM BUSINESS WHERE USERNAME='"+busUsername+"'"
+            "SELECT * FROM BUSINESS WHERE USERNAME='"+busUsername+"'"
         );
         if (rs.next()) {
-            this.currBus = rs.getString("BUSINESS_NAME");
+            this.currBus = new Business (
+                rs.getString("USERNAME"),
+                rs.getString("BUSINESS_NAME"),
+                rs.getString("OWNER_NAME"),
+                rs.getString("ADDRESS"),
+                rs.getString("PHONE")
+            );
         }
         else {
             logger.warning("connectToBusiness: No business with that username");
@@ -323,7 +333,7 @@ public class DatabaseManager {
         return true;
     }
     
-    public String getCurrentBusinessName() {
+    public Business getCurrentBusiness() {
         return this.currBus;
     }
 
@@ -418,7 +428,47 @@ public class DatabaseManager {
         }
         return businesses;
     }
-    
+
+    /** Update the business info in the database.
+      * @return true if there was an update, false if there was not.
+      * @throws SQLException If a database error occurred. */
+    public boolean updateBusinessInfo(
+        String busUsername,
+        String busName,
+        String owner,
+        String addr,
+        String phone,
+        File iconFile
+    ) throws SQLException
+    {
+        String filePath;
+        if (iconFile != null) {
+            filePath = iconFile.getAbsolutePath();
+        }
+        else {
+            filePath = "NULL";
+        }
+            
+        PreparedStatement pstmt = generalConnection.prepareStatement(
+        "UPDATE BUSINESS "
+            +"SET "
+                +"BUSINESS_NAME=?,"
+                +"OWNER_NAME=?,"
+                +"ADDRESS=?,"
+                +"PHONE=? "
+            +"WHERE USERNAME=?"
+        );
+
+        pstmt.setString(1, busName);
+        pstmt.setString(2, owner);
+        pstmt.setString(3, addr);
+        pstmt.setString(4, phone);
+        pstmt.setString(5, busUsername);
+
+        int updateCount = pstmt.executeUpdate();
+        return (updateCount > 0 ? true : false);
+    }
+
     /** Deletes the business from given object representation.
       * @return true if the business existed and was deleted; false if it did not
       * @param bus The business to delete
@@ -584,7 +634,9 @@ public class DatabaseManager {
         
         try {
             PreparedStatement stmt = generalConnection.prepareStatement(
-                "INSERT INTO BUSINESS VALUES (?, ?, ?, ?, ?)"
+                "INSERT INTO BUSINESS "
+               +"(USERNAME, BUSINESS_NAME, OWNER_NAME, ADDRESS, PHONE)"
+               +"VALUES (?, ?, ?, ?, ?)"
             );
             stmt.setString(1, username);
             stmt.setString(2, busname);

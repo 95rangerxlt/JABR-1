@@ -13,8 +13,11 @@ import javafx.stage.WindowEvent;//when window closes
 import javafx.stage.FileChooser;//choose icon
 import javafx.geometry.Insets;//insets = padding
 
+import java.sql.SQLException;
 
 public class BusinessEditInfoGUI {
+
+	private static File iconFile;
 
 	public static void display(SessionManager session) {
 		// create the window
@@ -46,7 +49,7 @@ public class BusinessEditInfoGUI {
 
 			@Override
 			public void handle(ActionEvent event) {
-				File file = fChooser.showOpenDialog(new Stage());
+				iconFile = fChooser.showOpenDialog(new Stage());
 				//TODO: set icon
 			}
 		});
@@ -56,7 +59,7 @@ public class BusinessEditInfoGUI {
 			@Override
 			public void handle(ActionEvent event) {
 				/* Validate inputs given */
-                		boolean valid = true;
+						boolean valid = true;
 				valid &=
 				session.validateAddressInput(tfAddress.getText());
 				if (!valid){
@@ -67,7 +70,11 @@ public class BusinessEditInfoGUI {
 				valid &=
 				session.validateBusinessNameInput(tfBusinessName.getText());
 				if (!valid){
-					NotificationGUI.display("Invalid Business Name Input:\nPlease enter a Business Name containing only letters (A-Z,a-z)", "Registration Error");
+					NotificationGUI.display("Invalid Business Name Input:\n"
+						+"Please enter a Business Name containing only valid"
+						+" characters. Valid characters are letters, numbers and"
+						+"common punctuation",
+						"Registration Error");
 					return;
 				}
 				System.out.println("Business Name valid");
@@ -85,7 +92,21 @@ public class BusinessEditInfoGUI {
 					return;
 				} 
 				System.out.println("Phone valid, saving");
-				System.out.println("TODO: save button functionality");
+				DatabaseManager dbm = session.getDatabaseManager();
+				try {
+					dbm.updateBusinessInfo(
+						dbm.getCurrentBusiness().username,
+						tfBusinessName.getText(),
+						tfBusinessOwner.getText(),
+						tfAddress.getText(),
+						tfPhone.getText(),
+						iconFile
+					);
+				} catch (SQLException sqle) {
+					NotificationGUI.display("Database error prevented the update", "Database error");
+					sqle.printStackTrace();
+					return;
+				}
 			}
 		});
 
@@ -99,17 +120,17 @@ public class BusinessEditInfoGUI {
 
 		
 		// Setup Window and layout
- 		VBox root = new VBox();//layout manager
- 		HBox buttonBox = new HBox();
+		VBox root = new VBox();//layout manager
+		HBox buttonBox = new HBox();
 
- 		root.setSpacing(SessionManager.spacing);
- 		root.setPadding(SessionManager.padding);
+		root.setSpacing(SessionManager.spacing);
+		root.setPadding(SessionManager.padding);
 
  		buttonBox.setSpacing(SessionManager.spacing);
 
 		//add elements to the layout
- 		root.getChildren().addAll(lBusinessName, tfBusinessName, lBusinessOwner, tfBusinessOwner, lAddress, tfAddress, lPhone, tfPhone, buttonBox);
- 		buttonBox.getChildren().addAll(bSetIcon, bSave, bClose);
+		root.getChildren().addAll(lBusinessName, tfBusinessName, lBusinessOwner, tfBusinessOwner, lAddress, tfAddress, lPhone, tfPhone, buttonBox);
+		buttonBox.getChildren().addAll(bSetIcon, bSave, bClose);
 
 		Scene scene = new Scene(root/*, 300, 200*/);//create area inside window
 
