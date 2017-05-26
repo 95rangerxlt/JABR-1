@@ -28,9 +28,8 @@ public class AvailabilityGUI {
 		bClose.setDefaultButton(true);
 
 		TextField tfName = new TextField();
-tfName.setMaxWidth(SessionManager.maxTfWidth);
+		tfName.setMaxWidth(SessionManager.maxTfWidth);
 		tfName.setPromptText("Name");
-		tfName.setPrefWidth(500);
 
 		Employee allEmployees = null;
 		TimetableGUI table = new TimetableGUI(/*Set timetable on combobox update*/);

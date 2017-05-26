@@ -199,7 +199,7 @@ tfName.setMaxWidth(SessionManager.maxTfWidth);
 		saveAndDelete.getChildren().addAll(bSave, bDelete);
 		root.getChildren().addAll(selEmpAndName, tfName, table, saveAndDelete);
 
-		Scene scene = new Scene(root, 1000, 475);//create area inside window
+		Scene scene = new Scene(root/*, 1000, 475*/);//create area inside window
 /*
 		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override

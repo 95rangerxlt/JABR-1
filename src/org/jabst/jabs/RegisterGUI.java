@@ -38,23 +38,23 @@ public class RegisterGUI {
 
 		Label lName = new Label("Name: ");
 		TextField tfName = new TextField();
-tfName.setMaxWidth(SessionManager.maxTfWidth);
+		tfName.setMaxWidth(SessionManager.maxTfWidth);
 		Label lAddress = new Label("Address: ");
 		TextField tfAddress = new TextField();
-tfAddress.setMaxWidth(SessionManager.maxTfWidth);
+		tfAddress.setMaxWidth(SessionManager.maxTfWidth);
 		// Label lEmail = new Label("Email: ");
 		// TextField tfEmail = new TextField();
-// tfEmail.setMaxWidth(SessionManager.maxTfWidth);
+		// tfEmail.setMaxWidth(SessionManager.maxTfWidth);
 		Label lPhone = new Label("Phone: ");
 		TextField tfPhone = new TextField();
-tfPhone.setMaxWidth(SessionManager.maxTfWidth);
+		tfPhone.setMaxWidth(SessionManager.maxTfWidth);
 
 		TextField tfUName = new TextField();
-tfUName.setMaxWidth(SessionManager.maxTfWidth);
+		tfUName.setMaxWidth(SessionManager.maxTfWidth);
 		PasswordField tfPWord = new PasswordField();
-tfPWord.setMaxWidth(SessionManager.maxTfWidth);
+		tfPWord.setMaxWidth(SessionManager.maxTfWidth);
 		PasswordField tfPWord2 = new PasswordField();
-tfPWord2.setMaxWidth(SessionManager.maxTfWidth);
+		tfPWord2.setMaxWidth(SessionManager.maxTfWidth);
 
 		// tfUName.setText(user);//homy didnt want this
 		// tfPWord.setText(pass);//homy didnt want this
